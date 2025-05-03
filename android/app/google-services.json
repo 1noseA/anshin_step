@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "647665477949",
+    "project_id": "anshin-step",
+    "storage_bucket": "anshin-step.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:647665477949:android:48e9d5570b43fd90b8bd54",
+        "android_client_info": {
+          "package_name": "com.example.anshin_step"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBe5tFpRZUj9aYPbRPlb5peRfobrn8QLtM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
