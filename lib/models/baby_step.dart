@@ -6,7 +6,8 @@ part 'baby_step.g.dart';
 @freezed
 abstract class BabyStep with _$BabyStep {
   const factory BabyStep({
-    String? action,
+    required String id,
+    required String action,
     int? displayOrder,
     bool? isDone,
     DateTime? executionDate,
@@ -20,5 +21,6 @@ abstract class BabyStep with _$BabyStep {
     required DateTime updatedAt,
   }) = _BabyStep;
 
-  factory BabyStep.fromJson(Map<String, dynamic> json) => _$BabyStepFromJson(json);
+  factory BabyStep.fromJson(Map<String, dynamic> json) =>
+      _$BabyStepFromJson(json);
 }

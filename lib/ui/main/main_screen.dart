@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:anshin_step/ui/chat/chat_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -19,6 +20,13 @@ class MainScreen extends ConsumerWidget {
       ),
       body: const Center(
         child: Text('まずは右下の「＋」ボタンから行動プランを追加してください'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ChatScreen()),
+        ),
+        child: const Icon(Icons.add),
       ),
     );
   }

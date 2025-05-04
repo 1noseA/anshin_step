@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$BabyStep {
-  String? get action;
+  String get id;
+  String get action;
   int? get displayOrder;
   bool? get isDone;
   DateTime? get executionDate;
@@ -43,6 +44,7 @@ mixin _$BabyStep {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is BabyStep &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.action, action) || other.action == action) &&
             (identical(other.displayOrder, displayOrder) ||
                 other.displayOrder == displayOrder) &&
@@ -70,6 +72,7 @@ mixin _$BabyStep {
   @override
   int get hashCode => Object.hash(
       runtimeType,
+      id,
       action,
       displayOrder,
       isDone,
@@ -85,7 +88,7 @@ mixin _$BabyStep {
 
   @override
   String toString() {
-    return 'BabyStep(action: $action, displayOrder: $displayOrder, isDone: $isDone, executionDate: $executionDate, beforeAnxietyScore: $beforeAnxietyScore, afterAnxietyScore: $afterAnxietyScore, comment: $comment, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
+    return 'BabyStep(id: $id, action: $action, displayOrder: $displayOrder, isDone: $isDone, executionDate: $executionDate, beforeAnxietyScore: $beforeAnxietyScore, afterAnxietyScore: $afterAnxietyScore, comment: $comment, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
   }
 }
 
@@ -95,7 +98,8 @@ abstract mixin class $BabyStepCopyWith<$Res> {
       _$BabyStepCopyWithImpl;
   @useResult
   $Res call(
-      {String? action,
+      {String id,
+      String action,
       int? displayOrder,
       bool? isDone,
       DateTime? executionDate,
@@ -121,7 +125,8 @@ class _$BabyStepCopyWithImpl<$Res> implements $BabyStepCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? action = freezed,
+    Object? id = null,
+    Object? action = null,
     Object? displayOrder = freezed,
     Object? isDone = freezed,
     Object? executionDate = freezed,
@@ -135,10 +140,14 @@ class _$BabyStepCopyWithImpl<$Res> implements $BabyStepCopyWith<$Res> {
     Object? updatedAt = null,
   }) {
     return _then(_self.copyWith(
-      action: freezed == action
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      action: null == action
           ? _self.action
           : action // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as String,
       displayOrder: freezed == displayOrder
           ? _self.displayOrder
           : displayOrder // ignore: cast_nullable_to_non_nullable
@@ -191,7 +200,8 @@ class _$BabyStepCopyWithImpl<$Res> implements $BabyStepCopyWith<$Res> {
 @JsonSerializable()
 class _BabyStep implements BabyStep {
   const _BabyStep(
-      {this.action,
+      {required this.id,
+      required this.action,
       this.displayOrder,
       this.isDone,
       this.executionDate,
@@ -207,7 +217,9 @@ class _BabyStep implements BabyStep {
       _$BabyStepFromJson(json);
 
   @override
-  final String? action;
+  final String id;
+  @override
+  final String action;
   @override
   final int? displayOrder;
   @override
@@ -251,6 +263,7 @@ class _BabyStep implements BabyStep {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _BabyStep &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.action, action) || other.action == action) &&
             (identical(other.displayOrder, displayOrder) ||
                 other.displayOrder == displayOrder) &&
@@ -278,6 +291,7 @@ class _BabyStep implements BabyStep {
   @override
   int get hashCode => Object.hash(
       runtimeType,
+      id,
       action,
       displayOrder,
       isDone,
@@ -293,7 +307,7 @@ class _BabyStep implements BabyStep {
 
   @override
   String toString() {
-    return 'BabyStep(action: $action, displayOrder: $displayOrder, isDone: $isDone, executionDate: $executionDate, beforeAnxietyScore: $beforeAnxietyScore, afterAnxietyScore: $afterAnxietyScore, comment: $comment, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
+    return 'BabyStep(id: $id, action: $action, displayOrder: $displayOrder, isDone: $isDone, executionDate: $executionDate, beforeAnxietyScore: $beforeAnxietyScore, afterAnxietyScore: $afterAnxietyScore, comment: $comment, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
   }
 }
 
@@ -305,7 +319,8 @@ abstract mixin class _$BabyStepCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String? action,
+      {String id,
+      String action,
       int? displayOrder,
       bool? isDone,
       DateTime? executionDate,
@@ -331,7 +346,8 @@ class __$BabyStepCopyWithImpl<$Res> implements _$BabyStepCopyWith<$Res> {
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? action = freezed,
+    Object? id = null,
+    Object? action = null,
     Object? displayOrder = freezed,
     Object? isDone = freezed,
     Object? executionDate = freezed,
@@ -345,10 +361,14 @@ class __$BabyStepCopyWithImpl<$Res> implements _$BabyStepCopyWith<$Res> {
     Object? updatedAt = null,
   }) {
     return _then(_BabyStep(
-      action: freezed == action
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      action: null == action
           ? _self.action
           : action // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as String,
       displayOrder: freezed == displayOrder
           ? _self.displayOrder
           : displayOrder // ignore: cast_nullable_to_non_nullable
