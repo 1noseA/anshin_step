@@ -17,10 +17,10 @@ T _$identity<T>(T value) => value;
 mixin _$AppUser {
   String get userName;
   int? get age;
-  int? get gender;
+  String? get gender;
   String? get attribute;
-  int? get mentalIllness;
-  List<String>? get diagnosisName;
+  bool? get hasMentalIllness;
+  List<String>? get mentalIllnesses;
   String get createdBy;
   DateTime get createdAt;
   String get updatedBy;
@@ -47,10 +47,10 @@ mixin _$AppUser {
             (identical(other.gender, gender) || other.gender == gender) &&
             (identical(other.attribute, attribute) ||
                 other.attribute == attribute) &&
-            (identical(other.mentalIllness, mentalIllness) ||
-                other.mentalIllness == mentalIllness) &&
+            (identical(other.hasMentalIllness, hasMentalIllness) ||
+                other.hasMentalIllness == hasMentalIllness) &&
             const DeepCollectionEquality()
-                .equals(other.diagnosisName, diagnosisName) &&
+                .equals(other.mentalIllnesses, mentalIllnesses) &&
             (identical(other.createdBy, createdBy) ||
                 other.createdBy == createdBy) &&
             (identical(other.createdAt, createdAt) ||
@@ -69,8 +69,8 @@ mixin _$AppUser {
       age,
       gender,
       attribute,
-      mentalIllness,
-      const DeepCollectionEquality().hash(diagnosisName),
+      hasMentalIllness,
+      const DeepCollectionEquality().hash(mentalIllnesses),
       createdBy,
       createdAt,
       updatedBy,
@@ -78,7 +78,7 @@ mixin _$AppUser {
 
   @override
   String toString() {
-    return 'AppUser(userName: $userName, age: $age, gender: $gender, attribute: $attribute, mentalIllness: $mentalIllness, diagnosisName: $diagnosisName, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
+    return 'AppUser(userName: $userName, age: $age, gender: $gender, attribute: $attribute, hasMentalIllness: $hasMentalIllness, mentalIllnesses: $mentalIllnesses, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
   }
 }
 
@@ -90,10 +90,10 @@ abstract mixin class $AppUserCopyWith<$Res> {
   $Res call(
       {String userName,
       int? age,
-      int? gender,
+      String? gender,
       String? attribute,
-      int? mentalIllness,
-      List<String>? diagnosisName,
+      bool? hasMentalIllness,
+      List<String>? mentalIllnesses,
       String createdBy,
       DateTime createdAt,
       String updatedBy,
@@ -116,8 +116,8 @@ class _$AppUserCopyWithImpl<$Res> implements $AppUserCopyWith<$Res> {
     Object? age = freezed,
     Object? gender = freezed,
     Object? attribute = freezed,
-    Object? mentalIllness = freezed,
-    Object? diagnosisName = freezed,
+    Object? hasMentalIllness = freezed,
+    Object? mentalIllnesses = freezed,
     Object? createdBy = null,
     Object? createdAt = null,
     Object? updatedBy = null,
@@ -135,18 +135,18 @@ class _$AppUserCopyWithImpl<$Res> implements $AppUserCopyWith<$Res> {
       gender: freezed == gender
           ? _self.gender
           : gender // ignore: cast_nullable_to_non_nullable
-              as int?,
+              as String?,
       attribute: freezed == attribute
           ? _self.attribute
           : attribute // ignore: cast_nullable_to_non_nullable
               as String?,
-      mentalIllness: freezed == mentalIllness
-          ? _self.mentalIllness
-          : mentalIllness // ignore: cast_nullable_to_non_nullable
-              as int?,
-      diagnosisName: freezed == diagnosisName
-          ? _self.diagnosisName
-          : diagnosisName // ignore: cast_nullable_to_non_nullable
+      hasMentalIllness: freezed == hasMentalIllness
+          ? _self.hasMentalIllness
+          : hasMentalIllness // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      mentalIllnesses: freezed == mentalIllnesses
+          ? _self.mentalIllnesses
+          : mentalIllnesses // ignore: cast_nullable_to_non_nullable
               as List<String>?,
       createdBy: null == createdBy
           ? _self.createdBy
@@ -176,13 +176,13 @@ class _AppUser implements AppUser {
       this.age,
       this.gender,
       this.attribute,
-      this.mentalIllness,
-      final List<String>? diagnosisName,
+      this.hasMentalIllness,
+      final List<String>? mentalIllnesses,
       required this.createdBy,
       required this.createdAt,
       required this.updatedBy,
       required this.updatedAt})
-      : _diagnosisName = diagnosisName;
+      : _mentalIllnesses = mentalIllnesses;
   factory _AppUser.fromJson(Map<String, dynamic> json) =>
       _$AppUserFromJson(json);
 
@@ -191,17 +191,17 @@ class _AppUser implements AppUser {
   @override
   final int? age;
   @override
-  final int? gender;
+  final String? gender;
   @override
   final String? attribute;
   @override
-  final int? mentalIllness;
-  final List<String>? _diagnosisName;
+  final bool? hasMentalIllness;
+  final List<String>? _mentalIllnesses;
   @override
-  List<String>? get diagnosisName {
-    final value = _diagnosisName;
+  List<String>? get mentalIllnesses {
+    final value = _mentalIllnesses;
     if (value == null) return null;
-    if (_diagnosisName is EqualUnmodifiableListView) return _diagnosisName;
+    if (_mentalIllnesses is EqualUnmodifiableListView) return _mentalIllnesses;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(value);
   }
@@ -241,10 +241,10 @@ class _AppUser implements AppUser {
             (identical(other.gender, gender) || other.gender == gender) &&
             (identical(other.attribute, attribute) ||
                 other.attribute == attribute) &&
-            (identical(other.mentalIllness, mentalIllness) ||
-                other.mentalIllness == mentalIllness) &&
+            (identical(other.hasMentalIllness, hasMentalIllness) ||
+                other.hasMentalIllness == hasMentalIllness) &&
             const DeepCollectionEquality()
-                .equals(other._diagnosisName, _diagnosisName) &&
+                .equals(other._mentalIllnesses, _mentalIllnesses) &&
             (identical(other.createdBy, createdBy) ||
                 other.createdBy == createdBy) &&
             (identical(other.createdAt, createdAt) ||
@@ -263,8 +263,8 @@ class _AppUser implements AppUser {
       age,
       gender,
       attribute,
-      mentalIllness,
-      const DeepCollectionEquality().hash(_diagnosisName),
+      hasMentalIllness,
+      const DeepCollectionEquality().hash(_mentalIllnesses),
       createdBy,
       createdAt,
       updatedBy,
@@ -272,7 +272,7 @@ class _AppUser implements AppUser {
 
   @override
   String toString() {
-    return 'AppUser(userName: $userName, age: $age, gender: $gender, attribute: $attribute, mentalIllness: $mentalIllness, diagnosisName: $diagnosisName, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
+    return 'AppUser(userName: $userName, age: $age, gender: $gender, attribute: $attribute, hasMentalIllness: $hasMentalIllness, mentalIllnesses: $mentalIllnesses, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
   }
 }
 
@@ -285,10 +285,10 @@ abstract mixin class _$AppUserCopyWith<$Res> implements $AppUserCopyWith<$Res> {
   $Res call(
       {String userName,
       int? age,
-      int? gender,
+      String? gender,
       String? attribute,
-      int? mentalIllness,
-      List<String>? diagnosisName,
+      bool? hasMentalIllness,
+      List<String>? mentalIllnesses,
       String createdBy,
       DateTime createdAt,
       String updatedBy,
@@ -311,8 +311,8 @@ class __$AppUserCopyWithImpl<$Res> implements _$AppUserCopyWith<$Res> {
     Object? age = freezed,
     Object? gender = freezed,
     Object? attribute = freezed,
-    Object? mentalIllness = freezed,
-    Object? diagnosisName = freezed,
+    Object? hasMentalIllness = freezed,
+    Object? mentalIllnesses = freezed,
     Object? createdBy = null,
     Object? createdAt = null,
     Object? updatedBy = null,
@@ -330,18 +330,18 @@ class __$AppUserCopyWithImpl<$Res> implements _$AppUserCopyWith<$Res> {
       gender: freezed == gender
           ? _self.gender
           : gender // ignore: cast_nullable_to_non_nullable
-              as int?,
+              as String?,
       attribute: freezed == attribute
           ? _self.attribute
           : attribute // ignore: cast_nullable_to_non_nullable
               as String?,
-      mentalIllness: freezed == mentalIllness
-          ? _self.mentalIllness
-          : mentalIllness // ignore: cast_nullable_to_non_nullable
-              as int?,
-      diagnosisName: freezed == diagnosisName
-          ? _self._diagnosisName
-          : diagnosisName // ignore: cast_nullable_to_non_nullable
+      hasMentalIllness: freezed == hasMentalIllness
+          ? _self.hasMentalIllness
+          : hasMentalIllness // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      mentalIllnesses: freezed == mentalIllnesses
+          ? _self._mentalIllnesses
+          : mentalIllnesses // ignore: cast_nullable_to_non_nullable
               as List<String>?,
       createdBy: null == createdBy
           ? _self.createdBy

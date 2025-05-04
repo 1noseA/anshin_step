@@ -9,10 +9,10 @@ part of 'app_user.dart';
 _AppUser _$AppUserFromJson(Map<String, dynamic> json) => _AppUser(
       userName: json['userName'] as String,
       age: (json['age'] as num?)?.toInt(),
-      gender: (json['gender'] as num?)?.toInt(),
+      gender: json['gender'] as String?,
       attribute: json['attribute'] as String?,
-      mentalIllness: (json['mentalIllness'] as num?)?.toInt(),
-      diagnosisName: (json['diagnosisName'] as List<dynamic>?)
+      hasMentalIllness: json['hasMentalIllness'] as bool?,
+      mentalIllnesses: (json['mentalIllnesses'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
       createdBy: json['createdBy'] as String,
@@ -26,8 +26,8 @@ Map<String, dynamic> _$AppUserToJson(_AppUser instance) => <String, dynamic>{
       'age': instance.age,
       'gender': instance.gender,
       'attribute': instance.attribute,
-      'mentalIllness': instance.mentalIllness,
-      'diagnosisName': instance.diagnosisName,
+      'hasMentalIllness': instance.hasMentalIllness,
+      'mentalIllnesses': instance.mentalIllnesses,
       'createdBy': instance.createdBy,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedBy': instance.updatedBy,

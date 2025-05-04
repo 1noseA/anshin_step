@@ -8,15 +8,16 @@ abstract class AppUser with _$AppUser {
   const factory AppUser({
     required String userName,
     int? age,
-    int? gender,
+    String? gender,
     String? attribute,
-    int? mentalIllness,
-    List<String>? diagnosisName,
+    bool? hasMentalIllness,
+    List<String>? mentalIllnesses,
     required String createdBy,
     required DateTime createdAt,
     required String updatedBy,
     required DateTime updatedAt,
   }) = _AppUser;
 
-  factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
+  factory AppUser.fromJson(Map<String, dynamic> json) =>
+      _$AppUserFromJson(json);
 }
