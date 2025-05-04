@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
             data: (user) => user == null
                 ? const SignInPage()
                 : user.displayName?.isEmpty ?? true
-                    ? const ProfileScreen(isNewUser: true)
+                    ? ProfileScreen(isNewUser: true)
                     : const MainScreen(),
             loading: () => const Scaffold(
                 body: Center(child: CircularProgressIndicator())),
@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
       ),
       routes: {
         '/main': (context) => const MainScreen(),
-        '/profile': (context) => const ProfileScreen(),
+        '/profile': (context) => ProfileScreen(),
       },
     );
   }

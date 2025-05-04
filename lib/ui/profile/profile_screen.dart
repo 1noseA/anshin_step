@@ -54,8 +54,23 @@ class ProfileNotifier extends StateNotifier<AppUser> {
 }
 
 class ProfileScreen extends ConsumerWidget {
-  const ProfileScreen({super.key, this.isNewUser = false});
+  ProfileScreen({super.key, this.isNewUser = false});
   final bool isNewUser;
+  final _formKey = GlobalKey<FormState>();
+
+  void _submitForm(BuildContext context, WidgetRef ref) {
+    if (_formKey.currentState?.validate() ?? false) {
+      ref.read(profileProvider.notifier).saveProfile('current_user_id');
+      if (isNewUser) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
+      } else {
+        Navigator.pop(context);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -64,16 +79,7 @@ class ProfileScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('プロフィール設定'),
         actions: [
-          if (state.hasMentalIllness != null)
-            IconButton(
-              icon: const Icon(Icons.check),
-              onPressed: () {
-                // TODO: 保存処理
-                Navigator.pop(context);
-              },
-            ),
-          IconButton(
-            icon: const Text('スキップ'),
+          TextButton(
             onPressed: () {
               if (isNewUser) {
                 Navigator.pushReplacement(
@@ -84,6 +90,11 @@ class ProfileScreen extends ConsumerWidget {
                 Navigator.pop(context);
               }
             },
+            child: const Text('スキップ'),
+          ),
+          TextButton(
+            onPressed: () => _submitForm(context, ref),
+            child: const Text('確定'),
           ),
         ],
       ),
@@ -174,6 +185,7 @@ class ProfileScreen extends ConsumerWidget {
                     'うつ病',
                     'その他'
                   ].map((diagnosis) => CheckboxListTile(
+                        controlAffinity: ListTileControlAffinity.leading,
                         title: Text(diagnosis),
                         value:
                             state.mentalIllnesses?.contains(diagnosis) ?? false,
