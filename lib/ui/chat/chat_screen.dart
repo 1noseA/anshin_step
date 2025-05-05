@@ -85,11 +85,36 @@ class _ChatScreenState extends State<ChatScreen> {
         return;
       }
 
+      // ユーザーの既存のGoal数を取得
+      final userGoals = await FirebaseFirestore.instance
+          .collection('goals')
+          .where('created_by',
+              isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+          .get();
+
+      // BabyStepにdisplayOrderを設定
+      final stepsWithOrder = _steps.asMap().entries.map((entry) {
+        final step = entry.value;
+        return BabyStep(
+          id: step.id,
+          action: step.action,
+          isDone: step.isDone,
+          displayOrder: entry.key + 1, // 1から10までの連番
+          isDeleted: false,
+          createdBy: step.createdBy,
+          createdAt: step.createdAt,
+          updatedBy: step.updatedBy,
+          updatedAt: step.updatedAt,
+        );
+      }).toList();
+
       final newGoal = Goal(
         id: _uuid.v4(),
         goal: goal,
         anxiety: anxiety,
-        babySteps: _steps,
+        babySteps: stepsWithOrder,
+        displayOrder: userGoals.docs.length + 1, // 既存のGoal数 + 1
+        isDeleted: false,
         createdBy: FirebaseAuth.instance.currentUser?.uid ?? 'unknown_user',
         createdAt: DateTime.now(),
         updatedBy: FirebaseAuth.instance.currentUser?.uid ?? 'unknown_user',
