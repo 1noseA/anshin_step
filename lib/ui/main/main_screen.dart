@@ -2,6 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:anshin_step/ui/chat/chat_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:anshin_step/models/goal.dart';
+
+final goalsProvider = StreamProvider<List<Goal>>((ref) {
+  final firestore = FirebaseFirestore.instance;
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    return Stream.value([]);
+  }
+  return firestore
+      .collection('goals')
+      .where('created_by', isEqualTo: user.uid)
+      .where('isDeleted', isEqualTo: false)
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map((doc) => Goal.fromJson(doc.data()..['id'] = doc.id))
+          .toList()
+        ..sort((a, b) => (a.displayOrder ?? 0).compareTo(b.displayOrder ?? 0)));
+});
 
 class MainScreen extends ConsumerWidget {
   const MainScreen({super.key});
@@ -18,8 +37,53 @@ class MainScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: const Center(
-        child: Text('まずは右下の「＋」ボタンから行動プランを追加してください'),
+      body: Consumer(
+        builder: (context, ref, child) {
+          final goalsAsync = ref.watch(goalsProvider);
+          return goalsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(child: Text('エラーが発生しました: $error')),
+            data: (goals) {
+              if (goals.isEmpty) {
+                return const Center(
+                  child: Text('まずは右下の「＋」ボタンから行動プランを追加してください'),
+                );
+              }
+              return ListView.builder(
+                itemCount: goals.length,
+                itemBuilder: (context, index) {
+                  final goal = goals[index];
+                  return Card(
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    child: ExpansionTile(
+                      title: Text(goal.goal),
+                      subtitle: Text(goal.anxiety),
+                      children: [
+                        if (goal.babySteps != null &&
+                            goal.babySteps!.isNotEmpty)
+                          ...goal.babySteps!
+                              .map((step) => ListTile(
+                                    title: Text(step.action),
+                                    trailing: Checkbox(
+                                      value: step.isDone ?? false,
+                                      onChanged: null,
+                                    ),
+                                  ))
+                              .toList(),
+                        if (goal.babySteps == null || goal.babySteps!.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Text('ベイビーステップが設定されていません'),
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
