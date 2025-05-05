@@ -8,6 +8,7 @@ abstract class BabyStep with _$BabyStep {
   const factory BabyStep({
     required String id,
     required String action, // 行動
+    required String goalId, // 親ゴールID
     int? displayOrder, // 表示順
     bool? isDone, // 実施済みフラグ
     DateTime? executionDate, // 実行日付

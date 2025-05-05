@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:anshin_step/models/baby_step.dart';
 
 class StepDetail extends StatefulWidget {
@@ -65,14 +67,60 @@ class _StepDetailState extends State<StepDetail> {
               ),
               maxLines: 3,
             ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _saveStep,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.blue,
+                ),
+                child: const Text(
+                  '保存',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  void _saveStep() {
-    // TODO: Firestoreに保存する処理を実装
-    Navigator.pop(context);
+  Future<void> _saveStep() async {
+    try {
+      final postAnxiety = int.tryParse(_postAnxietyController.text) ?? 0;
+      final comment = _commentController.text;
+
+      // 親ドキュメントの参照を取得
+      final parentRef = FirebaseFirestore.instance
+          .collection('goals')
+          .doc(widget.step.goalId ?? '');
+
+      // サブコレクションに保存
+      await parentRef.collection('babySteps').doc(widget.step.id).set({
+        'action': widget.step.action,
+        'beforeAnxietyScore': widget.step.beforeAnxietyScore,
+        'afterAnxietyScore': postAnxiety,
+        'comment': comment,
+        'isDone': widget.step.isDone,
+        'updatedAt': FieldValue.serverTimestamp(),
+        'updatedBy': FirebaseAuth.instance.currentUser?.uid ?? 'unknown_user'
+      }, SetOptions(merge: true));
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('更新が完了しました')),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('更新に失敗しました: ${e.toString()}')),
+        );
+      }
+    }
   }
 }
