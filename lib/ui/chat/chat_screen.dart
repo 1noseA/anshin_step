@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:anshin_step/models/baby_step.dart';
+import 'package:anshin_step/models/goal.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:uuid/uuid.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -9,13 +13,14 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final Uuid _uuid = const Uuid();
   final _goalController = TextEditingController();
   final _concernController = TextEditingController();
   List<BabyStep> _steps = [];
 
   void _generateSteps() {
-    // 仮のハードコードされたベイビーステップ
     setState(() {
+      _steps.clear();
       _steps = List.generate(
           10,
           (index) => BabyStep(
@@ -30,9 +35,40 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  void _saveSteps() {
-    // TODO: 保存処理実装
-    Navigator.pop(context);
+  void _clearSteps() {
+    setState(() {
+      _steps.clear();
+    });
+  }
+
+  void _saveSteps() async {
+    try {
+      final newGoal = Goal(
+        id: _uuid.v4(),
+        goal: _goalController.text,
+        anxiety: _concernController.text,
+        babySteps: _steps,
+        createdBy: 'current_user_id', // TODO: 実際のユーザーIDに置き換え
+        createdAt: DateTime.now(),
+        updatedBy: 'current_user_id',
+        updatedAt: DateTime.now(),
+      );
+
+      await FirebaseFirestore.instance
+          .collection('goals')
+          .doc(newGoal.id)
+          .set(newGoal.toJson());
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('保存に失敗しました: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -69,12 +105,46 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _generateSteps,
-        child: const Icon(Icons.send),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      ),
+      floatingActionButton: _steps.isEmpty
+          ? FloatingActionButton(
+              onPressed: _generateSteps,
+              child: const Icon(Icons.send),
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+            )
+          : null,
+      bottomNavigationBar: _steps.isNotEmpty
+          ? Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('もう一度生成'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[200],
+                        foregroundColor: Colors.black,
+                      ),
+                      onPressed: _clearSteps,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.save),
+                      label: const Text('保存する'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: _saveSteps,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : null,
     );
   }
 }
