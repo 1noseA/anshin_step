@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:anshin_step/models/baby_step.dart';
 import 'package:anshin_step/models/goal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter/foundation.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -48,9 +49,9 @@ class _ChatScreenState extends State<ChatScreen> {
         goal: _goalController.text,
         anxiety: _concernController.text,
         babySteps: _steps,
-        createdBy: 'current_user_id', // TODO: 実際のユーザーIDに置き換え
+        createdBy: FirebaseAuth.instance.currentUser?.uid ?? 'unknown_user',
         createdAt: DateTime.now(),
-        updatedBy: 'current_user_id',
+        updatedBy: FirebaseAuth.instance.currentUser?.uid ?? 'unknown_user',
         updatedAt: DateTime.now(),
       );
 
@@ -62,11 +63,22 @@ class _ChatScreenState extends State<ChatScreen> {
       if (mounted) {
         Navigator.pop(context);
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存に失敗しました: $e')),
+          SnackBar(content: Text('保存エラー: ${e.toString()}')),
         );
+        // デバッグ用にコンソール出力
+        if (kDebugMode) {
+          print('Firestore保存エラー詳細:');
+          print('エラータイプ: ${e.runtimeType}');
+          print('エラーメッセージ: ${e.toString()}');
+          print('スタックトレース: $stackTrace');
+          print('入力データ:');
+          print('目標: ${_goalController.text}');
+          print('不安: ${_concernController.text}');
+          print('ステップ数: ${_steps.length}');
+        }
       }
     }
   }

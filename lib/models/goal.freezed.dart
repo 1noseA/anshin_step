@@ -17,11 +17,12 @@ T _$identity<T>(T value) => value;
 mixin _$Goal {
   @JsonKey(name: 'id', defaultValue: '')
   String get id;
-  @JsonKey(name: 'title')
+  @JsonKey(name: 'goal')
   String get goal; // やりたいこと
-  @JsonKey(name: 'concern')
+  @JsonKey(name: 'anxiety')
   String get anxiety; // 不安なこと
-  @JsonKey(name: 'baby_steps')
+  @JsonKey(
+      name: 'babySteps', fromJson: _babyStepsFromJson, toJson: _babyStepsToJson)
   List<BabyStep>? get babySteps;
   int? get displayOrder; // 表示順
   bool? get isDeleted; // 論理削除フラグ
@@ -95,9 +96,13 @@ abstract mixin class $GoalCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'id', defaultValue: '') String id,
-      @JsonKey(name: 'title') String goal,
-      @JsonKey(name: 'concern') String anxiety,
-      @JsonKey(name: 'baby_steps') List<BabyStep>? babySteps,
+      @JsonKey(name: 'goal') String goal,
+      @JsonKey(name: 'anxiety') String anxiety,
+      @JsonKey(
+          name: 'babySteps',
+          fromJson: _babyStepsFromJson,
+          toJson: _babyStepsToJson)
+      List<BabyStep>? babySteps,
       int? displayOrder,
       bool? isDeleted,
       @JsonKey(name: 'created_by') String createdBy,
@@ -179,9 +184,13 @@ class _$GoalCopyWithImpl<$Res> implements $GoalCopyWith<$Res> {
 class _Goal implements Goal {
   const _Goal(
       {@JsonKey(name: 'id', defaultValue: '') required this.id,
-      @JsonKey(name: 'title') required this.goal,
-      @JsonKey(name: 'concern') required this.anxiety,
-      @JsonKey(name: 'baby_steps') final List<BabyStep>? babySteps,
+      @JsonKey(name: 'goal') required this.goal,
+      @JsonKey(name: 'anxiety') required this.anxiety,
+      @JsonKey(
+          name: 'babySteps',
+          fromJson: _babyStepsFromJson,
+          toJson: _babyStepsToJson)
+      final List<BabyStep>? babySteps,
       this.displayOrder,
       this.isDeleted,
       @JsonKey(name: 'created_by') required this.createdBy,
@@ -195,17 +204,18 @@ class _Goal implements Goal {
   @JsonKey(name: 'id', defaultValue: '')
   final String id;
   @override
-  @JsonKey(name: 'title')
+  @JsonKey(name: 'goal')
   final String goal;
 // やりたいこと
   @override
-  @JsonKey(name: 'concern')
+  @JsonKey(name: 'anxiety')
   final String anxiety;
 // 不安なこと
   final List<BabyStep>? _babySteps;
 // 不安なこと
   @override
-  @JsonKey(name: 'baby_steps')
+  @JsonKey(
+      name: 'babySteps', fromJson: _babyStepsFromJson, toJson: _babyStepsToJson)
   List<BabyStep>? get babySteps {
     final value = _babySteps;
     if (value == null) return null;
@@ -304,9 +314,13 @@ abstract mixin class _$GoalCopyWith<$Res> implements $GoalCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'id', defaultValue: '') String id,
-      @JsonKey(name: 'title') String goal,
-      @JsonKey(name: 'concern') String anxiety,
-      @JsonKey(name: 'baby_steps') List<BabyStep>? babySteps,
+      @JsonKey(name: 'goal') String goal,
+      @JsonKey(name: 'anxiety') String anxiety,
+      @JsonKey(
+          name: 'babySteps',
+          fromJson: _babyStepsFromJson,
+          toJson: _babyStepsToJson)
+      List<BabyStep>? babySteps,
       int? displayOrder,
       bool? isDeleted,
       @JsonKey(name: 'created_by') String createdBy,

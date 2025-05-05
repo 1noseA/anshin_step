@@ -15,11 +15,7 @@ final authProvider = StreamProvider<User?>((ref) {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: Platform.isAndroid
-        ? DefaultFirebaseOptions.android
-        : Platform.isIOS
-            ? DefaultFirebaseOptions.ios
-            : throw UnsupportedError('このプラットフォームはサポートされていません'),
+    options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(const ProviderScope(child: MyApp()));
 }
