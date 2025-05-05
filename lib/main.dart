@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:anshin_step/ui/profile/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';

@@ -20,6 +20,23 @@ class _ChatScreenState extends State<ChatScreen> {
   List<BabyStep> _steps = [];
 
   void _generateSteps() {
+    final goal = _goalController.text.trim();
+    final anxiety = _concernController.text.trim();
+
+    if (goal.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('やりたいことを入力してください')),
+      );
+      return;
+    }
+
+    if (anxiety.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('不安なことを入力してください')),
+      );
+      return;
+    }
+
     setState(() {
       _steps.clear();
       _steps = List.generate(
@@ -44,10 +61,34 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _saveSteps() async {
     try {
+      if (_steps.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ステップが生成されていません')),
+        );
+        return;
+      }
+
+      final goal = _goalController.text.trim();
+      final anxiety = _concernController.text.trim();
+
+      if (goal.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('やりたいことを入力してください')),
+        );
+        return;
+      }
+
+      if (anxiety.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('不安なことを入力してください')),
+        );
+        return;
+      }
+
       final newGoal = Goal(
         id: _uuid.v4(),
-        goal: _goalController.text,
-        anxiety: _concernController.text,
+        goal: goal,
+        anxiety: anxiety,
         babySteps: _steps,
         createdBy: FirebaseAuth.instance.currentUser?.uid ?? 'unknown_user',
         createdAt: DateTime.now(),
@@ -61,6 +102,9 @@ class _ChatScreenState extends State<ChatScreen> {
           .set(newGoal.toJson());
 
       if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('保存が完了しました')),
+        );
         Navigator.pop(context);
       }
     } catch (e, stackTrace) {
