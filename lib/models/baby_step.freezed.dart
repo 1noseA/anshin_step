@@ -16,17 +16,17 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$BabyStep {
   String get id;
-  String get action;
-  int? get displayOrder;
-  bool? get isDone;
-  DateTime? get executionDate;
-  int? get beforeAnxietyScore;
-  int? get afterAnxietyScore;
-  String? get comment;
-  bool? get isDeleted;
-  String get createdBy;
-  DateTime get createdAt;
-  String get updatedBy;
+  String get action; // 行動
+  int? get displayOrder; // 表示順
+  bool? get isDone; // 実施済みフラグ
+  DateTime? get executionDate; // 実行日付
+  int? get beforeAnxietyScore; // 事前不安得点
+  int? get afterAnxietyScore; // 事後不安得点
+  String? get comment; // コメント
+  bool? get isDeleted; // 論理削除フラグ
+  String get createdBy; // レコード登録者
+  DateTime get createdAt; // レコード登録日
+  String get updatedBy; // レコード更新者
   DateTime get updatedAt;
 
   /// Create a copy of BabyStep
@@ -220,26 +220,37 @@ class _BabyStep implements BabyStep {
   final String id;
   @override
   final String action;
+// 行動
   @override
   final int? displayOrder;
+// 表示順
   @override
   final bool? isDone;
+// 実施済みフラグ
   @override
   final DateTime? executionDate;
+// 実行日付
   @override
   final int? beforeAnxietyScore;
+// 事前不安得点
   @override
   final int? afterAnxietyScore;
+// 事後不安得点
   @override
   final String? comment;
+// コメント
   @override
   final bool? isDeleted;
+// 論理削除フラグ
   @override
   final String createdBy;
+// レコード登録者
   @override
   final DateTime createdAt;
+// レコード登録日
   @override
   final String updatedBy;
+// レコード更新者
   @override
   final DateTime updatedAt;
 

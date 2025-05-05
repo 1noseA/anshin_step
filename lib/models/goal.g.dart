@@ -7,23 +7,29 @@ part of 'goal.dart';
 // **************************************************************************
 
 _Goal _$GoalFromJson(Map<String, dynamic> json) => _Goal(
-      goal: json['goal'] as String,
-      anxiety: json['anxiety'] as String,
+      id: json['id'] as String? ?? '',
+      goal: json['title'] as String,
+      anxiety: json['concern'] as String,
+      babySteps: (json['baby_steps'] as List<dynamic>?)
+          ?.map((e) => BabyStep.fromJson(e as Map<String, dynamic>))
+          .toList(),
       displayOrder: (json['displayOrder'] as num?)?.toInt(),
       isDeleted: json['isDeleted'] as bool?,
-      createdBy: json['createdBy'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedBy: json['updatedBy'] as String,
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdBy: json['created_by'] as String,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedBy: json['updated_by'] as String,
+      updatedAt: DateTime.parse(json['updated_at'] as String),
     );
 
 Map<String, dynamic> _$GoalToJson(_Goal instance) => <String, dynamic>{
-      'goal': instance.goal,
-      'anxiety': instance.anxiety,
+      'id': instance.id,
+      'title': instance.goal,
+      'concern': instance.anxiety,
+      'baby_steps': instance.babySteps,
       'displayOrder': instance.displayOrder,
       'isDeleted': instance.isDeleted,
-      'createdBy': instance.createdBy,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedBy': instance.updatedBy,
-      'updatedAt': instance.updatedAt.toIso8601String(),
+      'created_by': instance.createdBy,
+      'created_at': instance.createdAt.toIso8601String(),
+      'updated_by': instance.updatedBy,
+      'updated_at': instance.updatedAt.toIso8601String(),
     };

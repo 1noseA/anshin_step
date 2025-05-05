@@ -15,15 +15,15 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$AppUser {
-  String get userName;
-  int? get age;
-  String? get gender;
-  String? get attribute;
-  bool? get hasMentalIllness;
-  List<String>? get mentalIllnesses;
-  String get createdBy;
-  DateTime get createdAt;
-  String get updatedBy;
+  String get userName; // ニックネーム
+  int? get age; // 年齢
+  String? get gender; // 性別
+  String? get attribute; // 属性
+  bool? get hasMentalIllness; // 精神疾患有無
+  List<String>? get mentalIllnesses; // 診断名
+  String get createdBy; // レコード登録者
+  DateTime get createdAt; // レコード登録日
+  String get updatedBy; // レコード更新者
   DateTime get updatedAt;
 
   /// Create a copy of AppUser
@@ -188,15 +188,21 @@ class _AppUser implements AppUser {
 
   @override
   final String userName;
+// ニックネーム
   @override
   final int? age;
+// 年齢
   @override
   final String? gender;
+// 性別
   @override
   final String? attribute;
+// 属性
   @override
   final bool? hasMentalIllness;
+// 精神疾患有無
   final List<String>? _mentalIllnesses;
+// 精神疾患有無
   @override
   List<String>? get mentalIllnesses {
     final value = _mentalIllnesses;
@@ -206,12 +212,16 @@ class _AppUser implements AppUser {
     return EqualUnmodifiableListView(value);
   }
 
+// 診断名
   @override
   final String createdBy;
+// レコード登録者
   @override
   final DateTime createdAt;
+// レコード登録日
   @override
   final String updatedBy;
+// レコード更新者
   @override
   final DateTime updatedAt;
 

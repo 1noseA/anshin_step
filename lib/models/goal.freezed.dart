@@ -15,13 +15,23 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$Goal {
-  String get goal;
-  String get anxiety;
-  int? get displayOrder;
-  bool? get isDeleted;
-  String get createdBy;
-  DateTime get createdAt;
-  String get updatedBy;
+  @JsonKey(name: 'id', defaultValue: '')
+  String get id;
+  @JsonKey(name: 'title')
+  String get goal; // やりたいこと
+  @JsonKey(name: 'concern')
+  String get anxiety; // 不安なこと
+  @JsonKey(name: 'baby_steps')
+  List<BabyStep>? get babySteps;
+  int? get displayOrder; // 表示順
+  bool? get isDeleted; // 論理削除フラグ
+  @JsonKey(name: 'created_by')
+  String get createdBy; // レコード登録者
+  @JsonKey(name: 'created_at')
+  DateTime get createdAt; // レコード登録日
+  @JsonKey(name: 'updated_by')
+  String get updatedBy; // レコード更新者
+  @JsonKey(name: 'updated_at')
   DateTime get updatedAt;
 
   /// Create a copy of Goal
@@ -39,8 +49,10 @@ mixin _$Goal {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Goal &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.goal, goal) || other.goal == goal) &&
             (identical(other.anxiety, anxiety) || other.anxiety == anxiety) &&
+            const DeepCollectionEquality().equals(other.babySteps, babySteps) &&
             (identical(other.displayOrder, displayOrder) ||
                 other.displayOrder == displayOrder) &&
             (identical(other.isDeleted, isDeleted) ||
@@ -57,12 +69,22 @@ mixin _$Goal {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, goal, anxiety, displayOrder,
-      isDeleted, createdBy, createdAt, updatedBy, updatedAt);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      goal,
+      anxiety,
+      const DeepCollectionEquality().hash(babySteps),
+      displayOrder,
+      isDeleted,
+      createdBy,
+      createdAt,
+      updatedBy,
+      updatedAt);
 
   @override
   String toString() {
-    return 'Goal(goal: $goal, anxiety: $anxiety, displayOrder: $displayOrder, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
+    return 'Goal(id: $id, goal: $goal, anxiety: $anxiety, babySteps: $babySteps, displayOrder: $displayOrder, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
   }
 }
 
@@ -72,14 +94,16 @@ abstract mixin class $GoalCopyWith<$Res> {
       _$GoalCopyWithImpl;
   @useResult
   $Res call(
-      {String goal,
-      String anxiety,
+      {@JsonKey(name: 'id', defaultValue: '') String id,
+      @JsonKey(name: 'title') String goal,
+      @JsonKey(name: 'concern') String anxiety,
+      @JsonKey(name: 'baby_steps') List<BabyStep>? babySteps,
       int? displayOrder,
       bool? isDeleted,
-      String createdBy,
-      DateTime createdAt,
-      String updatedBy,
-      DateTime updatedAt});
+      @JsonKey(name: 'created_by') String createdBy,
+      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'updated_by') String updatedBy,
+      @JsonKey(name: 'updated_at') DateTime updatedAt});
 }
 
 /// @nodoc
@@ -94,8 +118,10 @@ class _$GoalCopyWithImpl<$Res> implements $GoalCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = null,
     Object? goal = null,
     Object? anxiety = null,
+    Object? babySteps = freezed,
     Object? displayOrder = freezed,
     Object? isDeleted = freezed,
     Object? createdBy = null,
@@ -104,6 +130,10 @@ class _$GoalCopyWithImpl<$Res> implements $GoalCopyWith<$Res> {
     Object? updatedAt = null,
   }) {
     return _then(_self.copyWith(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
       goal: null == goal
           ? _self.goal
           : goal // ignore: cast_nullable_to_non_nullable
@@ -112,6 +142,10 @@ class _$GoalCopyWithImpl<$Res> implements $GoalCopyWith<$Res> {
           ? _self.anxiety
           : anxiety // ignore: cast_nullable_to_non_nullable
               as String,
+      babySteps: freezed == babySteps
+          ? _self.babySteps
+          : babySteps // ignore: cast_nullable_to_non_nullable
+              as List<BabyStep>?,
       displayOrder: freezed == displayOrder
           ? _self.displayOrder
           : displayOrder // ignore: cast_nullable_to_non_nullable
@@ -144,31 +178,62 @@ class _$GoalCopyWithImpl<$Res> implements $GoalCopyWith<$Res> {
 @JsonSerializable()
 class _Goal implements Goal {
   const _Goal(
-      {required this.goal,
-      required this.anxiety,
+      {@JsonKey(name: 'id', defaultValue: '') required this.id,
+      @JsonKey(name: 'title') required this.goal,
+      @JsonKey(name: 'concern') required this.anxiety,
+      @JsonKey(name: 'baby_steps') final List<BabyStep>? babySteps,
       this.displayOrder,
       this.isDeleted,
-      required this.createdBy,
-      required this.createdAt,
-      required this.updatedBy,
-      required this.updatedAt});
+      @JsonKey(name: 'created_by') required this.createdBy,
+      @JsonKey(name: 'created_at') required this.createdAt,
+      @JsonKey(name: 'updated_by') required this.updatedBy,
+      @JsonKey(name: 'updated_at') required this.updatedAt})
+      : _babySteps = babySteps;
   factory _Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);
 
   @override
-  final String goal;
+  @JsonKey(name: 'id', defaultValue: '')
+  final String id;
   @override
+  @JsonKey(name: 'title')
+  final String goal;
+// やりたいこと
+  @override
+  @JsonKey(name: 'concern')
   final String anxiety;
+// 不安なこと
+  final List<BabyStep>? _babySteps;
+// 不安なこと
+  @override
+  @JsonKey(name: 'baby_steps')
+  List<BabyStep>? get babySteps {
+    final value = _babySteps;
+    if (value == null) return null;
+    if (_babySteps is EqualUnmodifiableListView) return _babySteps;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
   @override
   final int? displayOrder;
+// 表示順
   @override
   final bool? isDeleted;
+// 論理削除フラグ
   @override
+  @JsonKey(name: 'created_by')
   final String createdBy;
+// レコード登録者
   @override
+  @JsonKey(name: 'created_at')
   final DateTime createdAt;
+// レコード登録日
   @override
+  @JsonKey(name: 'updated_by')
   final String updatedBy;
+// レコード更新者
   @override
+  @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
 
   /// Create a copy of Goal
@@ -191,8 +256,11 @@ class _Goal implements Goal {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _Goal &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.goal, goal) || other.goal == goal) &&
             (identical(other.anxiety, anxiety) || other.anxiety == anxiety) &&
+            const DeepCollectionEquality()
+                .equals(other._babySteps, _babySteps) &&
             (identical(other.displayOrder, displayOrder) ||
                 other.displayOrder == displayOrder) &&
             (identical(other.isDeleted, isDeleted) ||
@@ -209,12 +277,22 @@ class _Goal implements Goal {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, goal, anxiety, displayOrder,
-      isDeleted, createdBy, createdAt, updatedBy, updatedAt);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      goal,
+      anxiety,
+      const DeepCollectionEquality().hash(_babySteps),
+      displayOrder,
+      isDeleted,
+      createdBy,
+      createdAt,
+      updatedBy,
+      updatedAt);
 
   @override
   String toString() {
-    return 'Goal(goal: $goal, anxiety: $anxiety, displayOrder: $displayOrder, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
+    return 'Goal(id: $id, goal: $goal, anxiety: $anxiety, babySteps: $babySteps, displayOrder: $displayOrder, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
   }
 }
 
@@ -225,14 +303,16 @@ abstract mixin class _$GoalCopyWith<$Res> implements $GoalCopyWith<$Res> {
   @override
   @useResult
   $Res call(
-      {String goal,
-      String anxiety,
+      {@JsonKey(name: 'id', defaultValue: '') String id,
+      @JsonKey(name: 'title') String goal,
+      @JsonKey(name: 'concern') String anxiety,
+      @JsonKey(name: 'baby_steps') List<BabyStep>? babySteps,
       int? displayOrder,
       bool? isDeleted,
-      String createdBy,
-      DateTime createdAt,
-      String updatedBy,
-      DateTime updatedAt});
+      @JsonKey(name: 'created_by') String createdBy,
+      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(name: 'updated_by') String updatedBy,
+      @JsonKey(name: 'updated_at') DateTime updatedAt});
 }
 
 /// @nodoc
@@ -247,8 +327,10 @@ class __$GoalCopyWithImpl<$Res> implements _$GoalCopyWith<$Res> {
   @override
   @pragma('vm:prefer-inline')
   $Res call({
+    Object? id = null,
     Object? goal = null,
     Object? anxiety = null,
+    Object? babySteps = freezed,
     Object? displayOrder = freezed,
     Object? isDeleted = freezed,
     Object? createdBy = null,
@@ -257,6 +339,10 @@ class __$GoalCopyWithImpl<$Res> implements _$GoalCopyWith<$Res> {
     Object? updatedAt = null,
   }) {
     return _then(_Goal(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
       goal: null == goal
           ? _self.goal
           : goal // ignore: cast_nullable_to_non_nullable
@@ -265,6 +351,10 @@ class __$GoalCopyWithImpl<$Res> implements _$GoalCopyWith<$Res> {
           ? _self.anxiety
           : anxiety // ignore: cast_nullable_to_non_nullable
               as String,
+      babySteps: freezed == babySteps
+          ? _self._babySteps
+          : babySteps // ignore: cast_nullable_to_non_nullable
+              as List<BabyStep>?,
       displayOrder: freezed == displayOrder
           ? _self.displayOrder
           : displayOrder // ignore: cast_nullable_to_non_nullable
