@@ -9,7 +9,7 @@ part of 'baby_step.dart';
 _BabyStep _$BabyStepFromJson(Map<String, dynamic> json) => _BabyStep(
       id: json['id'] as String,
       action: json['action'] as String,
-      goalId: json['goalId'] as String,
+      goalId: json['goalId'] as String?,
       displayOrder: (json['displayOrder'] as num?)?.toInt(),
       isDone: json['isDone'] as bool?,
       executionDate: json['executionDate'] == null

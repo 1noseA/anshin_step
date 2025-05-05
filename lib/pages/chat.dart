@@ -105,6 +105,7 @@ class _ChatState extends State<Chat> {
           createdAt: step.createdAt,
           updatedBy: step.updatedBy,
           updatedAt: step.updatedAt,
+          goalId: null, // 一時的にnullを設定
         );
       }).toList();
 
@@ -121,10 +122,20 @@ class _ChatState extends State<Chat> {
         updatedAt: DateTime.now(),
       );
 
-      await FirebaseFirestore.instance
-          .collection('goals')
-          .doc(newGoal.id)
-          .set(newGoal.toJson());
+      final goalRef =
+          FirebaseFirestore.instance.collection('goals').doc(newGoal.id);
+      await goalRef.set(newGoal.toJson());
+
+      // BabyStepを更新してgoalIdを設定
+      final batch = FirebaseFirestore.instance.batch();
+      for (final step in stepsWithOrder) {
+        final stepRef = goalRef.collection('babySteps').doc(step.id);
+        // 必ずgoalIdを設定する
+        final stepData = step.toJson();
+        stepData['goalId'] = newGoal.id; // 上書きで確実に設定
+        batch.set(stepRef, stepData);
+      }
+      await batch.commit();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

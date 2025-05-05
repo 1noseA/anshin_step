@@ -17,7 +17,7 @@ T _$identity<T>(T value) => value;
 mixin _$BabyStep {
   String get id;
   String get action; // 行動
-  String get goalId; // 親ゴールID
+  String? get goalId; // ゴールID
   int? get displayOrder; // 表示順
   bool? get isDone; // 実施済みフラグ
   DateTime? get executionDate; // 実行日付
@@ -103,7 +103,7 @@ abstract mixin class $BabyStepCopyWith<$Res> {
   $Res call(
       {String id,
       String action,
-      String goalId,
+      String? goalId,
       int? displayOrder,
       bool? isDone,
       DateTime? executionDate,
@@ -131,7 +131,7 @@ class _$BabyStepCopyWithImpl<$Res> implements $BabyStepCopyWith<$Res> {
   $Res call({
     Object? id = null,
     Object? action = null,
-    Object? goalId = null,
+    Object? goalId = freezed,
     Object? displayOrder = freezed,
     Object? isDone = freezed,
     Object? executionDate = freezed,
@@ -153,10 +153,10 @@ class _$BabyStepCopyWithImpl<$Res> implements $BabyStepCopyWith<$Res> {
           ? _self.action
           : action // ignore: cast_nullable_to_non_nullable
               as String,
-      goalId: null == goalId
+      goalId: freezed == goalId
           ? _self.goalId
           : goalId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       displayOrder: freezed == displayOrder
           ? _self.displayOrder
           : displayOrder // ignore: cast_nullable_to_non_nullable
@@ -211,7 +211,7 @@ class _BabyStep implements BabyStep {
   const _BabyStep(
       {required this.id,
       required this.action,
-      required this.goalId,
+      this.goalId,
       this.displayOrder,
       this.isDone,
       this.executionDate,
@@ -232,8 +232,8 @@ class _BabyStep implements BabyStep {
   final String action;
 // 行動
   @override
-  final String goalId;
-// 親ゴールID
+  final String? goalId;
+// ゴールID
   @override
   final int? displayOrder;
 // 表示順
@@ -347,7 +347,7 @@ abstract mixin class _$BabyStepCopyWith<$Res>
   $Res call(
       {String id,
       String action,
-      String goalId,
+      String? goalId,
       int? displayOrder,
       bool? isDone,
       DateTime? executionDate,
@@ -375,7 +375,7 @@ class __$BabyStepCopyWithImpl<$Res> implements _$BabyStepCopyWith<$Res> {
   $Res call({
     Object? id = null,
     Object? action = null,
-    Object? goalId = null,
+    Object? goalId = freezed,
     Object? displayOrder = freezed,
     Object? isDone = freezed,
     Object? executionDate = freezed,
@@ -397,10 +397,10 @@ class __$BabyStepCopyWithImpl<$Res> implements _$BabyStepCopyWith<$Res> {
           ? _self.action
           : action // ignore: cast_nullable_to_non_nullable
               as String,
-      goalId: null == goalId
+      goalId: freezed == goalId
           ? _self.goalId
           : goalId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       displayOrder: freezed == displayOrder
           ? _self.displayOrder
           : displayOrder // ignore: cast_nullable_to_non_nullable

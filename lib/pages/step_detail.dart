@@ -15,6 +15,7 @@ class StepDetail extends StatefulWidget {
 class _StepDetailState extends State<StepDetail> {
   final _postAnxietyController = TextEditingController();
   final _commentController = TextEditingController();
+  bool _isEditing = false;
 
   @override
   void initState() {
@@ -30,10 +31,16 @@ class _StepDetailState extends State<StepDetail> {
       appBar: AppBar(
         title: const Text('ステップ詳細'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _saveStep,
-          ),
+          if (!_isEditing)
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => setState(() => _isEditing = true),
+            ),
+          if (_isEditing)
+            IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: _saveStep,
+            ),
         ],
       ),
       body: Padding(
@@ -50,38 +57,54 @@ class _StepDetailState extends State<StepDetail> {
               ],
             ),
             const SizedBox(height: 20),
-            TextField(
-              controller: _postAnxietyController,
-              decoration: const InputDecoration(
-                labelText: '事後不安得点',
-                hintText: '数値を入力',
-              ),
-              keyboardType: TextInputType.number,
-            ),
+            _isEditing
+                ? TextField(
+                    controller: _postAnxietyController,
+                    decoration: const InputDecoration(
+                      labelText: '事後不安得点',
+                      hintText: '数値を入力',
+                    ),
+                    keyboardType: TextInputType.number,
+                  )
+                : Row(
+                    children: [
+                      const Text('事後不安得点: '),
+                      Text('${widget.step.afterAnxietyScore ?? 0}'),
+                    ],
+                  ),
             const SizedBox(height: 20),
-            TextField(
-              controller: _commentController,
-              decoration: const InputDecoration(
-                labelText: 'コメント',
-                hintText: '感想や気付きを入力',
-              ),
-              maxLines: 3,
-            ),
+            _isEditing
+                ? TextField(
+                    controller: _commentController,
+                    decoration: const InputDecoration(
+                      labelText: 'コメント',
+                      hintText: '感想や気付きを入力',
+                    ),
+                    maxLines: 3,
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('コメント:'),
+                      Text(widget.step.comment ?? 'コメントはありません'),
+                    ],
+                  ),
             const SizedBox(height: 30),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _saveStep,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.blue,
-                ),
-                child: const Text(
-                  '保存',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+            if (_isEditing)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _saveStep,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Colors.blue,
+                  ),
+                  child: const Text(
+                    '保存',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
@@ -113,7 +136,7 @@ class _StepDetailState extends State<StepDetail> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('更新が完了しました')),
         );
-        Navigator.pop(context);
+        setState(() => _isEditing = false);
       }
     } catch (e) {
       if (mounted) {
