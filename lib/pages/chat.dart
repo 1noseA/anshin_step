@@ -6,14 +6,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart';
 
-class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+class Chat extends StatefulWidget {
+  const Chat({super.key});
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  State<Chat> createState() => _ChatState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatState extends State<Chat> {
   final Uuid _uuid = const Uuid();
   final _goalController = TextEditingController();
   final _concernController = TextEditingController();

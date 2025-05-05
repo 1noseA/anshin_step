@@ -1,11 +1,11 @@
-import 'package:anshin_step/ui/profile/profile_screen.dart';
+import 'package:anshin_step/pages/profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'firebase_options.dart';
-import 'package:anshin_step/ui/main/main_screen.dart';
+import 'package:anshin_step/pages/step_list.dart';
 
 final authProvider = StreamProvider<User?>((ref) {
   return FirebaseAuth.instance.authStateChanges();
@@ -32,8 +32,8 @@ class MyApp extends StatelessWidget {
             data: (user) => user == null
                 ? const SignInPage()
                 : user.displayName?.isEmpty ?? true
-                    ? ProfileScreen(isNewUser: true)
-                    : const MainScreen(),
+                    ? Profile(isNewUser: true)
+                    : const StepList(),
             loading: () => const Scaffold(
                 body: Center(child: CircularProgressIndicator())),
             error: (error, _) =>
@@ -42,8 +42,8 @@ class MyApp extends StatelessWidget {
         },
       ),
       routes: {
-        '/main': (context) => const MainScreen(),
-        '/profile': (context) => ProfileScreen(),
+        '/main': (context) => const StepList(),
+        '/profile': (context) => Profile(),
       },
     );
   }

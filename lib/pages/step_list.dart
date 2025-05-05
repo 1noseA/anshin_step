@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:anshin_step/ui/chat/chat_screen.dart';
+import 'package:anshin_step/pages/chat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:anshin_step/models/goal.dart';
+import 'package:anshin_step/models/baby_step.dart';
+import 'package:anshin_step/pages/step_detail.dart';
 
 final goalsProvider = StreamProvider<List<Goal>>((ref) {
   final firestore = FirebaseFirestore.instance;
@@ -22,8 +24,8 @@ final goalsProvider = StreamProvider<List<Goal>>((ref) {
         ..sort((a, b) => (a.displayOrder ?? 0).compareTo(b.displayOrder ?? 0)));
 });
 
-class MainScreen extends ConsumerWidget {
-  const MainScreen({super.key});
+class StepList extends ConsumerWidget {
+  const StepList({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,11 +65,20 @@ class MainScreen extends ConsumerWidget {
                         if (goal.babySteps != null &&
                             goal.babySteps!.isNotEmpty)
                           ...goal.babySteps!
-                              .map((step) => ListTile(
-                                    title: Text(step.action),
-                                    trailing: Checkbox(
-                                      value: step.isDone ?? false,
-                                      onChanged: null,
+                              .map((step) => InkWell(
+                                    onTap: () =>
+                                        _navigateToStepDetail(context, step),
+                                    child: Row(
+                                      children: [
+                                        Checkbox(
+                                          value: step.isDone ?? false,
+                                          onChanged: null,
+                                        ),
+                                        Expanded(
+                                          child: Text(step.action),
+                                        ),
+                                        Text('${step.beforeAnxietyScore ?? 0}'),
+                                      ],
                                     ),
                                   ))
                               .toList(),
@@ -88,7 +99,7 @@ class MainScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ChatScreen()),
+          MaterialPageRoute(builder: (context) => const Chat()),
         ),
         child: const Icon(Icons.add),
       ),
@@ -141,5 +152,14 @@ class MainScreen extends ConsumerWidget {
     final auth = FirebaseAuth.instance;
     auth.signOut();
     Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+  }
+
+  void _navigateToStepDetail(BuildContext context, BabyStep step) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StepDetail(step: step),
+      ),
+    );
   }
 }

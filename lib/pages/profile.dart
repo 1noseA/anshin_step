@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anshin_step/models/app_user.dart';
-import 'package:anshin_step/ui/main/main_screen.dart';
+import 'package:anshin_step/pages/step_list.dart';
 
 final profileProvider =
     StateNotifierProvider.autoDispose<ProfileNotifier, AppUser>(
@@ -53,8 +53,8 @@ class ProfileNotifier extends StateNotifier<AppUser> {
   }
 }
 
-class ProfileScreen extends ConsumerWidget {
-  ProfileScreen({super.key, this.isNewUser = false});
+class Profile extends ConsumerWidget {
+  Profile({super.key, this.isNewUser = false});
   final bool isNewUser;
   final _formKey = GlobalKey<FormState>();
 
@@ -64,7 +64,7 @@ class ProfileScreen extends ConsumerWidget {
       if (isNewUser) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MainScreen()),
+          MaterialPageRoute(builder: (context) => const StepList()),
         );
       } else {
         Navigator.pop(context);
@@ -84,7 +84,7 @@ class ProfileScreen extends ConsumerWidget {
               if (isNewUser) {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const MainScreen()),
+                  MaterialPageRoute(builder: (context) => const StepList()),
                 );
               } else {
                 Navigator.pop(context);
