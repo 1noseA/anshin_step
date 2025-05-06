@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:anshin_step/models/baby_step.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anshin_step/pages/step_list.dart';
 
-class AnxietyScoreInput extends StatefulWidget {
+class AnxietyScoreInput extends ConsumerStatefulWidget {
   final List<BabyStep> steps;
   final String goalId;
 
@@ -14,10 +16,10 @@ class AnxietyScoreInput extends StatefulWidget {
   });
 
   @override
-  State<AnxietyScoreInput> createState() => _AnxietyScoreInputState();
+  ConsumerState<AnxietyScoreInput> createState() => _AnxietyScoreInputState();
 }
 
-class _AnxietyScoreInputState extends State<AnxietyScoreInput> {
+class _AnxietyScoreInputState extends ConsumerState<AnxietyScoreInput> {
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, int> _scores = {};
   int _currentIndex = 0;
@@ -72,6 +74,8 @@ class _AnxietyScoreInputState extends State<AnxietyScoreInput> {
       await Future.delayed(const Duration(milliseconds: 500));
 
       if (mounted) {
+        // goalsProviderをリフレッシュ
+        ref.refresh(goalsProvider);
         // 一覧画面に戻る
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
