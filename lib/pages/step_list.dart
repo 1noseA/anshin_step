@@ -13,6 +13,7 @@ final goalsProvider = StreamProvider<List<Goal>>((ref) {
   if (user == null) {
     return Stream.value([]);
   }
+
   return firestore
       .collection('goals')
       .where('created_by', isEqualTo: user.uid)
@@ -25,8 +26,10 @@ final goalsProvider = StreamProvider<List<Goal>>((ref) {
         goalData['id'] = doc.id;
 
         // サブコレクションからbabyStepsを取得
-        final babyStepsSnapshot =
-            await doc.reference.collection('babySteps').get();
+        final babyStepsSnapshot = await doc.reference
+            .collection('babySteps')
+            .where('isDeleted', isEqualTo: false)
+            .get();
         final babyStepsData = babyStepsSnapshot.docs.map((stepDoc) {
           final stepData = stepDoc.data();
           stepData['id'] = stepDoc.id;

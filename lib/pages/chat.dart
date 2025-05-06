@@ -130,9 +130,12 @@ class _ChatState extends State<Chat> {
       final batch = FirebaseFirestore.instance.batch();
       for (final step in stepsWithOrder) {
         final stepRef = goalRef.collection('babySteps').doc(step.id);
-        // 必ずgoalIdを設定する
-        final stepData = step.toJson();
-        stepData['goalId'] = newGoal.id; // 上書きで確実に設定
+        final stepData = {
+          ...step.toJson(),
+          'goalId': newGoal.id, // 必ずgoalIdを設定
+          'createdBy': FirebaseAuth.instance.currentUser?.uid ?? 'unknown_user',
+          'updatedBy': FirebaseAuth.instance.currentUser?.uid ?? 'unknown_user',
+        };
         batch.set(stepRef, stepData);
       }
       await batch.commit();

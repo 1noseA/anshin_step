@@ -6,9 +6,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'firebase_options.dart';
 import 'package:anshin_step/pages/step_list.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 final authProvider = StreamProvider<User?>((ref) {
   return FirebaseAuth.instance.authStateChanges();
+});
+
+// 新規ユーザーかどうかを判定するProvider
+final isNewUserProvider = StreamProvider<bool>((ref) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return Stream.value(false);
+
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .snapshots()
+      .map((doc) => !doc.exists);
 });
 
 Future<void> main() async {
@@ -28,16 +41,41 @@ class MyApp extends StatelessWidget {
       home: Consumer(
         builder: (context, ref, _) {
           final authState = ref.watch(authProvider);
+          final isNewUser = ref.watch(isNewUserProvider);
+
           return authState.when(
-            data: (user) => user == null
-                ? const SignInPage()
-                : user.displayName?.isEmpty ?? true
-                    ? Profile(isNewUser: true)
-                    : const StepList(),
+            data: (user) {
+              if (user == null) {
+                return const SignInPage();
+              }
+
+              // 新規ユーザーの場合のみプロフィール画面を表示
+              return isNewUser.when(
+                data: (isNew) {
+                  final creationTime = user.metadata.creationTime;
+                  // 新規ユーザーで、かつメタデータが新規作成の場合のみプロフィール画面を表示
+                  if (isNew &&
+                      creationTime != null &&
+                      creationTime.isAfter(DateTime.now()
+                          .subtract(const Duration(minutes: 5)))) {
+                    return Profile(isNewUser: true);
+                  }
+                  return const StepList();
+                },
+                loading: () => const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                ),
+                error: (error, _) => Scaffold(
+                  body: Center(child: Text('エラー: $error')),
+                ),
+              );
+            },
             loading: () => const Scaffold(
-                body: Center(child: CircularProgressIndicator())),
-            error: (error, _) =>
-                Scaffold(body: Center(child: Text('エラー: $error'))),
+              body: Center(child: CircularProgressIndicator()),
+            ),
+            error: (error, _) => Scaffold(
+              body: Center(child: Text('エラー: $error')),
+            ),
           );
         },
       ),
