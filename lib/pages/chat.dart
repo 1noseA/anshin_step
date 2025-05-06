@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart';
+import 'package:anshin_step/pages/anxiety_score_input.dart';
 
 class Chat extends StatefulWidget {
   const Chat({super.key});
@@ -144,7 +145,16 @@ class _ChatState extends State<Chat> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('保存が完了しました')),
         );
-        Navigator.pop(context);
+        // 事前不安得点入力画面に遷移
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AnxietyScoreInput(
+              steps: stepsWithOrder,
+              goalId: newGoal.id,
+            ),
+          ),
+        );
       }
     } catch (e, stackTrace) {
       if (mounted) {
