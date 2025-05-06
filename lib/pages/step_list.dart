@@ -66,8 +66,8 @@ class StepList extends ConsumerWidget {
                             goal.babySteps!.isNotEmpty)
                           ...goal.babySteps!
                               .map((step) => InkWell(
-                                    onTap: () =>
-                                        _navigateToStepDetail(context, step),
+                                    onTap: () => _navigateToStepDetail(
+                                        context, step, ref),
                                     child: Row(
                                       children: [
                                         Checkbox(
@@ -154,12 +154,17 @@ class StepList extends ConsumerWidget {
     Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
   }
 
-  void _navigateToStepDetail(BuildContext context, BabyStep step) {
+  void _navigateToStepDetail(
+      BuildContext context, BabyStep step, WidgetRef ref) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => StepDetail(step: step),
       ),
-    );
+    ).then((updatedStep) {
+      if (updatedStep != null && updatedStep is BabyStep) {
+        ref.refresh(goalsProvider);
+      }
+    });
   }
 }
