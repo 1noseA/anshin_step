@@ -18,11 +18,33 @@ final goalsProvider = StreamProvider<List<Goal>>((ref) {
       .where('created_by', isEqualTo: user.uid)
       .where('isDeleted', isEqualTo: false)
       .snapshots()
-      .map((snapshot) => snapshot.docs
-          .map((doc) => Goal.fromJson(doc.data()..['id'] = doc.id))
-          .toList()
-        ..sort((a, b) => (a.displayOrder ?? 0).compareTo(b.displayOrder ?? 0)));
+      .asyncMap((snapshot) async {
+    final goals = await Future.wait(
+      snapshot.docs.map((doc) async {
+        final goalData = doc.data();
+        goalData['id'] = doc.id;
+
+        // サブコレクションからbabyStepsを取得
+        final babyStepsSnapshot =
+            await doc.reference.collection('babySteps').get();
+        final babyStepsData = babyStepsSnapshot.docs.map((stepDoc) {
+          final stepData = stepDoc.data();
+          stepData['id'] = stepDoc.id;
+          return stepData;
+        }).toList();
+
+        goalData['babySteps'] = babyStepsData;
+        return Goal.fromJson(goalData);
+      }),
+    );
+    goals.sort((a, b) => (a.displayOrder ?? 0).compareTo(b.displayOrder ?? 0));
+    return goals;
+  });
 });
+
+// 更新されたBabyStepを保持するProvider
+final updatedBabyStepProvider =
+    StateProvider<Map<String, BabyStep>>((ref) => {});
 
 class StepList extends ConsumerWidget {
   const StepList({super.key});
@@ -42,6 +64,8 @@ class StepList extends ConsumerWidget {
       body: Consumer(
         builder: (context, ref, child) {
           final goalsAsync = ref.watch(goalsProvider);
+          final updatedBabySteps = ref.watch(updatedBabyStepProvider);
+
           return goalsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stack) => Center(child: Text('エラーが発生しました: $error')),
@@ -64,24 +88,28 @@ class StepList extends ConsumerWidget {
                       children: [
                         if (goal.babySteps != null &&
                             goal.babySteps!.isNotEmpty)
-                          ...goal.babySteps!
-                              .map((step) => InkWell(
-                                    onTap: () => _navigateToStepDetail(
-                                        context, step, ref),
-                                    child: Row(
-                                      children: [
-                                        Checkbox(
-                                          value: step.isDone ?? false,
-                                          onChanged: null,
-                                        ),
-                                        Expanded(
-                                          child: Text(step.action),
-                                        ),
-                                        Text('${step.beforeAnxietyScore ?? 0}'),
-                                      ],
-                                    ),
-                                  ))
-                              .toList(),
+                          ...goal.babySteps!.map((step) {
+                            // 更新された値がある場合はそれを使用
+                            final updatedStep = updatedBabySteps[step.id];
+                            final displayStep = updatedStep ?? step;
+                            return InkWell(
+                              onTap: () => _navigateToStepDetail(
+                                  context, displayStep, ref),
+                              child: Row(
+                                children: [
+                                  Checkbox(
+                                    value: displayStep.isDone ?? false,
+                                    onChanged: null,
+                                  ),
+                                  Expanded(
+                                    child: Text(displayStep.action),
+                                  ),
+                                  Text(
+                                      '${displayStep.beforeAnxietyScore ?? 0}'),
+                                ],
+                              ),
+                            );
+                          }).toList(),
                         if (goal.babySteps == null || goal.babySteps!.isEmpty)
                           const Padding(
                             padding: EdgeInsets.all(16.0),
@@ -156,15 +184,48 @@ class StepList extends ConsumerWidget {
 
   void _navigateToStepDetail(
       BuildContext context, BabyStep step, WidgetRef ref) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => StepDetail(step: step),
-      ),
-    ).then((updatedStep) {
-      if (updatedStep != null && updatedStep is BabyStep) {
-        ref.refresh(goalsProvider);
+    // Firestoreから最新データを取得
+    final firestore = FirebaseFirestore.instance;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // まずgoalを取得
+    firestore
+        .collection('goals')
+        .where('created_by', isEqualTo: user.uid)
+        .where('isDeleted', isEqualTo: false)
+        .get()
+        .then((goalsSnapshot) {
+      for (var goalDoc in goalsSnapshot.docs) {
+        // 各goalのbabyStepsサブコレクションを確認
+        goalDoc.reference
+            .collection('babySteps')
+            .doc(step.id)
+            .get()
+            .then((stepDoc) {
+          if (stepDoc.exists) {
+            final latestData = stepDoc.data();
+            latestData!['id'] = stepDoc.id;
+            final latestStep = BabyStep.fromJson(latestData);
+
+            // 最新データで詳細画面を表示
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StepDetail(step: latestStep),
+              ),
+            ).then((updatedStep) {
+              if (updatedStep != null && updatedStep is BabyStep) {
+                // 一覧画面を再描画
+                ref.refresh(goalsProvider);
+              }
+            });
+            return; // 見つかったら処理を終了
+          }
+        });
       }
+    }).catchError((error) {
+      print('データ取得エラー: $error');
     });
   }
 }

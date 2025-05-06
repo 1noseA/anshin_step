@@ -28,11 +28,17 @@ mixin _$Goal {
   bool? get isDeleted; // 論理削除フラグ
   @JsonKey(name: 'created_by')
   String get createdBy; // レコード登録者
-  @JsonKey(name: 'created_at')
+  @JsonKey(
+      name: 'created_at',
+      fromJson: _dateTimeFromTimestamp,
+      toJson: _dateTimeToJson)
   DateTime get createdAt; // レコード登録日
   @JsonKey(name: 'updated_by')
   String get updatedBy; // レコード更新者
-  @JsonKey(name: 'updated_at')
+  @JsonKey(
+      name: 'updated_at',
+      fromJson: _dateTimeFromTimestamp,
+      toJson: _dateTimeToJson)
   DateTime get updatedAt;
 
   /// Create a copy of Goal
@@ -106,9 +112,17 @@ abstract mixin class $GoalCopyWith<$Res> {
       int? displayOrder,
       bool? isDeleted,
       @JsonKey(name: 'created_by') String createdBy,
-      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(
+          name: 'created_at',
+          fromJson: _dateTimeFromTimestamp,
+          toJson: _dateTimeToJson)
+      DateTime createdAt,
       @JsonKey(name: 'updated_by') String updatedBy,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(
+          name: 'updated_at',
+          fromJson: _dateTimeFromTimestamp,
+          toJson: _dateTimeToJson)
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -194,9 +208,17 @@ class _Goal implements Goal {
       this.displayOrder,
       this.isDeleted,
       @JsonKey(name: 'created_by') required this.createdBy,
-      @JsonKey(name: 'created_at') required this.createdAt,
+      @JsonKey(
+          name: 'created_at',
+          fromJson: _dateTimeFromTimestamp,
+          toJson: _dateTimeToJson)
+      required this.createdAt,
       @JsonKey(name: 'updated_by') required this.updatedBy,
-      @JsonKey(name: 'updated_at') required this.updatedAt})
+      @JsonKey(
+          name: 'updated_at',
+          fromJson: _dateTimeFromTimestamp,
+          toJson: _dateTimeToJson)
+      required this.updatedAt})
       : _babySteps = babySteps;
   factory _Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);
 
@@ -235,7 +257,10 @@ class _Goal implements Goal {
   final String createdBy;
 // レコード登録者
   @override
-  @JsonKey(name: 'created_at')
+  @JsonKey(
+      name: 'created_at',
+      fromJson: _dateTimeFromTimestamp,
+      toJson: _dateTimeToJson)
   final DateTime createdAt;
 // レコード登録日
   @override
@@ -243,7 +268,10 @@ class _Goal implements Goal {
   final String updatedBy;
 // レコード更新者
   @override
-  @JsonKey(name: 'updated_at')
+  @JsonKey(
+      name: 'updated_at',
+      fromJson: _dateTimeFromTimestamp,
+      toJson: _dateTimeToJson)
   final DateTime updatedAt;
 
   /// Create a copy of Goal
@@ -324,9 +352,17 @@ abstract mixin class _$GoalCopyWith<$Res> implements $GoalCopyWith<$Res> {
       int? displayOrder,
       bool? isDeleted,
       @JsonKey(name: 'created_by') String createdBy,
-      @JsonKey(name: 'created_at') DateTime createdAt,
+      @JsonKey(
+          name: 'created_at',
+          fromJson: _dateTimeFromTimestamp,
+          toJson: _dateTimeToJson)
+      DateTime createdAt,
       @JsonKey(name: 'updated_by') String updatedBy,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(
+          name: 'updated_at',
+          fromJson: _dateTimeFromTimestamp,
+          toJson: _dateTimeToJson)
+      DateTime updatedAt});
 }
 
 /// @nodoc

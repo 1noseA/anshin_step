@@ -12,17 +12,15 @@ _BabyStep _$BabyStepFromJson(Map<String, dynamic> json) => _BabyStep(
       goalId: json['goalId'] as String?,
       displayOrder: (json['displayOrder'] as num?)?.toInt(),
       isDone: json['isDone'] as bool?,
-      executionDate: json['executionDate'] == null
-          ? null
-          : DateTime.parse(json['executionDate'] as String),
+      executionDate: _nullableDateTimeFromTimestamp(json['executionDate']),
       beforeAnxietyScore: (json['beforeAnxietyScore'] as num?)?.toInt(),
       afterAnxietyScore: (json['afterAnxietyScore'] as num?)?.toInt(),
       comment: json['comment'] as String?,
       isDeleted: json['isDeleted'] as bool?,
       createdBy: json['createdBy'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: _dateTimeFromTimestamp(json['createdAt']),
       updatedBy: json['updatedBy'] as String,
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      updatedAt: _dateTimeFromTimestamp(json['updatedAt']),
     );
 
 Map<String, dynamic> _$BabyStepToJson(_BabyStep instance) => <String, dynamic>{
@@ -31,13 +29,13 @@ Map<String, dynamic> _$BabyStepToJson(_BabyStep instance) => <String, dynamic>{
       'goalId': instance.goalId,
       'displayOrder': instance.displayOrder,
       'isDone': instance.isDone,
-      'executionDate': instance.executionDate?.toIso8601String(),
+      'executionDate': _nullableDateTimeToJson(instance.executionDate),
       'beforeAnxietyScore': instance.beforeAnxietyScore,
       'afterAnxietyScore': instance.afterAnxietyScore,
       'comment': instance.comment,
       'isDeleted': instance.isDeleted,
       'createdBy': instance.createdBy,
-      'createdAt': instance.createdAt.toIso8601String(),
+      'createdAt': _dateTimeToJson(instance.createdAt),
       'updatedBy': instance.updatedBy,
-      'updatedAt': instance.updatedAt.toIso8601String(),
+      'updatedAt': _dateTimeToJson(instance.updatedAt),
     };

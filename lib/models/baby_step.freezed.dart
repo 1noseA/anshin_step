@@ -20,14 +20,18 @@ mixin _$BabyStep {
   String? get goalId; // ゴールID
   int? get displayOrder; // 表示順
   bool? get isDone; // 実施済みフラグ
+  @JsonKey(
+      fromJson: _nullableDateTimeFromTimestamp, toJson: _nullableDateTimeToJson)
   DateTime? get executionDate; // 実行日付
   int? get beforeAnxietyScore; // 事前不安得点
   int? get afterAnxietyScore; // 事後不安得点
   String? get comment; // コメント
   bool? get isDeleted; // 論理削除フラグ
   String get createdBy; // レコード登録者
+  @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
   DateTime get createdAt; // レコード登録日
   String get updatedBy; // レコード更新者
+  @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
   DateTime get updatedAt;
 
   /// Create a copy of BabyStep
@@ -106,14 +110,19 @@ abstract mixin class $BabyStepCopyWith<$Res> {
       String? goalId,
       int? displayOrder,
       bool? isDone,
+      @JsonKey(
+          fromJson: _nullableDateTimeFromTimestamp,
+          toJson: _nullableDateTimeToJson)
       DateTime? executionDate,
       int? beforeAnxietyScore,
       int? afterAnxietyScore,
       String? comment,
       bool? isDeleted,
       String createdBy,
+      @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
       DateTime createdAt,
       String updatedBy,
+      @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
       DateTime updatedAt});
 }
 
@@ -214,14 +223,19 @@ class _BabyStep implements BabyStep {
       this.goalId,
       this.displayOrder,
       this.isDone,
+      @JsonKey(
+          fromJson: _nullableDateTimeFromTimestamp,
+          toJson: _nullableDateTimeToJson)
       this.executionDate,
       this.beforeAnxietyScore,
       this.afterAnxietyScore,
       this.comment,
       this.isDeleted,
       required this.createdBy,
+      @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
       required this.createdAt,
       required this.updatedBy,
+      @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
       required this.updatedAt});
   factory _BabyStep.fromJson(Map<String, dynamic> json) =>
       _$BabyStepFromJson(json);
@@ -241,6 +255,8 @@ class _BabyStep implements BabyStep {
   final bool? isDone;
 // 実施済みフラグ
   @override
+  @JsonKey(
+      fromJson: _nullableDateTimeFromTimestamp, toJson: _nullableDateTimeToJson)
   final DateTime? executionDate;
 // 実行日付
   @override
@@ -259,12 +275,14 @@ class _BabyStep implements BabyStep {
   final String createdBy;
 // レコード登録者
   @override
+  @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
   final DateTime createdAt;
 // レコード登録日
   @override
   final String updatedBy;
 // レコード更新者
   @override
+  @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
   final DateTime updatedAt;
 
   /// Create a copy of BabyStep
@@ -350,14 +368,19 @@ abstract mixin class _$BabyStepCopyWith<$Res>
       String? goalId,
       int? displayOrder,
       bool? isDone,
+      @JsonKey(
+          fromJson: _nullableDateTimeFromTimestamp,
+          toJson: _nullableDateTimeToJson)
       DateTime? executionDate,
       int? beforeAnxietyScore,
       int? afterAnxietyScore,
       String? comment,
       bool? isDeleted,
       String createdBy,
+      @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
       DateTime createdAt,
       String updatedBy,
+      @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
       DateTime updatedAt});
 }
 

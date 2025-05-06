@@ -14,9 +14,9 @@ _Goal _$GoalFromJson(Map<String, dynamic> json) => _Goal(
       displayOrder: (json['displayOrder'] as num?)?.toInt(),
       isDeleted: json['isDeleted'] as bool?,
       createdBy: json['created_by'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: _dateTimeFromTimestamp(json['created_at']),
       updatedBy: json['updated_by'] as String,
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      updatedAt: _dateTimeFromTimestamp(json['updated_at']),
     );
 
 Map<String, dynamic> _$GoalToJson(_Goal instance) => <String, dynamic>{
@@ -27,7 +27,7 @@ Map<String, dynamic> _$GoalToJson(_Goal instance) => <String, dynamic>{
       'displayOrder': instance.displayOrder,
       'isDeleted': instance.isDeleted,
       'created_by': instance.createdBy,
-      'created_at': instance.createdAt.toIso8601String(),
+      'created_at': _dateTimeToJson(instance.createdAt),
       'updated_by': instance.updatedBy,
-      'updated_at': instance.updatedAt.toIso8601String(),
+      'updated_at': _dateTimeToJson(instance.updatedAt),
     };
