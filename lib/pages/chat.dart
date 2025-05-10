@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart';
 import 'package:anshin_step/pages/anxiety_score_input.dart';
+import 'package:anshin_step/services/action_suggestion_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Chat extends StatefulWidget {
   const Chat({super.key});
@@ -19,39 +21,78 @@ class _ChatState extends State<Chat> {
   final _goalController = TextEditingController();
   final _concernController = TextEditingController();
   List<BabyStep> _steps = [];
+  bool _isLoading = false;
 
-  void _generateSteps() {
+  @override
+  void dispose() {
+    _goalController.dispose();
+    _concernController.dispose();
+    super.dispose();
+  }
+
+  /// AIを使用してベイビーステップを生成する
+  Future<void> _generateStepsWithAI() async {
     final goal = _goalController.text.trim();
     final anxiety = _concernController.text.trim();
 
-    if (goal.isEmpty) {
+    if (goal.isEmpty || anxiety.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('やりたいことを入力してください')),
-      );
-      return;
-    }
-
-    if (anxiety.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('不安なことを入力してください')),
+        const SnackBar(content: Text('やりたいことと不安なことを入力してください')),
       );
       return;
     }
 
     setState(() {
+      _isLoading = true;
       _steps.clear();
-      _steps = List.generate(
-          10,
-          (index) => BabyStep(
-                id: '${DateTime.now().millisecondsSinceEpoch}_$index',
-                action: 'ステップ ${index + 1}: 具体的なアクション内容',
-                isDone: false,
-                createdBy: 'system',
-                createdAt: DateTime.now(),
-                updatedBy: 'system',
-                updatedAt: DateTime.now(),
-              ));
     });
+
+    try {
+      // .envからAPI Keyを取得
+      final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+      if (apiKey.isEmpty) {
+        throw Exception('API Keyが設定されていません');
+      }
+
+      print('API Key: ${apiKey.substring(0, 5)}...'); // デバッグ用（最初の5文字のみ表示）
+      print('目標: $goal');
+      print('不安: $anxiety');
+
+      final actionService = ActionSuggestionService(apiKey);
+      final aiSteps = await actionService.generateBabySteps(
+        goal: goal,
+        anxiety: anxiety,
+      );
+
+      print('生成されたステップ数: ${aiSteps.length}'); // デバッグ用
+
+      setState(() {
+        _steps = List.generate(
+            aiSteps.length,
+            (index) => BabyStep(
+                  id: '${DateTime.now().millisecondsSinceEpoch}_$index',
+                  action: aiSteps[index],
+                  isDone: false,
+                  createdBy: 'system',
+                  createdAt: DateTime.now(),
+                  updatedBy: 'system',
+                  updatedAt: DateTime.now(),
+                ));
+      });
+    } catch (e) {
+      print('エラー詳細: $e'); // デバッグ用
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('AI提案エラー: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   void _clearSteps() {
@@ -192,6 +233,11 @@ class _ChatState extends State<Chat> {
                 labelText: 'やりたいこと',
                 hintText: '達成したい目標を入力',
               ),
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.next,
+              enableSuggestions: true,
+              autocorrect: true,
+              style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -201,55 +247,55 @@ class _ChatState extends State<Chat> {
                 hintText: '心配な点や障害を入力',
               ),
               maxLines: 3,
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.done,
+              enableSuggestions: true,
+              autocorrect: true,
+              style: const TextStyle(fontSize: 16),
             ),
-            const SizedBox(height: 30),
-            if (_steps.isNotEmpty)
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _generateStepsWithAI,
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('AIに提案を依頼'),
+                ),
+                if (_steps.isNotEmpty)
+                  TextButton(
+                    onPressed: _clearSteps,
+                    child: const Text('クリア'),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            if (_steps.isNotEmpty) ...[
+              const Text(
+                '生成されたベイビーステップ',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
               ..._steps.map((step) => ListTile(
                     title: Text(step.action),
                   )),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _saveSteps,
+                child: const Text('保存して次へ'),
+              ),
+            ],
           ],
         ),
       ),
-      floatingActionButton: _steps.isEmpty
-          ? FloatingActionButton(
-              onPressed: _generateSteps,
-              child: const Icon(Icons.send),
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-            )
-          : null,
-      bottomNavigationBar: _steps.isNotEmpty
-          ? Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('もう一度生成'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[200],
-                        foregroundColor: Colors.black,
-                      ),
-                      onPressed: _clearSteps,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.save),
-                      label: const Text('保存する'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: _saveSteps,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : null,
     );
   }
 }

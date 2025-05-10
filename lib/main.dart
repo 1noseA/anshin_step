@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'package:anshin_step/pages/step_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -26,6 +27,10 @@ final isNewUserProvider = StreamProvider<bool>((ref) {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // .envファイルの読み込み
+  await dotenv.load(fileName: ".env");
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
