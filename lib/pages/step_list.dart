@@ -40,7 +40,10 @@ final goalsProvider = StreamProvider<List<Goal>>((ref) {
         return Goal.fromJson(goalData);
       }),
     );
-    goals.sort((a, b) => (a.displayOrder ?? 0).compareTo(b.displayOrder ?? 0));
+    // createdAtの降順でソート
+    goals.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    // 将来的にdisplayOrderによる並び替えが必要な場合のためのコード
+    // goals.sort((a, b) => (a.displayOrder ?? 0).compareTo(b.displayOrder ?? 0));
     return goals;
   });
 });
