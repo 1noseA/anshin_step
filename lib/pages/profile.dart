@@ -4,6 +4,7 @@ import 'package:anshin_step/models/app_user.dart';
 import 'package:anshin_step/pages/step_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 final profileProvider =
     StateNotifierProvider.autoDispose<ProfileNotifier, AppUser>(
@@ -20,7 +21,30 @@ class ProfileNotifier extends StateNotifier<AppUser> {
             updatedBy: '',
             updatedAt: DateTime.now(),
           ),
-        );
+        ) {
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (doc.exists) {
+        final userData = AppUser.fromJson(doc.data()!);
+        state = userData;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('プロフィール読み込みエラー: $e');
+      }
+    }
+  }
 
   void updateUserName(String value) {
     state = state.copyWith(userName: value);
@@ -116,6 +140,7 @@ class Profile extends ConsumerWidget {
           child: Column(
             children: [
               TextFormField(
+                key: ValueKey(state.userName),
                 decoration: const InputDecoration(
                   labelText: 'ニックネーム',
                   hintText: 'ユーザー',
@@ -132,11 +157,12 @@ class Profile extends ConsumerWidget {
               ),
               const SizedBox(height: 20),
               TextFormField(
+                key: ValueKey(state.age?.toString() ?? ''),
                 decoration: const InputDecoration(
                   labelText: '年齢',
                 ),
                 keyboardType: TextInputType.number,
-                initialValue: state.age?.toString(),
+                initialValue: state.age?.toString() ?? '',
                 onChanged: (value) =>
                     ref.read(profileProvider.notifier).updateAge(value),
               ),
