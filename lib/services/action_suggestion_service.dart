@@ -22,6 +22,8 @@ class ActionSuggestionService {
   Future<List<String>> generateBabySteps({
     required String goal,
     required String anxiety,
+    required String role,
+    required String profileContext,
   }) async {
     if (apiKey.isEmpty) {
       throw Exception('API Keyが設定されていません');
@@ -36,7 +38,15 @@ class ActionSuggestionService {
     final prompt = ActionSuggestionPrompts.generateBabyStepsPrompt(
       goal: goal,
       anxiety: anxiety,
+      role: role,
+      profileContext: profileContext,
     );
+
+    if (kDebugMode) {
+      print('=== 生成されたプロンプト === ');
+      print(prompt);
+      print('==============================');
+    }
 
     // リクエストボディの形式を修正
     final body = jsonEncode({
@@ -86,20 +96,21 @@ class ActionSuggestionService {
         // 番号付きのリストを抽出（日本語の番号にも対応）
         final steps = RegExp(r'^\d+[\.．]\s*(.+)$', multiLine: true)
             .allMatches(text)
-            .map((m) => m.group(1)!.trim())
+            .map((m) => m.group(1)!.trim().replaceAll('**', ''))
             .take(10)
             .toList()
             .cast<String>();
 
         if (steps.length < 10) {
-          final fallbackSteps = text
-              .split('\n')
+          final fallbackSteps = (text.split('\n') as List<String>)
               .where((e) => e.trim().isNotEmpty)
-              .map((e) => e.replaceAll(RegExp(r'^\d+[\.．]\s*'), '').trim())
+              .map((e) => e
+                  .replaceAll(RegExp(r'^\d+[\.．]\s*'), '')
+                  .trim()
+                  .replaceAll('**', ''))
               .where((e) => e.isNotEmpty)
               .take(10)
-              .toList()
-              .cast<String>();
+              .toList();
 
           return fallbackSteps;
         }

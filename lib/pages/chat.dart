@@ -8,15 +8,32 @@ import 'package:flutter/foundation.dart';
 import 'package:anshin_step/pages/anxiety_score_input.dart';
 import 'package:anshin_step/services/action_suggestion_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anshin_step/models/app_user.dart';
+import 'package:anshin_step/constants/action_suggestion_prompts.dart';
 
-class Chat extends StatefulWidget {
+// プロフィール情報を取得するProvider
+final userProfileProvider = StreamProvider<AppUser?>((ref) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return Stream.value(null);
+
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .snapshots()
+      .map((doc) {
+    return doc.exists ? AppUser.fromJson(doc.data()!) : null;
+  });
+});
+
+class Chat extends ConsumerStatefulWidget {
   const Chat({super.key});
 
   @override
-  State<Chat> createState() => _ChatState();
+  ConsumerState<Chat> createState() => _ChatState();
 }
 
-class _ChatState extends State<Chat> {
+class _ChatState extends ConsumerState<Chat> {
   final Uuid _uuid = const Uuid();
   final _goalController = TextEditingController();
   final _concernController = TextEditingController();
@@ -54,17 +71,73 @@ class _ChatState extends State<Chat> {
         throw Exception('API Keyが設定されていません');
       }
 
-      print('API Key: ${apiKey.substring(0, 5)}...'); // デバッグ用（最初の5文字のみ表示）
-      print('目標: $goal');
-      print('不安: $anxiety');
+      // プロフィール情報を取得
+      final userProfileAsync = ref.watch(userProfileProvider);
+      final isProfileReady = userProfileAsync is AsyncData<AppUser?> &&
+          userProfileAsync.value != null;
+      String role = '不安を抱える人々のためのベイビーステップ生成アシスタント';
+      String profileContext = '';
+
+      // プロフィール情報が取得できていない場合はAIリクエストを中断
+      if (!isProfileReady) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('プロフィール情報の取得中です。しばらくお待ちください')),
+          );
+        }
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final userProfile = userProfileAsync.value;
+      if (userProfile != null) {
+        if (userProfile.hasMentalIllness == true) {
+          role = '認知行動療法の専門家であり、公認心理師・臨床心理士二つの有資格者です';
+          if (userProfile.mentalIllnesses != null &&
+              userProfile.mentalIllnesses!.isNotEmpty) {
+            role = '${userProfile.mentalIllnesses!.join("、")}の臨床経験が豊富な$role';
+          }
+        }
+
+        List<String> profileInfo = [];
+        profileInfo.add('名前: ${userProfile.userName}');
+        if (userProfile.age != null)
+          profileInfo.add('年齢: 「${userProfile.age}歳」');
+        if (userProfile.gender != null)
+          profileInfo.add('性別: 「${userProfile.gender}」');
+        if (userProfile.attribute != null)
+          profileInfo.add('属性: 「${userProfile.attribute}」');
+        if (userProfile.hasMentalIllness != null)
+          profileInfo.add(
+              '精神疾患の有無: 「${userProfile.hasMentalIllness == true ? "あり" : "なし"}」');
+        if (userProfile.mentalIllnesses != null &&
+            userProfile.mentalIllnesses!.isNotEmpty)
+          profileInfo.add('診断名: 「${userProfile.mentalIllnesses!.join("、")}」');
+
+        profileContext = '\n\nユーザーのプロフィール情報:\n${profileInfo.join("\n")}';
+      } else {
+        if (kDebugMode) {
+          print('プロフィール情報がnullでした。');
+        }
+      }
 
       final actionService = ActionSuggestionService(apiKey);
       final aiSteps = await actionService.generateBabySteps(
         goal: goal,
         anxiety: anxiety,
+        role: role,
+        profileContext: profileContext,
       );
 
-      print('生成されたステップ数: ${aiSteps.length}'); // デバッグ用
+      if (kDebugMode) {
+        print('\n=== 生成されたベイビーステップ ===');
+        for (var i = 0; i < aiSteps.length; i++) {
+          print('${i + 1}. ${aiSteps[i]}');
+        }
+        print('==============================\n');
+      }
 
       setState(() {
         _steps = List.generate(
@@ -80,7 +153,7 @@ class _ChatState extends State<Chat> {
                 ));
       });
     } catch (e) {
-      print('エラー詳細: $e'); // デバッグ用
+      print('エラー詳細: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('AI提案エラー: $e')),
@@ -219,6 +292,9 @@ class _ChatState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
+    final userProfileAsync = ref.watch(userProfileProvider);
+    final isProfileReady = userProfileAsync is AsyncData<AppUser?> &&
+        userProfileAsync.value != null;
     return Scaffold(
       appBar: AppBar(
         title: const Text('新しい行動プラン作成'),
@@ -258,7 +334,9 @@ class _ChatState extends State<Chat> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: _isLoading ? null : _generateStepsWithAI,
+                  onPressed: _isLoading || !isProfileReady
+                      ? null
+                      : _generateStepsWithAI,
                   child: _isLoading
                       ? const SizedBox(
                           width: 20,
