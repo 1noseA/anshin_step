@@ -7,6 +7,7 @@ import 'package:anshin_step/services/comment_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:anshin_step/pages/chat.dart'; // userProfileProvider用
 import 'package:anshin_step/models/app_user.dart';
+import 'package:flutter/foundation.dart';
 
 class StepDetail extends ConsumerStatefulWidget {
   final BabyStep step;
@@ -23,6 +24,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
   bool _isEditing = false;
   bool _isLoading = false; // ローディング状態を追加
   late BabyStep _currentStep;
+  ({bool shouldRecommend, String reason})? _lastRecommendResult;
 
   @override
   void initState() {
@@ -252,8 +254,26 @@ class _StepDetailState extends ConsumerState<StepDetail> {
         aiComment = 'AIコメントの生成に失敗しました。';
       }
 
+      // ★ここで専門家受診レコメンド判定を実施
+      try {
+        _lastRecommendResult = await commentService.checkRecommendConsultation(
+          profileContext: profileContext,
+          action: _currentStep.action,
+          beforeAnxietyScore:
+              _currentStep.beforeAnxietyScore?.toString() ?? '未入力',
+          afterAnxietyScore: postAnxiety.toString(),
+          userComment: comment,
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          print('専門家受診レコメンド判定エラー: $e');
+        }
+        _lastRecommendResult = null;
+      }
+
       if (mounted) {
-        showDialog(
+        // まずAIコメントダイアログを表示
+        await showDialog(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('あなたへのメッセージ'),
@@ -266,6 +286,28 @@ class _StepDetailState extends ConsumerState<StepDetail> {
             ],
           ),
         );
+
+        // _lastRecommendResultをローカル変数に退避してからnullにリセット
+        final recommendResult = _lastRecommendResult;
+        _lastRecommendResult = null;
+        if (recommendResult != null && recommendResult.shouldRecommend) {
+          await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('サポートのご案内',
+                  style: TextStyle(
+                      color: Colors.red, fontWeight: FontWeight.bold)),
+              content: const Text(
+                  'あなたの状態について、専門家（精神科・カウンセリング等）への相談を強くおすすめします。\nオンラインで相談できるサービスもあります。'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('閉じる'),
+                ),
+              ],
+            ),
+          );
+        }
 
         // 更新後のデータを画面に反映
         setState(() {
