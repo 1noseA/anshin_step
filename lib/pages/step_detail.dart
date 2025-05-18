@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:anshin_step/models/baby_step.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anshin_step/services/comment_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:anshin_step/pages/chat.dart'; // userProfileProvider用
+import 'package:anshin_step/models/app_user.dart';
 
-class StepDetail extends StatefulWidget {
+class StepDetail extends ConsumerStatefulWidget {
   final BabyStep step;
 
   const StepDetail({super.key, required this.step});
 
   @override
-  State<StepDetail> createState() => _StepDetailState();
+  ConsumerState<StepDetail> createState() => _StepDetailState();
 }
 
-class _StepDetailState extends State<StepDetail> {
+class _StepDetailState extends ConsumerState<StepDetail> {
   final _postAnxietyController = TextEditingController();
   final _commentController = TextEditingController();
   bool _isEditing = false;
@@ -165,6 +170,61 @@ class _StepDetailState extends State<StepDetail> {
           await parentRef.collection('babySteps').doc(_currentStep.id).get();
       print('保存後のデータ:');
       print(afterDoc.data());
+
+      // AIコメント生成処理
+      final userProfileAsync = ref.watch(userProfileProvider);
+      final isProfileReady = userProfileAsync is AsyncData<AppUser?> &&
+          userProfileAsync.value != null;
+      String profileContext = '';
+      if (isProfileReady) {
+        final userProfile = userProfileAsync.value;
+        List<String> profileInfo = [];
+        profileInfo.add('名前: ${userProfile!.userName}');
+        if (userProfile.age != null)
+          profileInfo.add('年齢: 「${userProfile.age}歳」');
+        if (userProfile.gender != null)
+          profileInfo.add('性別: 「${userProfile.gender}」');
+        if (userProfile.attribute != null)
+          profileInfo.add('属性: 「${userProfile.attribute}」');
+        if (userProfile.hasMentalIllness != null)
+          profileInfo.add(
+              '精神疾患の有無: 「${userProfile.hasMentalIllness == true ? "あり" : "なし"}」');
+        if (userProfile.mentalIllnesses != null &&
+            userProfile.mentalIllnesses!.isNotEmpty)
+          profileInfo.add('診断名: 「${userProfile.mentalIllnesses!.join("、")}」');
+        profileContext = '\n\nユーザーのプロフィール情報:\n${profileInfo.join("\n")}';
+      }
+
+      final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+      final commentService = CommentService(apiKey);
+      String aiComment = '';
+      try {
+        aiComment = await commentService.generateComment(
+          profileContext: profileContext,
+          action: _currentStep.action,
+          beforeAnxietyScore:
+              _currentStep.beforeAnxietyScore?.toString() ?? '未入力',
+          afterAnxietyScore: postAnxiety.toString(),
+          userComment: comment,
+        );
+      } catch (e) {
+        aiComment = 'AIコメントの生成に失敗しました。';
+      }
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('AIからのコメント'),
+            content: Text(aiComment),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('閉じる'),
+              ),
+            ],
+          ),
+        );
+      }
 
       if (mounted) {
         // 更新後のデータを画面に反映
