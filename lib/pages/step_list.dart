@@ -110,8 +110,16 @@ class StepList extends ConsumerWidget {
                                   Expanded(
                                     child: Text(displayStep.action),
                                   ),
-                                  Text(
-                                      '${displayStep.beforeAnxietyScore ?? 0}'),
+                                  SizedBox(
+                                    width: 48, // 2桁+余白程度の幅
+                                    child: Text(
+                                      displayStep.beforeAnxietyScore == null
+                                          ? '   '
+                                          : displayStep.beforeAnxietyScore
+                                              .toString(),
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ),
                                 ],
                               ),
                             );

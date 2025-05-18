@@ -50,7 +50,8 @@ class _AnxietyScoreInputState extends ConsumerState<AnxietyScoreInput> {
           FirebaseFirestore.instance.collection('goals').doc(widget.goalId);
 
       for (var step in widget.steps) {
-        final score = int.tryParse(_controllers[step.id]?.text ?? '0') ?? 0;
+        final text = _controllers[step.id]?.text ?? '';
+        final score = text.isEmpty ? null : int.tryParse(text);
         final stepRef = goalRef.collection('babySteps').doc(step.id);
 
         // 更新データを明示的に設定
