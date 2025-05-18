@@ -84,7 +84,31 @@ class CommentService {
         if (text.isEmpty) {
           throw Exception('APIからの応答が空です');
         }
-        return text.trim();
+        final rawComment = text.trim();
+
+        // 感情分析結果とコメントを分離
+        final parts = rawComment.split('\n\n');
+        String analysis = '';
+        String comment = '';
+
+        for (var part in parts) {
+          if (part.startsWith('## 感情分析結果')) {
+            analysis = part.replaceAll('## 感情分析結果', '').trim();
+          } else {
+            comment = part.trim();
+          }
+        }
+
+        if (kDebugMode) {
+          print('=== 感情分析結果 === ');
+          print(analysis);
+          print('=== 生成されたコメント === ');
+          print(comment);
+          print('==============================');
+        }
+
+        // 「**」を削除して返す
+        return comment.replaceAll('**', '');
       } else {
         final errorData = jsonDecode(response.body);
         final errorMessage = errorData['error']?['message'] ?? '不明なエラー';

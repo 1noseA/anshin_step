@@ -21,6 +21,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
   final _postAnxietyController = TextEditingController();
   final _commentController = TextEditingController();
   bool _isEditing = false;
+  bool _isLoading = false; // ローディング状態を追加
   late BabyStep _currentStep;
 
   @override
@@ -46,7 +47,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
           if (_isEditing)
             IconButton(
               icon: const Icon(Icons.save),
-              onPressed: _saveStep,
+              onPressed: _isLoading ? null : _saveStep, // ローディング中は無効化
             ),
         ],
       ),
@@ -101,15 +102,25 @@ class _StepDetailState extends ConsumerState<StepDetail> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _saveStep,
+                  onPressed: _isLoading ? null : _saveStep, // ローディング中は無効化
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: Colors.blue,
                   ),
-                  child: const Text(
-                    '保存',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          '保存',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
                 ),
               ),
           ],
@@ -120,6 +131,10 @@ class _StepDetailState extends ConsumerState<StepDetail> {
 
   Future<void> _saveStep() async {
     try {
+      setState(() {
+        _isLoading = true; // ローディング開始
+      });
+
       final postAnxiety = int.tryParse(_postAnxietyController.text) ?? 0;
       final comment = _commentController.text;
 
@@ -172,27 +187,53 @@ class _StepDetailState extends ConsumerState<StepDetail> {
       print(afterDoc.data());
 
       // AIコメント生成処理
-      final userProfileAsync = ref.watch(userProfileProvider);
-      final isProfileReady = userProfileAsync is AsyncData<AppUser?> &&
-          userProfileAsync.value != null;
       String profileContext = '';
-      if (isProfileReady) {
-        final userProfile = userProfileAsync.value;
-        List<String> profileInfo = [];
-        profileInfo.add('名前: ${userProfile!.userName}');
-        if (userProfile.age != null)
-          profileInfo.add('年齢: 「${userProfile.age}歳」');
-        if (userProfile.gender != null)
-          profileInfo.add('性別: 「${userProfile.gender}」');
-        if (userProfile.attribute != null)
-          profileInfo.add('属性: 「${userProfile.attribute}」');
-        if (userProfile.hasMentalIllness != null)
-          profileInfo.add(
-              '精神疾患の有無: 「${userProfile.hasMentalIllness == true ? "あり" : "なし"}」');
-        if (userProfile.mentalIllnesses != null &&
-            userProfile.mentalIllnesses!.isNotEmpty)
-          profileInfo.add('診断名: 「${userProfile.mentalIllnesses!.join("、")}」');
-        profileContext = '\n\nユーザーのプロフィール情報:\n${profileInfo.join("\n")}';
+      bool isProfileReady = false;
+      int retryCount = 0;
+      const maxRetries = 5; // 最大リトライ回数
+
+      // プロフィール情報の取得を待機
+      while (!isProfileReady && retryCount < maxRetries) {
+        final userProfileAsync = ref.read(userProfileProvider);
+        if (userProfileAsync is AsyncData<AppUser?> &&
+            userProfileAsync.value != null) {
+          final userProfile = userProfileAsync.value;
+          if (userProfile != null) {
+            List<String> profileInfo = [];
+            profileInfo.add('名前: ${userProfile.userName}');
+            if (userProfile.age != null)
+              profileInfo.add('年齢: 「${userProfile.age}歳」');
+            if (userProfile.gender != null)
+              profileInfo.add('性別: 「${userProfile.gender}」');
+            if (userProfile.attribute != null)
+              profileInfo.add('属性: 「${userProfile.attribute}」');
+            if (userProfile.hasMentalIllness != null)
+              profileInfo.add(
+                  '精神疾患の有無: 「${userProfile.hasMentalIllness == true ? "あり" : "なし"}」');
+            if (userProfile.mentalIllnesses != null &&
+                userProfile.mentalIllnesses!.isNotEmpty)
+              profileInfo
+                  .add('診断名: 「${userProfile.mentalIllnesses!.join("、")}」');
+            profileContext = '\n\nユーザーのプロフィール情報:\n${profileInfo.join("\n")}';
+            isProfileReady = true;
+          }
+        }
+
+        if (!isProfileReady) {
+          retryCount++;
+          if (retryCount < maxRetries) {
+            await Future.delayed(const Duration(milliseconds: 500)); // 0.5秒待機
+          }
+        }
+      }
+
+      if (!isProfileReady) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('プロフィール情報の取得に失敗しました')),
+          );
+        }
+        return;
       }
 
       final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
@@ -210,11 +251,12 @@ class _StepDetailState extends ConsumerState<StepDetail> {
       } catch (e) {
         aiComment = 'AIコメントの生成に失敗しました。';
       }
+
       if (mounted) {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('AIからのコメント'),
+            title: const Text('あなたへのメッセージ'),
             content: Text(aiComment),
             actions: [
               TextButton(
@@ -224,9 +266,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
             ],
           ),
         );
-      }
 
-      if (mounted) {
         // 更新後のデータを画面に反映
         setState(() {
           _currentStep = _currentStep.copyWith(
@@ -247,6 +287,12 @@ class _StepDetailState extends ConsumerState<StepDetail> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('更新に失敗しました: ${e.toString()}')),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false; // ローディング終了
+        });
       }
     }
   }
