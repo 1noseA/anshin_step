@@ -297,82 +297,95 @@ class _ChatState extends ConsumerState<Chat> {
         userProfileAsync.value != null;
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         title: const Text('新しい行動プラン作成'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            TextField(
-              controller: _goalController,
-              decoration: const InputDecoration(
-                labelText: 'やりたいこと',
-                hintText: '達成したい目標を入力',
-              ),
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.next,
-              enableSuggestions: true,
-              autocorrect: true,
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _concernController,
-              decoration: const InputDecoration(
-                labelText: '不安なこと',
-                hintText: '心配な点や障害を入力',
-              ),
-              maxLines: 3,
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.done,
-              enableSuggestions: true,
-              autocorrect: true,
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: _isLoading || !isProfileReady
-                      ? null
-                      : _generateStepsWithAI,
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('AIに提案を依頼'),
-                ),
-                if (_steps.isNotEmpty)
-                  TextButton(
-                    onPressed: _clearSteps,
-                    child: const Text('クリア'),
+      body: Column(
+        children: [
+          Container(
+            height: 1,
+            color: const Color(0xFFE0E3E8),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ListView(
+                children: [
+                  TextField(
+                    controller: _goalController,
+                    decoration: const InputDecoration(
+                      labelText: 'やりたいこと',
+                      hintText: '達成したい目標を入力',
+                    ),
+                    keyboardType: TextInputType.text,
+                    textInputAction: TextInputAction.next,
+                    enableSuggestions: true,
+                    autocorrect: true,
+                    style: const TextStyle(fontSize: 16),
                   ),
-              ],
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _concernController,
+                    decoration: const InputDecoration(
+                      labelText: '不安なこと',
+                      hintText: '心配な点や障害を入力',
+                    ),
+                    maxLines: 3,
+                    keyboardType: TextInputType.text,
+                    textInputAction: TextInputAction.done,
+                    enableSuggestions: true,
+                    autocorrect: true,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: _isLoading || !isProfileReady
+                            ? null
+                            : _generateStepsWithAI,
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Text('AIに提案を依頼'),
+                      ),
+                      if (_steps.isNotEmpty)
+                        TextButton(
+                          onPressed: _clearSteps,
+                          child: const Text('クリア'),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  if (_steps.isNotEmpty) ...[
+                    const Text(
+                      '生成されたベイビーステップ',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    ..._steps.map((step) => ListTile(
+                          title: Text(step.action),
+                        )),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _saveSteps,
+                      child: const Text('保存して次へ'),
+                    ),
+                  ],
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            if (_steps.isNotEmpty) ...[
-              const Text(
-                '生成されたベイビーステップ',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              ..._steps.map((step) => ListTile(
-                    title: Text(step.action),
-                  )),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _saveSteps,
-                child: const Text('保存して次へ'),
-              ),
-            ],
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -106,80 +106,95 @@ class _AnxietyScoreInputState extends ConsumerState<AnxietyScoreInput> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         title: Text('事前不安得点の入力 (${_currentIndex + 1}/${widget.steps.length})'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'ステップ ${_currentIndex + 1}: ${currentStep.action}',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'このステップを実行する前に、不安の強さを0-100で評価してください',
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _controllers[currentStep.id],
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: '不安得点 (0-100)',
-                border: OutlineInputBorder(),
+      body: Column(
+        children: [
+          Container(
+            height: 1,
+            color: const Color(0xFFE0E3E8),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'ステップ ${_currentIndex + 1}: ${currentStep.action}',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'このステップを実行する前に、不安の強さを0-100で評価してください',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 24),
+                  TextField(
+                    controller: _controllers[currentStep.id],
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: '不安得点 (0-100)',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      final score = int.tryParse(value) ?? 0;
+                      if (score >= 0 && score <= 100) {
+                        setState(() {
+                          _scores[currentStep.id] = score;
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (_currentIndex > 0)
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _currentIndex--;
+                            });
+                          },
+                          child: const Text('前へ'),
+                        ),
+                      if (_currentIndex < widget.steps.length - 1)
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _currentIndex++;
+                            });
+                          },
+                          child: const Text('次へ'),
+                        ),
+                    ],
+                  ),
+                ],
               ),
-              onChanged: (value) {
-                final score = int.tryParse(value) ?? 0;
-                if (score >= 0 && score <= 100) {
-                  setState(() {
-                    _scores[currentStep.id] = score;
-                  });
-                }
-              },
             ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (_currentIndex > 0)
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _currentIndex--;
-                      });
-                    },
-                    child: const Text('前へ'),
-                  ),
-                if (_currentIndex < widget.steps.length - 1)
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _currentIndex++;
-                      });
-                    },
-                    child: const Text('次へ'),
-                  ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            TextButton(
-              onPressed: _skipInput,
-              child: const Text('スキップ'),
-            ),
-            ElevatedButton(
-              onPressed: _saveScore,
-              child: const Text('保存して完了'),
-            ),
-          ],
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              TextButton(
+                onPressed: _skipInput,
+                child: const Text('スキップ'),
+              ),
+              ElevatedButton(
+                onPressed: _saveScore,
+                child: const Text('保存して完了'),
+              ),
+            ],
+          ),
         ),
       ),
     );

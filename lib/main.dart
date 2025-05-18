@@ -42,7 +42,105 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(),
+      theme: ThemeData(
+        scaffoldBackgroundColor: const Color(0xFFECF5FF),
+        cardColor: Colors.white,
+        fontFamily: 'Noto Sans JP',
+        textTheme: const TextTheme(
+          headlineLarge: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1A1A1A),
+            height: 1.6,
+            fontFamily: 'Noto Sans JP',
+          ),
+          headlineMedium: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1A1A1A),
+            height: 1.6,
+            fontFamily: 'Noto Sans JP',
+          ),
+          headlineSmall: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1A1A1A),
+            height: 1.6,
+            fontFamily: 'Noto Sans JP',
+          ),
+          bodyLarge: TextStyle(
+            fontSize: 16,
+            color: Color(0xFF1A1A1A),
+            height: 1.75,
+            fontFamily: 'Noto Sans JP',
+          ),
+          bodyMedium: TextStyle(
+            fontSize: 14,
+            color: Color(0xFF1A1A1A),
+            height: 1.75,
+            fontFamily: 'Noto Sans JP',
+          ),
+          bodySmall: TextStyle(
+            fontSize: 12,
+            color: Color(0xFF1A1A1A),
+            height: 1.75,
+            fontFamily: 'Noto Sans JP',
+          ),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: Color(0xFF1A1A1A),
+          elevation: 1,
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1A1A1A),
+            fontFamily: 'Noto Sans JP',
+          ),
+          iconTheme: IconThemeData(color: Color(0xFF1A1A1A)),
+        ),
+        primaryColor: Colors.white,
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          primary: Colors.white,
+          secondary: const Color(0xFF3EA8FF),
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(),
+          labelStyle: TextStyle(color: Color(0xFF1A1A1A)),
+        ),
+        snackBarTheme: const SnackBarThemeData(
+          backgroundColor: Colors.white,
+          contentTextStyle: TextStyle(color: Color(0xFF222222)),
+        ),
+        dialogBackgroundColor: Colors.white,
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Color(0xFF3EA8FF),
+          foregroundColor: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF3EA8FF),
+            foregroundColor: Colors.white,
+            textStyle: const TextStyle(fontWeight: FontWeight.bold),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: const Color(0xFF3EA8FF),
+            textStyle: const TextStyle(
+              color: Color(0xFF3EA8FF),
+              fontWeight: FontWeight.normal,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+        shadowColor: Colors.black12,
+      ),
       home: Consumer(
         builder: (context, ref, _) {
           final authState = ref.watch(authProvider);
