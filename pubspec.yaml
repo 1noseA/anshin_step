@@ -78,6 +78,9 @@ flutter:
         - asset: fonts/NotoSansJP-Regular.ttf
         - asset: fonts/NotoSansJP-Bold.ttf
           weight: 700
+    - family: Varela Round
+      fonts:
+        - asset: fonts/VarelaRound-Regular.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -70,7 +70,43 @@ class StepList extends ConsumerWidget {
           statusBarIconBrightness: Brightness.dark,
           statusBarBrightness: Brightness.light,
         ),
-        title: const Text('メイン画面'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.cloud, color: Color(0xFF3EA8FF)),
+            const SizedBox(width: 4),
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(
+                  fontFamily: 'Varela Round',
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1A1A1A),
+                  letterSpacing: 1.2,
+                ),
+                children: [
+                  TextSpan(
+                    text: 'S',
+                    style: const TextStyle(
+                      fontFamily: 'Varela Round',
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1A1A1A),
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const TextSpan(
+                    text: 'tepumo',
+                    style: TextStyle(
+                      fontFamily: 'Varela Round',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
