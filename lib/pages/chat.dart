@@ -314,10 +314,29 @@ class _ChatState extends ConsumerState<Chat> {
                 children: [
                   TextField(
                     controller: _goalController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'やりたいこと',
                       hintText: '達成したい目標を入力',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: Color(0xFFE0E3E8)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: Color(0xFFE0E3E8)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(
+                            color: Color(0xFF3EA8FF), width: 2),
+                      ),
+                      labelStyle: const TextStyle(color: Color(0xFF1A1A1A)),
+                      floatingLabelStyle:
+                          const TextStyle(color: Color(0xFF1A1A1A)),
                     ),
+                    cursorColor: const Color(0xFF3EA8FF),
                     keyboardType: TextInputType.text,
                     textInputAction: TextInputAction.next,
                     enableSuggestions: true,
@@ -327,10 +346,29 @@ class _ChatState extends ConsumerState<Chat> {
                   const SizedBox(height: 20),
                   TextField(
                     controller: _concernController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: '不安なこと',
                       hintText: '心配な点や障害を入力',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: Color(0xFFE0E3E8)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: Color(0xFFE0E3E8)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(
+                            color: Color(0xFF3EA8FF), width: 2),
+                      ),
+                      labelStyle: const TextStyle(color: Color(0xFF1A1A1A)),
+                      floatingLabelStyle:
+                          const TextStyle(color: Color(0xFF1A1A1A)),
                     ),
+                    cursorColor: const Color(0xFF3EA8FF),
                     maxLines: 3,
                     keyboardType: TextInputType.text,
                     textInputAction: TextInputAction.done,

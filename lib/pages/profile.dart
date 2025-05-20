@@ -158,11 +158,13 @@ class Profile extends ConsumerWidget {
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.black),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE0E3E8)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.black),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE0E3E8)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -196,11 +198,13 @@ class Profile extends ConsumerWidget {
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.black),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE0E3E8)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.black),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE0E3E8)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -264,11 +268,13 @@ class Profile extends ConsumerWidget {
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.black),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE0E3E8)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.black),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE0E3E8)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
