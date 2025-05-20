@@ -317,6 +317,7 @@ class _ChatState extends ConsumerState<Chat> {
                     decoration: InputDecoration(
                       labelText: 'やりたいこと',
                       hintText: '達成したい目標を入力',
+                      hintStyle: const TextStyle(color: Color(0xFF757575)),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
@@ -349,6 +350,7 @@ class _ChatState extends ConsumerState<Chat> {
                     decoration: InputDecoration(
                       labelText: '不安なこと',
                       hintText: '心配な点や障害を入力',
+                      hintStyle: const TextStyle(color: Color(0xFF757575)),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(

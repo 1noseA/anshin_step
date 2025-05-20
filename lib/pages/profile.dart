@@ -154,6 +154,7 @@ class Profile extends ConsumerWidget {
                       decoration: InputDecoration(
                         labelText: 'ニックネーム',
                         hintText: 'ユーザー',
+                        hintStyle: const TextStyle(color: Color(0xFF757575)),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -194,6 +195,7 @@ class Profile extends ConsumerWidget {
                       decoration: InputDecoration(
                         labelText: '年齢',
                         hintText: '',
+                        hintStyle: const TextStyle(color: Color(0xFF757575)),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -264,6 +266,7 @@ class Profile extends ConsumerWidget {
                       decoration: InputDecoration(
                         labelText: '属性',
                         hintText: '',
+                        hintStyle: const TextStyle(color: Color(0xFF757575)),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
