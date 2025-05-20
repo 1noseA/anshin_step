@@ -148,12 +148,32 @@ class Profile extends ConsumerWidget {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
+                    // ニックネーム
                     TextFormField(
                       key: ValueKey(state.userName),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'ニックネーム',
                         hintText: 'ユーザー',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Colors.black),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Colors.black),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF3EA8FF), width: 2),
+                        ),
+                        labelStyle: const TextStyle(color: Color(0xFF1A1A1A)),
+                        floatingLabelStyle:
+                            const TextStyle(color: Color(0xFF1A1A1A)),
                       ),
+                      cursorColor: const Color(0xFF3EA8FF),
                       initialValue: state.userName,
                       onChanged: (value) => ref
                           .read(profileProvider.notifier)
@@ -166,11 +186,32 @@ class Profile extends ConsumerWidget {
                       },
                     ),
                     const SizedBox(height: 20),
+                    // 年齢
                     TextFormField(
                       key: ValueKey(state.age?.toString() ?? ''),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: '年齢',
+                        hintText: '',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Colors.black),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Colors.black),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF3EA8FF), width: 2),
+                        ),
+                        labelStyle: const TextStyle(color: Color(0xFF1A1A1A)),
+                        floatingLabelStyle:
+                            const TextStyle(color: Color(0xFF1A1A1A)),
                       ),
+                      cursorColor: const Color(0xFF3EA8FF),
                       keyboardType: TextInputType.number,
                       initialValue: state.age?.toString() ?? '',
                       onChanged: (value) =>
@@ -214,10 +255,31 @@ class Profile extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 20),
+                    // 属性
                     TextFormField(
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: '属性',
+                        hintText: '',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Colors.black),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Colors.black),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF3EA8FF), width: 2),
+                        ),
+                        labelStyle: const TextStyle(color: Color(0xFF1A1A1A)),
+                        floatingLabelStyle:
+                            const TextStyle(color: Color(0xFF1A1A1A)),
                       ),
+                      cursorColor: const Color(0xFF3EA8FF),
                       initialValue: state.attribute,
                       onChanged: (value) => ref
                           .read(profileProvider.notifier)
