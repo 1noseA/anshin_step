@@ -188,6 +188,8 @@ class Profile extends ConsumerWidget {
                           onChanged: (value) => ref
                               .read(profileProvider.notifier)
                               .updateGender(value),
+                          activeColor: Color(0xFF3EA8FF),
+                          selectedTileColor: Color(0xFFEAF6FF),
                         ),
                         RadioListTile<String>(
                           title: const Text('女性'),
@@ -196,6 +198,8 @@ class Profile extends ConsumerWidget {
                           onChanged: (value) => ref
                               .read(profileProvider.notifier)
                               .updateGender(value),
+                          activeColor: Color(0xFF3EA8FF),
+                          selectedTileColor: Color(0xFFEAF6FF),
                         ),
                         RadioListTile<String>(
                           title: const Text('その他'),
@@ -204,6 +208,8 @@ class Profile extends ConsumerWidget {
                           onChanged: (value) => ref
                               .read(profileProvider.notifier)
                               .updateGender(value),
+                          activeColor: Color(0xFF3EA8FF),
+                          selectedTileColor: Color(0xFFEAF6FF),
                         ),
                       ],
                     ),
@@ -229,6 +235,8 @@ class Profile extends ConsumerWidget {
                           onChanged: (value) => ref
                               .read(profileProvider.notifier)
                               .updateMentalIllness(value),
+                          activeColor: Color(0xFF3EA8FF),
+                          selectedTileColor: Color(0xFFEAF6FF),
                         ),
                         RadioListTile<bool>(
                           title: const Text('なし'),
@@ -237,6 +245,8 @@ class Profile extends ConsumerWidget {
                           onChanged: (value) => ref
                               .read(profileProvider.notifier)
                               .updateMentalIllness(value),
+                          activeColor: Color(0xFF3EA8FF),
+                          selectedTileColor: Color(0xFFEAF6FF),
                         ),
                         if (state.hasMentalIllness == true) ...[
                           const SizedBox(height: 16),
@@ -268,6 +278,13 @@ class Profile extends ConsumerWidget {
                                       .read(profileProvider.notifier)
                                       .updateMentalIllnesses(newList);
                                 },
+                                activeColor: Color(0xFF3EA8FF),
+                                checkColor: Colors.white,
+                                tileColor: (state.mentalIllnesses
+                                            ?.contains(diagnosis) ??
+                                        false)
+                                    ? Color(0xFFEAF6FF)
+                                    : null,
                               )),
                         ],
                       ],
