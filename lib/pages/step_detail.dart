@@ -9,6 +9,7 @@ import 'package:anshin_step/pages/chat.dart'; // userProfileProvider用
 import 'package:anshin_step/models/app_user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:anshin_step/components/text_styles.dart';
+import 'package:anshin_step/components/colors.dart';
 
 class StepDetail extends ConsumerStatefulWidget {
   final BabyStep step;
@@ -47,7 +48,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
         actions: [],
       ),
       body: Container(
-        color: const Color(0xFFF6F7FB), // 柔らかいグレー背景
+        color: const Color(0xFFF6F7FB), // 背景色
         child: Column(
           children: [
             Container(
@@ -119,9 +120,9 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                             color: Color(0xFF3EA8FF), width: 2),
                                       ),
                                       labelStyle:
-                                          TextStyle(color: Color(0xFF1A1A1A)),
+                                          TextStyle(color: AppColors.text),
                                       floatingLabelStyle:
-                                          TextStyle(color: Color(0xFF1A1A1A)),
+                                          TextStyle(color: AppColors.text),
                                     ),
                                     keyboardType: TextInputType.number,
                                   )
@@ -163,9 +164,9 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                             color: Color(0xFF3EA8FF), width: 2),
                                       ),
                                       labelStyle:
-                                          TextStyle(color: Color(0xFF1A1A1A)),
+                                          TextStyle(color: AppColors.text),
                                       floatingLabelStyle:
-                                          TextStyle(color: Color(0xFF1A1A1A)),
+                                          TextStyle(color: AppColors.text),
                                     ),
                                     maxLines: 3,
                                   )
@@ -184,36 +185,76 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                   ),
                             const SizedBox(height: 32),
                             if (_isEditing)
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: _isLoading ? null : _saveStep,
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16),
-                                    backgroundColor: const Color(0xFF3EA8FF),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: _isLoading
+                                          ? null
+                                          : () {
+                                              setState(() {
+                                                _isEditing = false;
+                                                // 編集内容を破棄し、元の値に戻す
+                                                _postAnxietyController.text =
+                                                    _currentStep
+                                                            .afterAnxietyScore
+                                                            ?.toString() ??
+                                                        '';
+                                                _commentController.text =
+                                                    _currentStep.comment ?? '';
+                                              });
+                                            },
+                                      style: OutlinedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                        side: const BorderSide(
+                                            color: AppColors.primary),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'キャンセル',
+                                        style: TextStyle(
+                                            color: AppColors.primary,
+                                            fontSize: 16),
+                                      ),
                                     ),
                                   ),
-                                  child: _isLoading
-                                      ? const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                    Colors.white),
-                                          ),
-                                        )
-                                      : const Text(
-                                          '保存',
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: _isLoading ? null : _saveStep,
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                        backgroundColor: AppColors.primary,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
-                                ),
+                                      ),
+                                      child: _isLoading
+                                          ? const SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(Colors.white),
+                                              ),
+                                            )
+                                          : const Text(
+                                              '保存',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16),
+                                            ),
+                                    ),
+                                  ),
+                                ],
                               ),
                           ],
                         ),
@@ -225,7 +266,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                           right: 16,
                           child: IconButton(
                             icon: const Icon(Icons.edit,
-                                size: 22, color: Color(0xFF3EA8FF)),
+                                size: 22, color: AppColors.primary),
                             onPressed: () => setState(() => _isEditing = true),
                             tooltip: '編集',
                           ),

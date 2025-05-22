@@ -8,6 +8,7 @@ import 'package:anshin_step/models/baby_step.dart';
 import 'package:anshin_step/pages/step_detail.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:anshin_step/components/colors.dart';
 
 final goalsProvider = StreamProvider<List<Goal>>((ref) {
   final firestore = FirebaseFirestore.instance;
@@ -73,7 +74,7 @@ class StepList extends ConsumerWidget {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud, color: Color(0xFF3EA8FF)),
+            Icon(Icons.cloud, color: Color(0xFF5bc2dc)),
             const SizedBox(width: 4),
             RichText(
               text: TextSpan(
@@ -81,7 +82,7 @@ class StepList extends ConsumerWidget {
                   fontFamily: 'Varela Round',
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A1A1A),
+                  color: Color(0xFF5bc2dc),
                   letterSpacing: 1.2,
                 ),
                 children: [
@@ -91,7 +92,7 @@ class StepList extends ConsumerWidget {
                       fontFamily: 'Varela Round',
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1A1A1A),
+                      color: Color(0xFF5bc2dc),
                       letterSpacing: 1.2,
                     ),
                   ),
@@ -114,145 +115,155 @@ class StepList extends ConsumerWidget {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Container(
-            height: 1,
-            color: const Color(0xFFE0E3E8),
-          ),
-          Expanded(
-            child: SafeArea(
-              child: Consumer(
-                builder: (context, ref, child) {
-                  final goalsAsync = ref.watch(goalsProvider);
-                  final updatedBabySteps = ref.watch(updatedBabyStepProvider);
+      body: Container(
+        color: AppColors.background,
+        child: Column(
+          children: [
+            Container(
+              height: 1,
+              color: const Color(0xFFE0E3E8),
+            ),
+            Expanded(
+              child: SafeArea(
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final goalsAsync = ref.watch(goalsProvider);
+                    final updatedBabySteps = ref.watch(updatedBabyStepProvider);
 
-                  return goalsAsync.when(
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) =>
-                        Center(child: Text('エラーが発生しました: $error')),
-                    data: (goals) {
-                      if (goals.isEmpty) {
-                        return const Center(
-                          child: Text('まずは右下の「＋」ボタンから行動プランを追加してください'),
-                        );
-                      }
-                      return ListView.builder(
-                        itemCount: goals.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            return const SizedBox(height: 16);
-                          }
-                          final goal = goals[index - 1];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                                vertical: 4, horizontal: 8),
-                            child: ExpansionTile(
-                              title: Text(goal.goal),
-                              subtitle: Text(goal.anxiety),
-                              iconColor: Color(0xFF1A1A1A),
-                              collapsedIconColor: Color(0xFF1A1A1A),
-                              children: [
-                                if (goal.babySteps != null &&
-                                    goal.babySteps!.isNotEmpty)
-                                  ...goal.babySteps!.map((step) {
-                                    // 更新された値がある場合はそれを使用
-                                    final updatedStep =
-                                        updatedBabySteps[step.id];
-                                    final displayStep = updatedStep ?? step;
-                                    return InkWell(
-                                      onTap: () => _navigateToStepDetail(
-                                          context, displayStep, ref),
-                                      child: Row(
-                                        children: [
-                                          Checkbox(
-                                            value: displayStep.isDone ?? false,
-                                            activeColor: Color(0xFF3EA8FF),
-                                            onChanged: (checked) async {
-                                              final user = FirebaseAuth
-                                                  .instance.currentUser;
-                                              if (user == null) return;
-                                              final newIsDone =
-                                                  checked ?? false;
-                                              final newExecutionDate = newIsDone
-                                                  ? DateTime.now()
-                                                  : null;
-                                              final firestore =
-                                                  FirebaseFirestore.instance;
-                                              // goalIdがnullの場合は何もしない
-                                              if (displayStep.goalId == null)
-                                                return;
-                                              final stepRef = firestore
-                                                  .collection('goals')
-                                                  .doc(displayStep.goalId)
-                                                  .collection('babySteps')
-                                                  .doc(displayStep.id);
-                                              await stepRef.update({
-                                                'isDone': newIsDone,
-                                                'executionDate':
-                                                    newExecutionDate,
-                                                'updatedBy': user.uid,
-                                                'updatedAt': DateTime.now(),
-                                              });
-                                              // ローカル状態も即時更新
-                                              final updatedStep =
-                                                  displayStep.copyWith(
-                                                isDone: newIsDone,
-                                                executionDate: newExecutionDate,
-                                                updatedBy: user.uid,
-                                                updatedAt: DateTime.now(),
-                                              );
-                                              final updatedMap =
-                                                  Map<String, BabyStep>.from(
-                                                      updatedBabySteps);
-                                              updatedMap[displayStep.id] =
-                                                  updatedStep;
-                                              ref
-                                                  .read(updatedBabyStepProvider
-                                                      .notifier)
-                                                  .state = updatedMap;
-                                              ref.refresh(goalsProvider);
-                                            },
-                                          ),
-                                          Expanded(
-                                            child: Text(displayStep.action),
-                                          ),
-                                          SizedBox(
-                                            width: 48, // 2桁+余白程度の幅
-                                            child: Text(
-                                              displayStep.beforeAnxietyScore ==
-                                                      null
-                                                  ? '   '
-                                                  : displayStep
-                                                      .beforeAnxietyScore
-                                                      .toString(),
-                                              textAlign: TextAlign.right,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 16),
-                                        ],
-                                      ),
-                                    );
-                                  }).toList(),
-                                if (goal.babySteps == null ||
-                                    goal.babySteps!.isEmpty)
-                                  const Padding(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: Text('ベイビーステップが設定されていません'),
-                                  ),
-                              ],
-                            ),
+                    return goalsAsync.when(
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, stack) =>
+                          Center(child: Text('エラーが発生しました: $error')),
+                      data: (goals) {
+                        if (goals.isEmpty) {
+                          return const Center(
+                            child: Text('まずは右下の「＋」ボタンから行動プランを追加してください'),
                           );
-                        },
-                      );
-                    },
-                  );
-                },
+                        }
+                        return ListView.builder(
+                          itemCount: goals.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              return const SizedBox(height: 16);
+                            }
+                            final goal = goals[index - 1];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                  vertical: 4, horizontal: 8),
+                              child: ExpansionTile(
+                                title: Text(goal.goal),
+                                subtitle: Text(goal.anxiety),
+                                iconColor: AppColors.text,
+                                collapsedIconColor: AppColors.text,
+                                children: [
+                                  if (goal.babySteps != null &&
+                                      goal.babySteps!.isNotEmpty)
+                                    ...goal.babySteps!.map((step) {
+                                      // 更新された値がある場合はそれを使用
+                                      final updatedStep =
+                                          updatedBabySteps[step.id];
+                                      final displayStep = updatedStep ?? step;
+                                      return InkWell(
+                                        onTap: () => _navigateToStepDetail(
+                                            context, displayStep, ref),
+                                        child: Row(
+                                          children: [
+                                            Checkbox(
+                                              value:
+                                                  displayStep.isDone ?? false,
+                                              activeColor: AppColors.primary,
+                                              side: const BorderSide(
+                                                  color: AppColors.text,
+                                                  width: 2),
+                                              onChanged: (checked) async {
+                                                final user = FirebaseAuth
+                                                    .instance.currentUser;
+                                                if (user == null) return;
+                                                final newIsDone =
+                                                    checked ?? false;
+                                                final newExecutionDate =
+                                                    newIsDone
+                                                        ? DateTime.now()
+                                                        : null;
+                                                final firestore =
+                                                    FirebaseFirestore.instance;
+                                                // goalIdがnullの場合は何もしない
+                                                if (displayStep.goalId == null)
+                                                  return;
+                                                final stepRef = firestore
+                                                    .collection('goals')
+                                                    .doc(displayStep.goalId)
+                                                    .collection('babySteps')
+                                                    .doc(displayStep.id);
+                                                await stepRef.update({
+                                                  'isDone': newIsDone,
+                                                  'executionDate':
+                                                      newExecutionDate,
+                                                  'updatedBy': user.uid,
+                                                  'updatedAt': DateTime.now(),
+                                                });
+                                                // ローカル状態も即時更新
+                                                final updatedStep =
+                                                    displayStep.copyWith(
+                                                  isDone: newIsDone,
+                                                  executionDate:
+                                                      newExecutionDate,
+                                                  updatedBy: user.uid,
+                                                  updatedAt: DateTime.now(),
+                                                );
+                                                final updatedMap =
+                                                    Map<String, BabyStep>.from(
+                                                        updatedBabySteps);
+                                                updatedMap[displayStep.id] =
+                                                    updatedStep;
+                                                ref
+                                                    .read(
+                                                        updatedBabyStepProvider
+                                                            .notifier)
+                                                    .state = updatedMap;
+                                                ref.refresh(goalsProvider);
+                                              },
+                                            ),
+                                            Expanded(
+                                              child: Text(displayStep.action),
+                                            ),
+                                            SizedBox(
+                                              width: 48, // 2桁+余白程度の幅
+                                              child: Text(
+                                                displayStep.beforeAnxietyScore ==
+                                                        null
+                                                    ? '   '
+                                                    : displayStep
+                                                        .beforeAnxietyScore
+                                                        .toString(),
+                                                textAlign: TextAlign.right,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 16),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                  if (goal.babySteps == null ||
+                                      goal.babySteps!.isEmpty)
+                                    const Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text('ベイビーステップが設定されていません'),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
@@ -268,13 +279,14 @@ class StepList extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('メニュー'),
+        title: const Text('メニュー', style: TextStyle(color: AppColors.text)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('プロフィール設定'),
+              textColor: AppColors.text,
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/profile');
@@ -283,21 +295,25 @@ class StepList extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.article),
               title: const Text('利用規約'),
+              textColor: AppColors.text,
               onTap: () {},
             ),
             ListTile(
               leading: const Icon(Icons.privacy_tip),
               title: const Text('プライバシーポリシー'),
+              textColor: AppColors.text,
               onTap: () {},
             ),
             ListTile(
               leading: const Icon(Icons.contact_support),
               title: const Text('お問い合わせ'),
+              textColor: AppColors.text,
               onTap: () {},
             ),
             ListTile(
               leading: const Icon(Icons.exit_to_app),
               title: const Text('ログアウト'),
+              textColor: AppColors.text,
               onTap: () => _handleLogout(context),
             ),
           ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:anshin_step/components/colors.dart';
 
 class CodeBlock extends StatelessWidget {
   final String code;
@@ -18,7 +19,7 @@ class CodeBlock extends StatelessWidget {
         code,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontFamily: 'monospace',
-              color: const Color(0xFF1A1A1A),
+              color: AppColors.text,
             ),
       ),
     );

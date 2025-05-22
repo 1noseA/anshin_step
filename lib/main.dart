@@ -8,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'package:anshin_step/pages/step_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:anshin_step/components/colors.dart';
 
 final authProvider = StreamProvider<User?>((ref) {
   return FirebaseAuth.instance.authStateChanges();
@@ -43,97 +44,97 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFFECF5FF),
-        cardColor: Colors.white,
+        scaffoldBackgroundColor: AppColors.background,
+        cardColor: AppColors.card,
         fontFamily: 'Noto Sans JP',
         textTheme: const TextTheme(
           headlineLarge: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1A1A),
+            color: AppColors.text,
             height: 1.6,
             fontFamily: 'Noto Sans JP',
           ),
           headlineMedium: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1A1A),
+            color: AppColors.text,
             height: 1.6,
             fontFamily: 'Noto Sans JP',
           ),
           headlineSmall: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1A1A),
+            color: AppColors.text,
             height: 1.6,
             fontFamily: 'Noto Sans JP',
           ),
           bodyLarge: TextStyle(
             fontSize: 16,
-            color: Color(0xFF1A1A1A),
+            color: AppColors.text,
             height: 1.75,
             fontFamily: 'Noto Sans JP',
           ),
           bodyMedium: TextStyle(
             fontSize: 14,
-            color: Color(0xFF1A1A1A),
+            color: AppColors.text,
             height: 1.75,
             fontFamily: 'Noto Sans JP',
           ),
           bodySmall: TextStyle(
             fontSize: 12,
-            color: Color(0xFF1A1A1A),
+            color: AppColors.text,
             height: 1.75,
             fontFamily: 'Noto Sans JP',
           ),
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
-          foregroundColor: Color(0xFF1A1A1A),
+          backgroundColor: AppColors.card,
+          foregroundColor: AppColors.text,
           elevation: 1,
           titleTextStyle: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1A1A),
+            color: AppColors.text,
             fontFamily: 'Noto Sans JP',
           ),
-          iconTheme: IconThemeData(color: Color(0xFF1A1A1A)),
+          iconTheme: IconThemeData(color: AppColors.text),
         ),
-        primaryColor: Colors.white,
+        primaryColor: AppColors.card,
         colorScheme: ColorScheme.fromSwatch().copyWith(
-          primary: Colors.white,
-          secondary: const Color(0xFF3EA8FF),
+          primary: AppColors.card,
+          secondary: AppColors.primary,
         ),
         inputDecorationTheme: const InputDecorationTheme(
           filled: true,
-          fillColor: Colors.white,
+          fillColor: AppColors.card,
           border: OutlineInputBorder(),
-          labelStyle: TextStyle(color: Color(0xFF1A1A1A)),
+          labelStyle: TextStyle(color: AppColors.text),
         ),
         snackBarTheme: const SnackBarThemeData(
-          backgroundColor: Colors.white,
-          contentTextStyle: TextStyle(color: Color(0xFF222222)),
+          backgroundColor: AppColors.card,
+          contentTextStyle: TextStyle(color: AppColors.text),
         ),
-        dialogBackgroundColor: Colors.white,
+        dialogBackgroundColor: AppColors.card,
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: Color(0xFF3EA8FF),
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.card,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF3EA8FF),
-            foregroundColor: Colors.white,
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.card,
             textStyle: const TextStyle(fontWeight: FontWeight.bold),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.all(Radius.circular(8)),
             ),
           ),
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            foregroundColor: const Color(0xFF3EA8FF),
+            foregroundColor: AppColors.primary,
             textStyle: const TextStyle(
-              color: Color(0xFF3EA8FF),
+              color: AppColors.primary,
               fontWeight: FontWeight.normal,
               decoration: TextDecoration.underline,
             ),

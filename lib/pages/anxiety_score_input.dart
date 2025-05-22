@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anshin_step/pages/step_list.dart';
+import 'package:anshin_step/components/colors.dart';
 
 class AnxietyScoreInput extends ConsumerStatefulWidget {
   final List<BabyStep> steps;
@@ -110,73 +111,76 @@ class _AnxietyScoreInputState extends ConsumerState<AnxietyScoreInput> {
         elevation: 0,
         title: Text('事前不安得点の入力 (${_currentIndex + 1}/${widget.steps.length})'),
       ),
-      body: Column(
-        children: [
-          Container(
-            height: 1,
-            color: const Color(0xFFE0E3E8),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'ステップ ${_currentIndex + 1}: ${currentStep.action}',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'このステップを実行する前に、不安の強さを0-100で評価してください',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 24),
-                  TextField(
-                    controller: _controllers[currentStep.id],
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: '不安得点 (0-100)',
-                      border: OutlineInputBorder(),
+      body: Container(
+        color: AppColors.background,
+        child: Column(
+          children: [
+            Container(
+              height: 1,
+              color: const Color(0xFFE0E3E8),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ステップ ${_currentIndex + 1}: ${currentStep.action}',
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    onChanged: (value) {
-                      final score = int.tryParse(value) ?? 0;
-                      if (score >= 0 && score <= 100) {
-                        setState(() {
-                          _scores[currentStep.id] = score;
-                        });
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      if (_currentIndex > 0)
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _currentIndex--;
-                            });
-                          },
-                          child: const Text('前へ'),
-                        ),
-                      if (_currentIndex < widget.steps.length - 1)
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _currentIndex++;
-                            });
-                          },
-                          child: const Text('次へ'),
-                        ),
-                    ],
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    const Text(
+                      'このステップを実行する前に、不安の強さを0-100で評価してください',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 24),
+                    TextField(
+                      controller: _controllers[currentStep.id],
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: '不安得点 (0-100)',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        final score = int.tryParse(value) ?? 0;
+                        if (score >= 0 && score <= 100) {
+                          setState(() {
+                            _scores[currentStep.id] = score;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (_currentIndex > 0)
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _currentIndex--;
+                              });
+                            },
+                            child: const Text('前へ'),
+                          ),
+                        if (_currentIndex < widget.steps.length - 1)
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _currentIndex++;
+                              });
+                            },
+                            child: const Text('次へ'),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: Container(
         color: Colors.white,

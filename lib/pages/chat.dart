@@ -11,6 +11,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anshin_step/models/app_user.dart';
 import 'package:anshin_step/constants/action_suggestion_prompts.dart';
+import 'package:anshin_step/components/colors.dart';
 
 // プロフィール情報を取得するProvider
 final userProfileProvider = StreamProvider<AppUser?>((ref) {
@@ -301,131 +302,138 @@ class _ChatState extends ConsumerState<Chat> {
         elevation: 0,
         title: const Text('新しい行動プラン作成'),
       ),
-      body: Column(
-        children: [
-          Container(
-            height: 1,
-            color: const Color(0xFFE0E3E8),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ListView(
-                children: [
-                  TextField(
-                    controller: _goalController,
-                    decoration: InputDecoration(
-                      labelText: 'やりたいこと',
-                      hintText: '達成したい目標を入力',
-                      hintStyle: const TextStyle(color: Color(0xFF757575)),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFFE0E3E8)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFFE0E3E8)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(
-                            color: Color(0xFF3EA8FF), width: 2),
-                      ),
-                      labelStyle: const TextStyle(color: Color(0xFF1A1A1A)),
-                      floatingLabelStyle:
-                          const TextStyle(color: Color(0xFF1A1A1A)),
-                    ),
-                    cursorColor: const Color(0xFF3EA8FF),
-                    keyboardType: TextInputType.text,
-                    textInputAction: TextInputAction.next,
-                    enableSuggestions: true,
-                    autocorrect: true,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _concernController,
-                    decoration: InputDecoration(
-                      labelText: '不安なこと',
-                      hintText: '心配な点や障害を入力',
-                      hintStyle: const TextStyle(color: Color(0xFF757575)),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFFE0E3E8)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFFE0E3E8)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(
-                            color: Color(0xFF3EA8FF), width: 2),
-                      ),
-                      labelStyle: const TextStyle(color: Color(0xFF1A1A1A)),
-                      floatingLabelStyle:
-                          const TextStyle(color: Color(0xFF1A1A1A)),
-                    ),
-                    cursorColor: const Color(0xFF3EA8FF),
-                    maxLines: 3,
-                    keyboardType: TextInputType.text,
-                    textInputAction: TextInputAction.done,
-                    enableSuggestions: true,
-                    autocorrect: true,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: _isLoading || !isProfileReady
-                            ? null
-                            : _generateStepsWithAI,
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Text('AIに提案を依頼'),
-                      ),
-                      if (_steps.isNotEmpty)
-                        TextButton(
-                          onPressed: _clearSteps,
-                          child: const Text('クリア'),
+      body: Container(
+        color: AppColors.background,
+        child: Column(
+          children: [
+            Container(
+              height: 1,
+              color: const Color(0xFFE0E3E8),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView(
+                  children: [
+                    TextField(
+                      controller: _goalController,
+                      decoration: InputDecoration(
+                        labelText: 'やりたいこと',
+                        hintText: '達成したい目標を入力',
+                        hintStyle: const TextStyle(color: Color(0xFF757575)),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE0E3E8)),
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  if (_steps.isNotEmpty) ...[
-                    const Text(
-                      '生成されたベイビーステップ',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE0E3E8)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF3EA8FF), width: 2),
+                        ),
+                        labelStyle: const TextStyle(color: AppColors.text),
+                        floatingLabelStyle:
+                            const TextStyle(color: AppColors.text),
                       ),
+                      cursorColor: const Color(0xFF3EA8FF),
+                      keyboardType: TextInputType.text,
+                      textInputAction: TextInputAction.next,
+                      enableSuggestions: true,
+                      autocorrect: true,
+                      style: const TextStyle(fontSize: 16),
                     ),
-                    const SizedBox(height: 10),
-                    ..._steps.map((step) => ListTile(
-                          title: Text(step.action),
-                        )),
                     const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _saveSteps,
-                      child: const Text('保存して次へ'),
+                    TextField(
+                      controller: _concernController,
+                      decoration: InputDecoration(
+                        labelText: '不安なこと',
+                        hintText: '心配な点や障害を入力',
+                        hintStyle: const TextStyle(color: Color(0xFF757575)),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE0E3E8)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE0E3E8)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF3EA8FF), width: 2),
+                        ),
+                        labelStyle: const TextStyle(color: AppColors.text),
+                        floatingLabelStyle:
+                            const TextStyle(color: AppColors.text),
+                      ),
+                      cursorColor: const Color(0xFF3EA8FF),
+                      maxLines: 3,
+                      keyboardType: TextInputType.text,
+                      textInputAction: TextInputAction.done,
+                      enableSuggestions: true,
+                      autocorrect: true,
+                      style: const TextStyle(fontSize: 16),
                     ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _isLoading || !isProfileReady
+                              ? null
+                              : _generateStepsWithAI,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Text('AIに提案を依頼'),
+                        ),
+                        if (_steps.isNotEmpty)
+                          TextButton(
+                            onPressed: _clearSteps,
+                            child: const Text('クリア'),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    if (_steps.isNotEmpty) ...[
+                      const Text(
+                        '生成されたベイビーステップ',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      ..._steps.map((step) => ListTile(
+                            title: Text(step.action),
+                          )),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _saveSteps,
+                        child: const Text('保存して次へ'),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
