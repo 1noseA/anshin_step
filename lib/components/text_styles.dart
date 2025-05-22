@@ -7,26 +7,26 @@ class TextStyles {
     fontWeight: FontWeight.bold,
     color: AppColors.text,
     height: 1.6,
-    fontFamily: 'Noto Sans',
+    fontFamily: 'Noto Sans JP',
   );
   static const h2 = TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.bold,
     color: AppColors.text,
     height: 1.6,
-    fontFamily: 'Noto Sans',
+    fontFamily: 'Noto Sans JP',
   );
   static const h3 = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
     color: AppColors.text,
     height: 1.6,
-    fontFamily: 'Noto Sans',
+    fontFamily: 'Noto Sans JP',
   );
   static const body = TextStyle(
     fontSize: 16,
     color: AppColors.text,
     height: 1.75,
-    fontFamily: 'Noto Sans',
+    fontFamily: 'Noto Sans JP',
   );
 }
