@@ -174,6 +174,12 @@ class _ProfileState extends ConsumerState<Profile> {
                   MaterialPageRoute(builder: (context) => const StepList()),
                 );
               },
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                textStyle: const TextStyle(
+                  decoration: TextDecoration.none,
+                ),
+              ),
               child: const Text('スキップ'),
             ),
         ],

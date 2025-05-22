@@ -190,8 +190,14 @@ class _AnxietyScoreInputState extends ConsumerState<AnxietyScoreInput> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               TextButton(
-                onPressed: _skipInput,
-                child: const Text('スキップ'),
+                onPressed: () => Navigator.pop(context),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  textStyle: const TextStyle(
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+                child: const Text('キャンセル'),
               ),
               ElevatedButton(
                 onPressed: _saveScore,

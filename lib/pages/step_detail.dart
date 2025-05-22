@@ -432,6 +432,12 @@ class _StepDetailState extends ConsumerState<StepDetail> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  textStyle: const TextStyle(
+                    decoration: TextDecoration.none,
+                  ),
+                ),
                 child: const Text('閉じる'),
               ),
             ],
@@ -453,6 +459,12 @@ class _StepDetailState extends ConsumerState<StepDetail> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    textStyle: const TextStyle(
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
                   child: const Text('閉じる'),
                 ),
               ],

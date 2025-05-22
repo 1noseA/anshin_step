@@ -359,8 +359,16 @@ class _SignInPageState extends State<SignInPage> {
                 ],
               ),
               TextButton(
-                child: const Text('戻る'),
-                onPressed: () => setState(() => _showEmailPasswordForm = false),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  textStyle: const TextStyle(
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+                child: const Text('キャンセル'),
               ),
             ],
           ],

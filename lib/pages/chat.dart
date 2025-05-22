@@ -336,13 +336,13 @@ class _ChatState extends ConsumerState<Chat> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: const BorderSide(
-                              color: Color(0xFF3EA8FF), width: 2),
+                              color: AppColors.primary, width: 2),
                         ),
                         labelStyle: const TextStyle(color: AppColors.text),
                         floatingLabelStyle:
                             const TextStyle(color: AppColors.text),
                       ),
-                      cursorColor: const Color(0xFF3EA8FF),
+                      cursorColor: AppColors.primary,
                       keyboardType: TextInputType.text,
                       textInputAction: TextInputAction.next,
                       enableSuggestions: true,
@@ -371,13 +371,13 @@ class _ChatState extends ConsumerState<Chat> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: const BorderSide(
-                              color: Color(0xFF3EA8FF), width: 2),
+                              color: AppColors.primary, width: 2),
                         ),
                         labelStyle: const TextStyle(color: AppColors.text),
                         floatingLabelStyle:
                             const TextStyle(color: AppColors.text),
                       ),
-                      cursorColor: const Color(0xFF3EA8FF),
+                      cursorColor: AppColors.primary,
                       maxLines: 3,
                       keyboardType: TextInputType.text,
                       textInputAction: TextInputAction.done,
@@ -386,27 +386,54 @@ class _ChatState extends ConsumerState<Chat> {
                       style: const TextStyle(fontSize: 16),
                     ),
                     const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    Column(
                       children: [
-                        ElevatedButton(
-                          onPressed: _isLoading || !isProfileReady
-                              ? null
-                              : _generateStepsWithAI,
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Text('AIに提案を依頼'),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _isLoading || !isProfileReady
+                                ? null
+                                : _generateStepsWithAI,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                    ),
+                                  )
+                                : const Text(
+                                    'AIに提案を依頼',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
                         ),
-                        if (_steps.isNotEmpty)
+                        if (_steps.isNotEmpty) ...[
+                          const SizedBox(height: 8),
                           TextButton(
                             onPressed: _clearSteps,
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              textStyle: const TextStyle(
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
                             child: const Text('クリア'),
                           ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 20),
