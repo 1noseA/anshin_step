@@ -107,7 +107,30 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                 decoration: const InputDecoration(
                                   labelText: '事後不安得点',
                                   hintText: '数値を入力',
-                                  border: OutlineInputBorder(),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  border: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide:
+                                        BorderSide(color: Color(0xFFE0E3E8)),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide:
+                                        BorderSide(color: Color(0xFFE0E3E8)),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide: BorderSide(
+                                        color: Color(0xFF3EA8FF), width: 2),
+                                  ),
+                                  labelStyle:
+                                      TextStyle(color: Color(0xFF1A1A1A)),
+                                  floatingLabelStyle:
+                                      TextStyle(color: Color(0xFF1A1A1A)),
                                 ),
                                 keyboardType: TextInputType.number,
                               )
@@ -126,7 +149,30 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                 decoration: const InputDecoration(
                                   labelText: 'コメント',
                                   hintText: '感想や気付きを入力',
-                                  border: OutlineInputBorder(),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  border: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide:
+                                        BorderSide(color: Color(0xFFE0E3E8)),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide:
+                                        BorderSide(color: Color(0xFFE0E3E8)),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide: BorderSide(
+                                        color: Color(0xFF3EA8FF), width: 2),
+                                  ),
+                                  labelStyle:
+                                      TextStyle(color: Color(0xFF1A1A1A)),
+                                  floatingLabelStyle:
+                                      TextStyle(color: Color(0xFF1A1A1A)),
                                 ),
                                 maxLines: 3,
                               )
