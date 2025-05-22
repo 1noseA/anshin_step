@@ -79,9 +79,38 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              _currentStep.action,
-                              style: TextStyles.h2,
+                            // 丸数字を上中央、その下にステップ内容を中央揃えで表示
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                        color: AppColors.primary, width: 2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Text(
+                                    (_currentStep.displayOrder ?? 1).toString(),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                      fontSize: 18,
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  _currentStep.action,
+                                  style: TextStyles.h2,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 24),
                             Row(

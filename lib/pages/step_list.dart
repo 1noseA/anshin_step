@@ -159,88 +159,162 @@ class StepList extends ConsumerWidget {
                                 children: [
                                   if (goal.babySteps != null &&
                                       goal.babySteps!.isNotEmpty)
-                                    ...goal.babySteps!.map((step) {
-                                      // 更新された値がある場合はそれを使用
+                                    ...goal.babySteps!
+                                        .asMap()
+                                        .entries
+                                        .map((entry) {
+                                      final step = entry.value;
                                       final updatedStep =
                                           updatedBabySteps[step.id];
                                       final displayStep = updatedStep ?? step;
-                                      return InkWell(
-                                        onTap: () => _navigateToStepDetail(
-                                            context, displayStep, ref),
+                                      final isLast = entry.key ==
+                                          goal.babySteps!.length - 1;
+                                      return IntrinsicHeight(
                                         child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
                                           children: [
-                                            Checkbox(
-                                              value:
-                                                  displayStep.isDone ?? false,
-                                              activeColor: AppColors.primary,
-                                              side: const BorderSide(
-                                                  color: AppColors.text,
-                                                  width: 2),
-                                              onChanged: (checked) async {
-                                                final user = FirebaseAuth
-                                                    .instance.currentUser;
-                                                if (user == null) return;
-                                                final newIsDone =
-                                                    checked ?? false;
-                                                final newExecutionDate =
-                                                    newIsDone
-                                                        ? DateTime.now()
-                                                        : null;
-                                                final firestore =
-                                                    FirebaseFirestore.instance;
-                                                // goalIdがnullの場合は何もしない
-                                                if (displayStep.goalId == null)
-                                                  return;
-                                                final stepRef = firestore
-                                                    .collection('goals')
-                                                    .doc(displayStep.goalId)
-                                                    .collection('babySteps')
-                                                    .doc(displayStep.id);
-                                                await stepRef.update({
-                                                  'isDone': newIsDone,
-                                                  'executionDate':
-                                                      newExecutionDate,
-                                                  'updatedBy': user.uid,
-                                                  'updatedAt': DateTime.now(),
-                                                });
-                                                // ローカル状態も即時更新
-                                                final updatedStep =
-                                                    displayStep.copyWith(
-                                                  isDone: newIsDone,
-                                                  executionDate:
-                                                      newExecutionDate,
-                                                  updatedBy: user.uid,
-                                                  updatedAt: DateTime.now(),
-                                                );
-                                                final updatedMap =
-                                                    Map<String, BabyStep>.from(
-                                                        updatedBabySteps);
-                                                updatedMap[displayStep.id] =
-                                                    updatedStep;
-                                                ref
-                                                    .read(
-                                                        updatedBabyStepProvider
-                                                            .notifier)
-                                                    .state = updatedMap;
-                                                ref.refresh(goalsProvider);
-                                              },
+                                            const SizedBox(width: 8),
+                                            // Timeline部分
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                // 丸番号
+                                                Container(
+                                                  width: 24,
+                                                  height: 24,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    border: Border.all(
+                                                        color:
+                                                            AppColors.primary,
+                                                        width: 2),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Text(
+                                                    '${entry.key + 1}',
+                                                    textAlign: TextAlign.center,
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: AppColors.primary,
+                                                      fontSize: 16,
+                                                      height: 1.0,
+                                                    ),
+                                                  ),
+                                                ),
+                                                if (!isLast)
+                                                  Expanded(
+                                                    child: Container(
+                                                      width: 2,
+                                                      color: AppColors.primary
+                                                          .withOpacity(0.3),
+                                                      margin: EdgeInsets.zero,
+                                                    ),
+                                                  ),
+                                              ],
                                             ),
+                                            const SizedBox(width: 12),
+                                            // ステップ内容＋チェックボックス
                                             Expanded(
-                                              child: Text(displayStep.action),
-                                            ),
-                                            SizedBox(
-                                              width: 48, // 2桁+余白程度の幅
-                                              child: Text(
-                                                displayStep.beforeAnxietyScore ==
-                                                        null
-                                                    ? '   '
-                                                    : displayStep
-                                                        .beforeAnxietyScore
-                                                        .toString(),
-                                                textAlign: TextAlign.right,
+                                              child: InkWell(
+                                                onTap: () =>
+                                                    _navigateToStepDetail(
+                                                        context,
+                                                        displayStep,
+                                                        ref),
+                                                child: Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(vertical: 4),
+                                                  child: Row(
+                                                    children: [
+                                                      Expanded(
+                                                          child: Text(
+                                                              displayStep
+                                                                  .action)),
+                                                      Checkbox(
+                                                        value: displayStep
+                                                                .isDone ??
+                                                            false,
+                                                        activeColor:
+                                                            AppColors.primary,
+                                                        side: const BorderSide(
+                                                            color:
+                                                                AppColors.text,
+                                                            width: 2),
+                                                        onChanged:
+                                                            (checked) async {
+                                                          final user =
+                                                              FirebaseAuth
+                                                                  .instance
+                                                                  .currentUser;
+                                                          if (user == null)
+                                                            return;
+                                                          final newIsDone =
+                                                              checked ?? false;
+                                                          final newExecutionDate =
+                                                              newIsDone
+                                                                  ? DateTime
+                                                                      .now()
+                                                                  : null;
+                                                          final firestore =
+                                                              FirebaseFirestore
+                                                                  .instance;
+                                                          if (displayStep
+                                                                  .goalId ==
+                                                              null) return;
+                                                          final stepRef = firestore
+                                                              .collection(
+                                                                  'goals')
+                                                              .doc(displayStep
+                                                                  .goalId)
+                                                              .collection(
+                                                                  'babySteps')
+                                                              .doc(displayStep
+                                                                  .id);
+                                                          await stepRef.update({
+                                                            'isDone': newIsDone,
+                                                            'executionDate':
+                                                                newExecutionDate,
+                                                            'updatedBy':
+                                                                user.uid,
+                                                            'updatedAt':
+                                                                DateTime.now(),
+                                                          });
+                                                          final updatedStep =
+                                                              displayStep
+                                                                  .copyWith(
+                                                            isDone: newIsDone,
+                                                            executionDate:
+                                                                newExecutionDate,
+                                                            updatedBy: user.uid,
+                                                            updatedAt:
+                                                                DateTime.now(),
+                                                          );
+                                                          final updatedMap = Map<
+                                                                  String,
+                                                                  BabyStep>.from(
+                                                              updatedBabySteps);
+                                                          updatedMap[displayStep
+                                                                  .id] =
+                                                              updatedStep;
+                                                          ref
+                                                              .read(
+                                                                  updatedBabyStepProvider
+                                                                      .notifier)
+                                                              .state = updatedMap;
+                                                          ref.refresh(
+                                                              goalsProvider);
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
                                               ),
                                             ),
-                                            const SizedBox(width: 16),
+                                            const SizedBox(width: 4),
                                           ],
                                         ),
                                       );
