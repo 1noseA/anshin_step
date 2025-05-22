@@ -44,18 +44,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
         elevation: 0,
         shadowColor: Colors.transparent,
         title: const Text('ステップ詳細'),
-        actions: [
-          if (!_isEditing)
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => setState(() => _isEditing = true),
-            ),
-          if (_isEditing)
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _isLoading ? null : _saveStep, // ローディング中は無効化
-            ),
-        ],
+        actions: [],
       ),
       body: Container(
         color: const Color(0xFFF6F7FB), // 柔らかいグレー背景
@@ -70,157 +59,178 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 32.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.07),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 28),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _currentStep.action,
-                          style: TextStyles.h2,
-                        ),
-                        const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            const Text('事前不安得点:', style: TextStyles.body),
-                            const SizedBox(width: 8),
-                            Text('${_currentStep.beforeAnxietyScore ?? 0}',
-                                style: TextStyles.body),
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.07),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        _isEditing
-                            ? TextField(
-                                controller: _postAnxietyController,
-                                decoration: const InputDecoration(
-                                  labelText: '事後不安得点',
-                                  hintText: '数値を入力',
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFFE0E3E8)),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFFE0E3E8)),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide: BorderSide(
-                                        color: Color(0xFF3EA8FF), width: 2),
-                                  ),
-                                  labelStyle:
-                                      TextStyle(color: Color(0xFF1A1A1A)),
-                                  floatingLabelStyle:
-                                      TextStyle(color: Color(0xFF1A1A1A)),
-                                ),
-                                keyboardType: TextInputType.number,
-                              )
-                            : Row(
-                                children: [
-                                  const Text('事後不安得点:', style: TextStyles.body),
-                                  const SizedBox(width: 8),
-                                  Text('${_currentStep.afterAnxietyScore ?? 0}',
-                                      style: TextStyles.body),
-                                ],
-                              ),
-                        const SizedBox(height: 16),
-                        _isEditing
-                            ? TextField(
-                                controller: _commentController,
-                                decoration: const InputDecoration(
-                                  labelText: 'コメント',
-                                  hintText: '感想や気付きを入力',
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFFE0E3E8)),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFFE0E3E8)),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide: BorderSide(
-                                        color: Color(0xFF3EA8FF), width: 2),
-                                  ),
-                                  labelStyle:
-                                      TextStyle(color: Color(0xFF1A1A1A)),
-                                  floatingLabelStyle:
-                                      TextStyle(color: Color(0xFF1A1A1A)),
-                                ),
-                                maxLines: 3,
-                              )
-                            : Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('コメント:', style: TextStyles.body),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    _currentStep.comment ?? 'コメントはありません',
-                                    style: TextStyles.body,
-                                  ),
-                                ],
-                              ),
-                        const SizedBox(height: 32),
-                        if (_isEditing)
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _saveStep,
-                              style: ElevatedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
-                                backgroundColor: const Color(0xFF3EA8FF),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                Colors.white),
-                                      ),
-                                    )
-                                  : const Text(
-                                      '保存',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 16),
-                                    ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 28),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _currentStep.action,
+                              style: TextStyles.h2,
                             ),
+                            const SizedBox(height: 24),
+                            Row(
+                              children: [
+                                const Text('事前不安得点:', style: TextStyles.body),
+                                const SizedBox(width: 8),
+                                Text('${_currentStep.beforeAnxietyScore ?? 0}',
+                                    style: TextStyles.body),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            _isEditing
+                                ? TextField(
+                                    controller: _postAnxietyController,
+                                    decoration: const InputDecoration(
+                                      labelText: '事後不安得点',
+                                      hintText: '数値を入力',
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(8)),
+                                        borderSide: BorderSide(
+                                            color: Color(0xFFE0E3E8)),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(8)),
+                                        borderSide: BorderSide(
+                                            color: Color(0xFFE0E3E8)),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(8)),
+                                        borderSide: BorderSide(
+                                            color: Color(0xFF3EA8FF), width: 2),
+                                      ),
+                                      labelStyle:
+                                          TextStyle(color: Color(0xFF1A1A1A)),
+                                      floatingLabelStyle:
+                                          TextStyle(color: Color(0xFF1A1A1A)),
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                  )
+                                : Row(
+                                    children: [
+                                      const Text('事後不安得点:',
+                                          style: TextStyles.body),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                          '${_currentStep.afterAnxietyScore ?? 0}',
+                                          style: TextStyles.body),
+                                    ],
+                                  ),
+                            const SizedBox(height: 16),
+                            _isEditing
+                                ? TextField(
+                                    controller: _commentController,
+                                    decoration: const InputDecoration(
+                                      labelText: 'コメント',
+                                      hintText: '感想や気付きを入力',
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(8)),
+                                        borderSide: BorderSide(
+                                            color: Color(0xFFE0E3E8)),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(8)),
+                                        borderSide: BorderSide(
+                                            color: Color(0xFFE0E3E8)),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(8)),
+                                        borderSide: BorderSide(
+                                            color: Color(0xFF3EA8FF), width: 2),
+                                      ),
+                                      labelStyle:
+                                          TextStyle(color: Color(0xFF1A1A1A)),
+                                      floatingLabelStyle:
+                                          TextStyle(color: Color(0xFF1A1A1A)),
+                                    ),
+                                    maxLines: 3,
+                                  )
+                                : Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('コメント:',
+                                          style: TextStyles.body),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        _currentStep.comment ?? 'コメントはありません',
+                                        style: TextStyles.body,
+                                      ),
+                                    ],
+                                  ),
+                            const SizedBox(height: 32),
+                            if (_isEditing)
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: _isLoading ? null : _saveStep,
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16),
+                                    backgroundColor: const Color(0xFF3EA8FF),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: _isLoading
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.white),
+                                          ),
+                                        )
+                                      : const Text(
+                                          '保存',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16),
+                                        ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      // カード右下に小さめのペンマークアイコン配置（丸背景なし、アイコンのみ）
+                      if (!_isEditing)
+                        Positioned(
+                          bottom: 16,
+                          right: 16,
+                          child: IconButton(
+                            icon: const Icon(Icons.edit,
+                                size: 22, color: Color(0xFF3EA8FF)),
+                            onPressed: () => setState(() => _isEditing = true),
+                            tooltip: '編集',
                           ),
-                      ],
-                    ),
+                        ),
+                    ],
                   ),
                 ),
               ),
