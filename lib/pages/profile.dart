@@ -87,10 +87,35 @@ class ProfileNotifier extends StateNotifier<AppUser> {
   }
 }
 
-class Profile extends ConsumerWidget {
+class Profile extends ConsumerStatefulWidget {
   Profile({super.key, this.isNewUser = false});
   final bool isNewUser;
+  @override
+  ConsumerState<Profile> createState() => _ProfileState();
+}
+
+class _ProfileState extends ConsumerState<Profile> {
   final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _userNameController;
+  late final TextEditingController _ageController;
+  late final TextEditingController _attributeController;
+
+  @override
+  void initState() {
+    super.initState();
+    final state = ref.read(profileProvider);
+    _userNameController = TextEditingController(text: state.userName);
+    _ageController = TextEditingController(text: state.age?.toString() ?? '');
+    _attributeController = TextEditingController(text: state.attribute ?? '');
+  }
+
+  @override
+  void dispose() {
+    _userNameController.dispose();
+    _ageController.dispose();
+    _attributeController.dispose();
+    super.dispose();
+  }
 
   void _submitForm(BuildContext context, WidgetRef ref) async {
     if (_formKey.currentState?.validate() ?? false) {
@@ -99,7 +124,7 @@ class Profile extends ConsumerWidget {
 
       await ref.read(profileProvider.notifier).saveProfile(user.uid);
 
-      if (isNewUser) {
+      if (widget.isNewUser) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const StepList()),
@@ -111,15 +136,27 @@ class Profile extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final state = ref.watch(profileProvider);
+    ref.listen<AppUser>(profileProvider, (prev, next) {
+      if (_userNameController.text != next.userName) {
+        _userNameController.text = next.userName ?? '';
+      }
+      final ageStr = next.age?.toString() ?? '';
+      if (_ageController.text != ageStr) {
+        _ageController.text = ageStr;
+      }
+      if (_attributeController.text != (next.attribute ?? '')) {
+        _attributeController.text = next.attribute ?? '';
+      }
+    });
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         title: const Text('プロフィール設定'),
         actions: [
-          if (isNewUser)
+          if (widget.isNewUser)
             TextButton(
               onPressed: () {
                 Navigator.pushReplacement(
@@ -150,7 +187,7 @@ class Profile extends ConsumerWidget {
                   children: [
                     // ニックネーム
                     TextFormField(
-                      key: ValueKey(state.userName),
+                      controller: _userNameController,
                       decoration: InputDecoration(
                         labelText: 'ニックネーム',
                         hintText: 'ユーザー',
@@ -177,7 +214,6 @@ class Profile extends ConsumerWidget {
                             const TextStyle(color: Color(0xFF1A1A1A)),
                       ),
                       cursorColor: const Color(0xFF3EA8FF),
-                      initialValue: state.userName,
                       onChanged: (value) => ref
                           .read(profileProvider.notifier)
                           .updateUserName(value),
@@ -191,7 +227,7 @@ class Profile extends ConsumerWidget {
                     const SizedBox(height: 20),
                     // 年齢
                     TextFormField(
-                      key: ValueKey(state.age?.toString() ?? ''),
+                      controller: _ageController,
                       decoration: InputDecoration(
                         labelText: '年齢',
                         hintText: '',
@@ -219,7 +255,6 @@ class Profile extends ConsumerWidget {
                       ),
                       cursorColor: const Color(0xFF3EA8FF),
                       keyboardType: TextInputType.number,
-                      initialValue: state.age?.toString() ?? '',
                       onChanged: (value) =>
                           ref.read(profileProvider.notifier).updateAge(value),
                     ),
@@ -263,6 +298,7 @@ class Profile extends ConsumerWidget {
                     const SizedBox(height: 20),
                     // 属性
                     TextFormField(
+                      controller: _attributeController,
                       decoration: InputDecoration(
                         labelText: '属性',
                         hintText: '',
@@ -289,7 +325,6 @@ class Profile extends ConsumerWidget {
                             const TextStyle(color: Color(0xFF1A1A1A)),
                       ),
                       cursorColor: const Color(0xFF3EA8FF),
-                      initialValue: state.attribute,
                       onChanged: (value) => ref
                           .read(profileProvider.notifier)
                           .updateAttribute(value),
