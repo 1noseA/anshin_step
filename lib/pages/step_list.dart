@@ -151,6 +151,8 @@ class StepList extends ConsumerWidget {
                             child: ExpansionTile(
                               title: Text(goal.goal),
                               subtitle: Text(goal.anxiety),
+                              iconColor: Color(0xFF1A1A1A),
+                              collapsedIconColor: Color(0xFF1A1A1A),
                               children: [
                                 if (goal.babySteps != null &&
                                     goal.babySteps!.isNotEmpty)
@@ -183,6 +185,7 @@ class StepList extends ConsumerWidget {
                                               textAlign: TextAlign.right,
                                             ),
                                           ),
+                                          const SizedBox(width: 16),
                                         ],
                                       ),
                                     );
