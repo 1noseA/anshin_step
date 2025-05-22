@@ -299,7 +299,10 @@ class _ChatState extends ConsumerState<Chat> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        shadowColor: Colors.transparent,
         title: const Text('新しい行動プラン作成'),
       ),
       body: Container(
@@ -315,6 +318,7 @@ class _ChatState extends ConsumerState<Chat> {
                 padding: const EdgeInsets.all(16.0),
                 child: ListView(
                   children: [
+                    const SizedBox(height: 16),
                     TextField(
                       controller: _goalController,
                       decoration: InputDecoration(
@@ -433,23 +437,37 @@ class _ChatState extends ConsumerState<Chat> {
                             ),
                             child: const Text('クリア'),
                           ),
+                          const SizedBox(height: 16),
+                          ...List.generate(_steps.length, (index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${index + 1}.',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.text,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _steps[index].action,
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
                         ],
                       ],
                     ),
                     const SizedBox(height: 20),
                     if (_steps.isNotEmpty) ...[
-                      const Text(
-                        '生成されたベイビーステップ',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      ..._steps.map((step) => ListTile(
-                            title: Text(step.action),
-                          )),
-                      const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: _saveSteps,
                         child: const Text('保存して次へ'),

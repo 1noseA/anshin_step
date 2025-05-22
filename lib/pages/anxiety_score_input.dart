@@ -138,10 +138,32 @@ class _AnxietyScoreInputState extends ConsumerState<AnxietyScoreInput> {
                     TextField(
                       controller: _controllers[currentStep.id],
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: '不安得点 (0-100)',
-                        border: OutlineInputBorder(),
+                        hintText: '数値を入力',
+                        hintStyle: const TextStyle(color: Color(0xFF757575)),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE0E3E8)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE0E3E8)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                              color: AppColors.primary, width: 2),
+                        ),
+                        labelStyle: const TextStyle(color: AppColors.text),
+                        floatingLabelStyle:
+                            const TextStyle(color: AppColors.text),
                       ),
+                      cursorColor: AppColors.primary,
                       onChanged: (value) {
                         final score = int.tryParse(value) ?? 0;
                         if (score >= 0 && score <= 100) {
@@ -163,7 +185,9 @@ class _AnxietyScoreInputState extends ConsumerState<AnxietyScoreInput> {
                               });
                             },
                             child: const Text('前へ'),
-                          ),
+                          )
+                        else
+                          const SizedBox(width: 80), // 前へボタンがない場合のスペース
                         if (_currentIndex < widget.steps.length - 1)
                           ElevatedButton(
                             onPressed: () {
@@ -190,14 +214,14 @@ class _AnxietyScoreInputState extends ConsumerState<AnxietyScoreInput> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: _skipInput,
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.primary,
                   textStyle: const TextStyle(
                     decoration: TextDecoration.none,
                   ),
                 ),
-                child: const Text('キャンセル'),
+                child: const Text('スキップ'),
               ),
               ElevatedButton(
                 onPressed: _saveScore,
