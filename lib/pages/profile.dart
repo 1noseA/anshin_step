@@ -221,13 +221,13 @@ class _ProfileState extends ConsumerState<Profile> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: const BorderSide(
-                                color: Color(0xFF3EA8FF), width: 2),
+                                color: AppColors.primary, width: 2),
                           ),
                           labelStyle: const TextStyle(color: AppColors.text),
                           floatingLabelStyle:
                               const TextStyle(color: AppColors.text),
                         ),
-                        cursorColor: const Color(0xFF3EA8FF),
+                        cursorColor: AppColors.primary,
                         onChanged: (value) => ref
                             .read(profileProvider.notifier)
                             .updateUserName(value),
@@ -261,13 +261,13 @@ class _ProfileState extends ConsumerState<Profile> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: const BorderSide(
-                                color: Color(0xFF3EA8FF), width: 2),
+                                color: AppColors.primary, width: 2),
                           ),
                           labelStyle: const TextStyle(color: AppColors.text),
                           floatingLabelStyle:
                               const TextStyle(color: AppColors.text),
                         ),
-                        cursorColor: const Color(0xFF3EA8FF),
+                        cursorColor: AppColors.primary,
                         keyboardType: TextInputType.number,
                         onChanged: (value) =>
                             ref.read(profileProvider.notifier).updateAge(value),
@@ -336,13 +336,13 @@ class _ProfileState extends ConsumerState<Profile> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: const BorderSide(
-                                color: Color(0xFF3EA8FF), width: 2),
+                                color: AppColors.primary, width: 2),
                           ),
                           labelStyle: const TextStyle(color: AppColors.text),
                           floatingLabelStyle:
                               const TextStyle(color: AppColors.text),
                         ),
-                        cursorColor: const Color(0xFF3EA8FF),
+                        cursorColor: AppColors.primary,
                         onChanged: (value) => ref
                             .read(profileProvider.notifier)
                             .updateAttribute(value),

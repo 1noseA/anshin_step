@@ -117,7 +117,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(8)),
                                         borderSide: BorderSide(
-                                            color: Color(0xFF3EA8FF), width: 2),
+                                            color: AppColors.primary, width: 2),
                                       ),
                                       labelStyle:
                                           TextStyle(color: AppColors.text),
@@ -161,7 +161,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(8)),
                                         borderSide: BorderSide(
-                                            color: Color(0xFF3EA8FF), width: 2),
+                                            color: AppColors.primary, width: 2),
                                       ),
                                       labelStyle:
                                           TextStyle(color: AppColors.text),

@@ -29,11 +29,4 @@ class TextStyles {
     height: 1.75,
     fontFamily: 'Noto Sans',
   );
-  static const link = TextStyle(
-    color: Color(0xFF3EA8FF),
-    fontWeight: FontWeight.normal,
-    decoration: TextDecoration.underline,
-    fontSize: 16,
-    fontFamily: 'Noto Sans',
-  );
 }
