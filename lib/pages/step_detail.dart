@@ -8,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:anshin_step/pages/chat.dart'; // userProfileProvider用
 import 'package:anshin_step/models/app_user.dart';
 import 'package:flutter/foundation.dart';
+import 'package:anshin_step/components/text_styles.dart';
 
 class StepDetail extends ConsumerStatefulWidget {
   final BabyStep step;
@@ -56,90 +57,130 @@ class _StepDetailState extends ConsumerState<StepDetail> {
             ),
         ],
       ),
-      body: Column(
-        children: [
-          Container(
-            height: 1,
-            color: const Color(0xFFE0E3E8),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Text(_currentStep.action,
-                      style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      const Text('事前不安得点: '),
-                      Text('${_currentStep.beforeAnxietyScore ?? 0}'),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  _isEditing
-                      ? TextField(
-                          controller: _postAnxietyController,
-                          decoration: const InputDecoration(
-                            labelText: '事後不安得点',
-                            hintText: '数値を入力',
-                          ),
-                          keyboardType: TextInputType.number,
-                        )
-                      : Row(
-                          children: [
-                            const Text('事後不安得点: '),
-                            Text('${_currentStep.afterAnxietyScore ?? 0}'),
-                          ],
+      body: Container(
+        color: const Color(0xFFF6F7FB), // 柔らかいグレー背景
+        child: Column(
+          children: [
+            Container(
+              height: 1,
+              color: const Color(0xFFE0E3E8),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 32.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.07),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
                         ),
-                  const SizedBox(height: 20),
-                  _isEditing
-                      ? TextField(
-                          controller: _commentController,
-                          decoration: const InputDecoration(
-                            labelText: 'コメント',
-                            hintText: '感想や気付きを入力',
-                          ),
-                          maxLines: 3,
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('コメント:'),
-                            Text(_currentStep.comment ?? 'コメントはありません'),
-                          ],
-                        ),
-                  const SizedBox(height: 30),
-                  if (_isEditing)
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _saveStep, // ローディング中は無効化
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
-                                ),
-                              )
-                            : const Text(
-                                '保存',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 16),
-                              ),
-                      ),
+                      ],
                     ),
-                ],
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 28),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _currentStep.action,
+                          style: TextStyles.h2,
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          children: [
+                            const Text('事前不安得点:', style: TextStyles.body),
+                            const SizedBox(width: 8),
+                            Text('${_currentStep.beforeAnxietyScore ?? 0}',
+                                style: TextStyles.body),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        _isEditing
+                            ? TextField(
+                                controller: _postAnxietyController,
+                                decoration: const InputDecoration(
+                                  labelText: '事後不安得点',
+                                  hintText: '数値を入力',
+                                  border: OutlineInputBorder(),
+                                ),
+                                keyboardType: TextInputType.number,
+                              )
+                            : Row(
+                                children: [
+                                  const Text('事後不安得点:', style: TextStyles.body),
+                                  const SizedBox(width: 8),
+                                  Text('${_currentStep.afterAnxietyScore ?? 0}',
+                                      style: TextStyles.body),
+                                ],
+                              ),
+                        const SizedBox(height: 16),
+                        _isEditing
+                            ? TextField(
+                                controller: _commentController,
+                                decoration: const InputDecoration(
+                                  labelText: 'コメント',
+                                  hintText: '感想や気付きを入力',
+                                  border: OutlineInputBorder(),
+                                ),
+                                maxLines: 3,
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('コメント:', style: TextStyles.body),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _currentStep.comment ?? 'コメントはありません',
+                                    style: TextStyles.body,
+                                  ),
+                                ],
+                              ),
+                        const SizedBox(height: 32),
+                        if (_isEditing)
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _saveStep,
+                              style: ElevatedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                backgroundColor: const Color(0xFF3EA8FF),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
+                                      ),
+                                    )
+                                  : const Text(
+                                      '保存',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 16),
+                                    ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
