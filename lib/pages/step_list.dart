@@ -168,7 +168,52 @@ class StepList extends ConsumerWidget {
                                         children: [
                                           Checkbox(
                                             value: displayStep.isDone ?? false,
-                                            onChanged: null,
+                                            activeColor: Color(0xFF3EA8FF),
+                                            onChanged: (checked) async {
+                                              final user = FirebaseAuth
+                                                  .instance.currentUser;
+                                              if (user == null) return;
+                                              final newIsDone =
+                                                  checked ?? false;
+                                              final newExecutionDate = newIsDone
+                                                  ? DateTime.now()
+                                                  : null;
+                                              final firestore =
+                                                  FirebaseFirestore.instance;
+                                              // goalIdがnullの場合は何もしない
+                                              if (displayStep.goalId == null)
+                                                return;
+                                              final stepRef = firestore
+                                                  .collection('goals')
+                                                  .doc(displayStep.goalId)
+                                                  .collection('babySteps')
+                                                  .doc(displayStep.id);
+                                              await stepRef.update({
+                                                'isDone': newIsDone,
+                                                'executionDate':
+                                                    newExecutionDate,
+                                                'updatedBy': user.uid,
+                                                'updatedAt': DateTime.now(),
+                                              });
+                                              // ローカル状態も即時更新
+                                              final updatedStep =
+                                                  displayStep.copyWith(
+                                                isDone: newIsDone,
+                                                executionDate: newExecutionDate,
+                                                updatedBy: user.uid,
+                                                updatedAt: DateTime.now(),
+                                              );
+                                              final updatedMap =
+                                                  Map<String, BabyStep>.from(
+                                                      updatedBabySteps);
+                                              updatedMap[displayStep.id] =
+                                                  updatedStep;
+                                              ref
+                                                  .read(updatedBabyStepProvider
+                                                      .notifier)
+                                                  .state = updatedMap;
+                                              ref.refresh(goalsProvider);
+                                            },
                                           ),
                                           Expanded(
                                             child: Text(displayStep.action),
