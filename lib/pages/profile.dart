@@ -6,6 +6,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:anshin_step/components/colors.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 final profileProvider =
     StateNotifierProvider.autoDispose<ProfileNotifier, AppUser>(
@@ -155,6 +157,13 @@ class _ProfileState extends ConsumerState<Profile> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        shadowColor: Colors.transparent,
+        surfaceTintColor: Colors.white,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.white,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
         title: const Text('プロフィール設定'),
         actions: [
           if (widget.isNewUser)
