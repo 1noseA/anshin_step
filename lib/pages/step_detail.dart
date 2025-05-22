@@ -107,12 +107,12 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                 const SizedBox(height: 12),
                                 Text(
                                   _currentStep.action,
-                                  style: TextStyles.h2,
+                                  style: TextStyles.h2.copyWith(height: 1.4),
                                   textAlign: TextAlign.center,
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 40),
                             Row(
                               children: [
                                 const Text('事前不安得点:', style: TextStyles.body),
@@ -213,78 +213,6 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                     ],
                                   ),
                             const SizedBox(height: 32),
-                            if (_isEditing)
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: OutlinedButton(
-                                      onPressed: _isLoading
-                                          ? null
-                                          : () {
-                                              setState(() {
-                                                _isEditing = false;
-                                                // 編集内容を破棄し、元の値に戻す
-                                                _postAnxietyController.text =
-                                                    _currentStep
-                                                            .afterAnxietyScore
-                                                            ?.toString() ??
-                                                        '';
-                                                _commentController.text =
-                                                    _currentStep.comment ?? '';
-                                              });
-                                            },
-                                      style: OutlinedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 16),
-                                        side: const BorderSide(
-                                            color: AppColors.primary),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'キャンセル',
-                                        style: TextStyle(
-                                            color: AppColors.primary,
-                                            fontSize: 16),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      onPressed: _isLoading ? null : _saveStep,
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 16),
-                                        backgroundColor: AppColors.primary,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                      ),
-                                      child: _isLoading
-                                          ? const SizedBox(
-                                              width: 20,
-                                              height: 20,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                valueColor:
-                                                    AlwaysStoppedAnimation<
-                                                        Color>(Colors.white),
-                                              ),
-                                            )
-                                          : const Text(
-                                              '保存',
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16),
-                                            ),
-                                    ),
-                                  ),
-                                ],
-                              ),
                           ],
                         ),
                       ),
@@ -308,6 +236,77 @@ class _StepDetailState extends ConsumerState<StepDetail> {
           ],
         ),
       ),
+      bottomNavigationBar: _isEditing
+          ? Container(
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                setState(() {
+                                  _isEditing = false;
+                                  // 編集内容を破棄し、元の値に戻す
+                                  _postAnxietyController.text = _currentStep
+                                          .afterAnxietyScore
+                                          ?.toString() ??
+                                      '';
+                                  _commentController.text =
+                                      _currentStep.comment ?? '';
+                                });
+                              },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          side: const BorderSide(color: AppColors.primary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'キャンセル',
+                          style:
+                              TextStyle(color: AppColors.primary, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _saveStep,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                              )
+                            : const Text(
+                                '保存',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : null,
     );
   }
 
