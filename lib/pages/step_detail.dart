@@ -117,8 +117,9 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                               children: [
                                 const Text('事前不安得点:', style: TextStyles.body),
                                 const SizedBox(width: 8),
-                                Text('${_currentStep.beforeAnxietyScore ?? 0}',
-                                    style: TextStyles.body),
+                                if (_currentStep.beforeAnxietyScore != null)
+                                  Text('${_currentStep.beforeAnxietyScore}',
+                                      style: TextStyles.body),
                               ],
                             ),
                             const SizedBox(height: 16),
@@ -128,6 +129,8 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                     decoration: const InputDecoration(
                                       labelText: '事後不安得点',
                                       hintText: '数値を入力',
+                                      hintStyle:
+                                          TextStyle(color: Color(0xFF757575)),
                                       filled: true,
                                       fillColor: Colors.white,
                                       border: OutlineInputBorder(
@@ -160,9 +163,11 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                       const Text('事後不安得点:',
                                           style: TextStyles.body),
                                       const SizedBox(width: 8),
-                                      Text(
-                                          '${_currentStep.afterAnxietyScore ?? 0}',
-                                          style: TextStyles.body),
+                                      if (_currentStep.afterAnxietyScore !=
+                                          null)
+                                        Text(
+                                            '${_currentStep.afterAnxietyScore}',
+                                            style: TextStyles.body),
                                     ],
                                   ),
                             const SizedBox(height: 16),
@@ -172,6 +177,8 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                     decoration: const InputDecoration(
                                       labelText: 'コメント',
                                       hintText: '感想や気付きを入力',
+                                      hintStyle:
+                                          TextStyle(color: Color(0xFF757575)),
                                       filled: true,
                                       fillColor: Colors.white,
                                       border: OutlineInputBorder(
