@@ -8,8 +8,8 @@ part of 'goal.dart';
 
 _Goal _$GoalFromJson(Map<String, dynamic> json) => _Goal(
       id: json['id'] as String? ?? '',
-      goal: json['goal'] as String,
-      anxiety: json['anxiety'] as String,
+      content: json['content'] as String,
+      originalContent: json['originalContent'] as String,
       babySteps: _babyStepsFromJson(json['babySteps'] as List),
       displayOrder: (json['displayOrder'] as num?)?.toInt(),
       isDeleted: json['isDeleted'] as bool?,
@@ -21,8 +21,8 @@ _Goal _$GoalFromJson(Map<String, dynamic> json) => _Goal(
 
 Map<String, dynamic> _$GoalToJson(_Goal instance) => <String, dynamic>{
       'id': instance.id,
-      'goal': instance.goal,
-      'anxiety': instance.anxiety,
+      'content': instance.content,
+      'originalContent': instance.originalContent,
       'babySteps': _babyStepsToJson(instance.babySteps),
       'displayOrder': instance.displayOrder,
       'isDeleted': instance.isDeleted,

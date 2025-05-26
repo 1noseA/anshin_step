@@ -154,10 +154,17 @@ class StepList extends ConsumerWidget {
                                   vertical: 10, horizontal: 8),
                               child: ExpansionTile(
                                 title: Text(
-                                  goal.goal,
+                                  goal.content.split('\\n')[0],
                                   style: TextStyles.h3,
                                 ),
-                                subtitle: Text(goal.anxiety),
+                                subtitle: Text(
+                                  goal.content.split('\\n').length > 1
+                                      ? goal.content.split('\\n')[1]
+                                      : '',
+                                  style: TextStyles.body.copyWith(
+                                    color: AppColors.text.withOpacity(0.7),
+                                  ),
+                                ),
                                 iconColor: AppColors.text,
                                 collapsedIconColor: AppColors.text,
                                 children: [

@@ -17,10 +17,10 @@ T _$identity<T>(T value) => value;
 mixin _$Goal {
   @JsonKey(name: 'id', defaultValue: '')
   String get id;
-  @JsonKey(name: 'goal')
-  String get goal; // やりたいこと
-  @JsonKey(name: 'anxiety')
-  String get anxiety; // 不安なこと
+  @JsonKey(name: 'content')
+  String get content;
+  @JsonKey(name: 'originalContent')
+  String get originalContent;
   @JsonKey(
       name: 'babySteps', fromJson: _babyStepsFromJson, toJson: _babyStepsToJson)
   List<BabyStep>? get babySteps;
@@ -57,8 +57,9 @@ mixin _$Goal {
         (other.runtimeType == runtimeType &&
             other is Goal &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.goal, goal) || other.goal == goal) &&
-            (identical(other.anxiety, anxiety) || other.anxiety == anxiety) &&
+            (identical(other.content, content) || other.content == content) &&
+            (identical(other.originalContent, originalContent) ||
+                other.originalContent == originalContent) &&
             const DeepCollectionEquality().equals(other.babySteps, babySteps) &&
             (identical(other.displayOrder, displayOrder) ||
                 other.displayOrder == displayOrder) &&
@@ -79,8 +80,8 @@ mixin _$Goal {
   int get hashCode => Object.hash(
       runtimeType,
       id,
-      goal,
-      anxiety,
+      content,
+      originalContent,
       const DeepCollectionEquality().hash(babySteps),
       displayOrder,
       isDeleted,
@@ -91,7 +92,7 @@ mixin _$Goal {
 
   @override
   String toString() {
-    return 'Goal(id: $id, goal: $goal, anxiety: $anxiety, babySteps: $babySteps, displayOrder: $displayOrder, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
+    return 'Goal(id: $id, content: $content, originalContent: $originalContent, babySteps: $babySteps, displayOrder: $displayOrder, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
   }
 }
 
@@ -102,8 +103,8 @@ abstract mixin class $GoalCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'id', defaultValue: '') String id,
-      @JsonKey(name: 'goal') String goal,
-      @JsonKey(name: 'anxiety') String anxiety,
+      @JsonKey(name: 'content') String content,
+      @JsonKey(name: 'originalContent') String originalContent,
       @JsonKey(
           name: 'babySteps',
           fromJson: _babyStepsFromJson,
@@ -138,8 +139,8 @@ class _$GoalCopyWithImpl<$Res> implements $GoalCopyWith<$Res> {
   @override
   $Res call({
     Object? id = null,
-    Object? goal = null,
-    Object? anxiety = null,
+    Object? content = null,
+    Object? originalContent = null,
     Object? babySteps = freezed,
     Object? displayOrder = freezed,
     Object? isDeleted = freezed,
@@ -153,13 +154,13 @@ class _$GoalCopyWithImpl<$Res> implements $GoalCopyWith<$Res> {
           ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      goal: null == goal
-          ? _self.goal
-          : goal // ignore: cast_nullable_to_non_nullable
+      content: null == content
+          ? _self.content
+          : content // ignore: cast_nullable_to_non_nullable
               as String,
-      anxiety: null == anxiety
-          ? _self.anxiety
-          : anxiety // ignore: cast_nullable_to_non_nullable
+      originalContent: null == originalContent
+          ? _self.originalContent
+          : originalContent // ignore: cast_nullable_to_non_nullable
               as String,
       babySteps: freezed == babySteps
           ? _self.babySteps
@@ -198,8 +199,8 @@ class _$GoalCopyWithImpl<$Res> implements $GoalCopyWith<$Res> {
 class _Goal implements Goal {
   const _Goal(
       {@JsonKey(name: 'id', defaultValue: '') required this.id,
-      @JsonKey(name: 'goal') required this.goal,
-      @JsonKey(name: 'anxiety') required this.anxiety,
+      @JsonKey(name: 'content') required this.content,
+      @JsonKey(name: 'originalContent') required this.originalContent,
       @JsonKey(
           name: 'babySteps',
           fromJson: _babyStepsFromJson,
@@ -226,15 +227,12 @@ class _Goal implements Goal {
   @JsonKey(name: 'id', defaultValue: '')
   final String id;
   @override
-  @JsonKey(name: 'goal')
-  final String goal;
-// やりたいこと
+  @JsonKey(name: 'content')
+  final String content;
   @override
-  @JsonKey(name: 'anxiety')
-  final String anxiety;
-// 不安なこと
+  @JsonKey(name: 'originalContent')
+  final String originalContent;
   final List<BabyStep>? _babySteps;
-// 不安なこと
   @override
   @JsonKey(
       name: 'babySteps', fromJson: _babyStepsFromJson, toJson: _babyStepsToJson)
@@ -295,8 +293,9 @@ class _Goal implements Goal {
         (other.runtimeType == runtimeType &&
             other is _Goal &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.goal, goal) || other.goal == goal) &&
-            (identical(other.anxiety, anxiety) || other.anxiety == anxiety) &&
+            (identical(other.content, content) || other.content == content) &&
+            (identical(other.originalContent, originalContent) ||
+                other.originalContent == originalContent) &&
             const DeepCollectionEquality()
                 .equals(other._babySteps, _babySteps) &&
             (identical(other.displayOrder, displayOrder) ||
@@ -318,8 +317,8 @@ class _Goal implements Goal {
   int get hashCode => Object.hash(
       runtimeType,
       id,
-      goal,
-      anxiety,
+      content,
+      originalContent,
       const DeepCollectionEquality().hash(_babySteps),
       displayOrder,
       isDeleted,
@@ -330,7 +329,7 @@ class _Goal implements Goal {
 
   @override
   String toString() {
-    return 'Goal(id: $id, goal: $goal, anxiety: $anxiety, babySteps: $babySteps, displayOrder: $displayOrder, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
+    return 'Goal(id: $id, content: $content, originalContent: $originalContent, babySteps: $babySteps, displayOrder: $displayOrder, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
   }
 }
 
@@ -342,8 +341,8 @@ abstract mixin class _$GoalCopyWith<$Res> implements $GoalCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'id', defaultValue: '') String id,
-      @JsonKey(name: 'goal') String goal,
-      @JsonKey(name: 'anxiety') String anxiety,
+      @JsonKey(name: 'content') String content,
+      @JsonKey(name: 'originalContent') String originalContent,
       @JsonKey(
           name: 'babySteps',
           fromJson: _babyStepsFromJson,
@@ -378,8 +377,8 @@ class __$GoalCopyWithImpl<$Res> implements _$GoalCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   $Res call({
     Object? id = null,
-    Object? goal = null,
-    Object? anxiety = null,
+    Object? content = null,
+    Object? originalContent = null,
     Object? babySteps = freezed,
     Object? displayOrder = freezed,
     Object? isDeleted = freezed,
@@ -393,13 +392,13 @@ class __$GoalCopyWithImpl<$Res> implements _$GoalCopyWith<$Res> {
           ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      goal: null == goal
-          ? _self.goal
-          : goal // ignore: cast_nullable_to_non_nullable
+      content: null == content
+          ? _self.content
+          : content // ignore: cast_nullable_to_non_nullable
               as String,
-      anxiety: null == anxiety
-          ? _self.anxiety
-          : anxiety // ignore: cast_nullable_to_non_nullable
+      originalContent: null == originalContent
+          ? _self.originalContent
+          : originalContent // ignore: cast_nullable_to_non_nullable
               as String,
       babySteps: freezed == babySteps
           ? _self._babySteps

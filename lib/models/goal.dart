@@ -48,8 +48,8 @@ List<Map<String, dynamic>> _babyStepsToJson(List<BabyStep>? steps) {
 abstract class Goal with _$Goal {
   const factory Goal({
     @JsonKey(name: 'id', defaultValue: '') required String id,
-    @JsonKey(name: 'goal') required String goal, // やりたいこと
-    @JsonKey(name: 'anxiety') required String anxiety, // 不安なこと
+    @JsonKey(name: 'content') required String content,
+    @JsonKey(name: 'originalContent') required String originalContent,
     @JsonKey(
       name: 'babySteps',
       fromJson: _babyStepsFromJson,
@@ -72,5 +72,17 @@ abstract class Goal with _$Goal {
     required DateTime updatedAt, // レコード更新日
   }) = _Goal;
 
-  factory Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);
+  factory Goal.fromJson(Map<String, dynamic> json) => Goal(
+        id: json['id'] as String? ?? '',
+        content: json['content'] as String? ?? '',
+        originalContent: json['originalContent'] as String? ?? '',
+        babySteps:
+            _babyStepsFromJson(json['babySteps'] as List<dynamic>? ?? []),
+        displayOrder: json['displayOrder'] as int?,
+        isDeleted: json['isDeleted'] as bool?,
+        createdBy: json['created_by'] as String? ?? '',
+        createdAt: _dateTimeFromTimestamp(json['created_at']),
+        updatedBy: json['updated_by'] as String? ?? '',
+        updatedAt: _dateTimeFromTimestamp(json['updated_at']),
+      );
 }
