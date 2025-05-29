@@ -70,6 +70,10 @@ abstract class Goal with _$Goal {
         fromJson: _dateTimeFromTimestamp,
         toJson: _dateTimeToJson)
     required DateTime updatedAt, // レコード更新日
+    @JsonKey(name: 'title') required String title, // タイトル
+    @JsonKey(name: 'goal') String? goal, // やりたいこと
+    @JsonKey(name: 'anxiety') String? anxiety, // 不安なこと
+    @JsonKey(name: 'category') String? category, // カテゴリー
   }) = _Goal;
 
   factory Goal.fromJson(Map<String, dynamic> json) => Goal(
@@ -84,5 +88,9 @@ abstract class Goal with _$Goal {
         createdAt: _dateTimeFromTimestamp(json['created_at']),
         updatedBy: json['updated_by'] as String? ?? '',
         updatedAt: _dateTimeFromTimestamp(json['updated_at']),
+        title: json['title'] as String? ?? '',
+        goal: json['goal'] as String?,
+        anxiety: json['anxiety'] as String?,
+        category: json['category'] as String?,
       );
 }

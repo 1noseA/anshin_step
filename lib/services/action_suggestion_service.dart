@@ -13,100 +13,6 @@ class ActionSuggestionService {
 
   ActionSuggestionService(this.apiKey);
 
-  /// 入力内容を要約・成形する（登録・表示用）
-  Future<String> summarizeContent({
-    required String content,
-    required String role,
-    required String profileContext,
-  }) async {
-    if (apiKey.isEmpty) {
-      throw Exception('API Keyが設定されていません');
-    }
-
-    final url = Uri.parse('$baseUrl?key=$apiKey');
-    final headers = {
-      'Content-Type': 'application/json',
-    };
-
-    // プロンプトの生成
-    final prompt = ActionSuggestionPrompts.generateContentSummaryPrompt(
-      content: content,
-      role: role,
-      profileContext: profileContext,
-    );
-
-    if (kDebugMode) {
-      print('=== 生成されたプロンプト（登録・表示用）=== ');
-      print(prompt);
-      print('==============================');
-    }
-
-    // リクエストボディの形式を修正
-    final body = jsonEncode({
-      "contents": [
-        {
-          "role": "user",
-          "parts": [
-            {"text": prompt}
-          ]
-        }
-      ],
-      "generationConfig": {
-        "temperature": 0.7,
-        "topK": 40,
-        "topP": 0.95,
-        "maxOutputTokens": 1024,
-      }
-    });
-
-    try {
-      final response = await http
-          .post(
-        url,
-        headers: headers,
-        body: body,
-      )
-          .timeout(
-        const Duration(seconds: 30),
-        onTimeout: () {
-          throw Exception('リクエストがタイムアウトしました');
-        },
-      );
-
-      if (kDebugMode) {
-        print('APIレスポンスステータス: ${response.statusCode}');
-      }
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final text =
-            data['candidates']?[0]?['content']?['parts']?[0]?['text'] ?? '';
-
-        if (text.isEmpty) {
-          throw Exception('APIからの応答が空です');
-        }
-
-        return text.trim();
-      } else {
-        final errorData = jsonDecode(response.body);
-        final errorMessage = errorData['error']?['message'] ?? '不明なエラー';
-        throw Exception('APIエラー: $errorMessage');
-      }
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('エラー詳細: $e');
-        print('スタックトレース: $stackTrace');
-      }
-      if (e is FormatException) {
-        throw Exception('APIレスポンスの解析に失敗しました');
-      } else if (e is http.ClientException) {
-        throw Exception('ネットワークエラーが発生しました');
-      } else {
-        throw Exception('予期せぬエラーが発生しました');
-      }
-    }
-  }
-
   /// 入力内容を要約・成形する（ステップ生成用）
   Future<String> summarizeContentForSteps({
     required String content,
@@ -123,14 +29,14 @@ class ActionSuggestionService {
     };
 
     // プロンプトの生成
-    final prompt = ActionSuggestionPrompts.generateContentForStepsPrompt(
+    final prompt = ActionSuggestionPrompts.generateBabyStepsPrompt(
       content: content,
       role: role,
       profileContext: profileContext,
     );
 
     if (kDebugMode) {
-      print('=== 生成されたプロンプト（ステップ生成用）=== ');
+      print('=== 生成されたプロンプト === ');
       print(prompt);
       print('==============================');
     }
@@ -207,8 +113,8 @@ class ActionSuggestionService {
   /// [role] ユーザーの役割
   /// [profileContext] ユーザーのプロフィールコンテキスト
   ///
-  /// 戻り値: 生成されたベイビーステップのリスト
-  Future<List<String>> generateBabySteps({
+  /// 戻り値: 生成されたベイビーステップのリストと分析結果を含むMap
+  Future<Map<String, dynamic>> generateBabySteps({
     required String content,
     required String role,
     required String profileContext,
@@ -235,12 +141,6 @@ class ActionSuggestionService {
       role: role,
       profileContext: profileContext,
     );
-
-    if (kDebugMode) {
-      print('=== 生成されたプロンプト === ');
-      print(prompt);
-      print('==============================');
-    }
 
     // リクエストボディの形式を修正
     final body = jsonEncode({
@@ -287,6 +187,21 @@ class ActionSuggestionService {
           throw Exception('APIからの応答が空です');
         }
 
+        // 分析結果を抽出
+        final goalMatch = RegExp(r'やりたいこと[:：]\s*(.*)').firstMatch(text);
+        final anxietyMatch = RegExp(r'不安なこと[:：]\s*(.*)').firstMatch(text);
+        final titleMatch = RegExp(r'タイトル[:：]\s*(.*)').firstMatch(text);
+        final categoryMatch = RegExp(r'カテゴリー[:：]\s*(.*)').firstMatch(text);
+
+        if (kDebugMode) {
+          print('=== AI分析結果 ===');
+          print('やりたいこと: ${goalMatch?.group(1)?.trim() ?? ''}');
+          print('不安なこと: ${anxietyMatch?.group(1)?.trim() ?? ''}');
+          print('タイトル: ${titleMatch?.group(1)?.trim() ?? ''}');
+          print('カテゴリー: ${categoryMatch?.group(1)?.trim() ?? ''}');
+          print('=================');
+        }
+
         // 番号付きのリストを抽出（日本語の番号にも対応）
         final steps = RegExp(r'^\d+[\.．]\s*(.+)$', multiLine: true)
             .allMatches(text)
@@ -306,10 +221,22 @@ class ActionSuggestionService {
               .take(10)
               .toList();
 
-          return fallbackSteps;
+          return {
+            'steps': fallbackSteps,
+            'goal': goalMatch?.group(1)?.trim() ?? '',
+            'anxiety': anxietyMatch?.group(1)?.trim() ?? '',
+            'title': titleMatch?.group(1)?.trim() ?? '',
+            'category': categoryMatch?.group(1)?.trim() ?? '',
+          };
         }
 
-        return steps;
+        return {
+          'steps': steps,
+          'goal': goalMatch?.group(1)?.trim() ?? '',
+          'anxiety': anxietyMatch?.group(1)?.trim() ?? '',
+          'title': titleMatch?.group(1)?.trim() ?? '',
+          'category': categoryMatch?.group(1)?.trim() ?? '',
+        };
       } else {
         final errorData = jsonDecode(response.body);
         final errorMessage = errorData['error']?['message'] ?? '不明なエラー';

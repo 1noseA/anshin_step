@@ -39,7 +39,15 @@ mixin _$Goal {
       name: 'updated_at',
       fromJson: _dateTimeFromTimestamp,
       toJson: _dateTimeToJson)
-  DateTime get updatedAt;
+  DateTime get updatedAt; // レコード更新日
+  @JsonKey(name: 'title')
+  String get title; // タイトル
+  @JsonKey(name: 'goal')
+  String? get goal; // やりたいこと
+  @JsonKey(name: 'anxiety')
+  String? get anxiety; // 不安なこと
+  @JsonKey(name: 'category')
+  String? get category;
 
   /// Create a copy of Goal
   /// with the given fields replaced by the non-null parameter values.
@@ -72,7 +80,12 @@ mixin _$Goal {
             (identical(other.updatedBy, updatedBy) ||
                 other.updatedBy == updatedBy) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.title, title) || other.title == title) &&
+            (identical(other.goal, goal) || other.goal == goal) &&
+            (identical(other.anxiety, anxiety) || other.anxiety == anxiety) &&
+            (identical(other.category, category) ||
+                other.category == category));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -88,11 +101,15 @@ mixin _$Goal {
       createdBy,
       createdAt,
       updatedBy,
-      updatedAt);
+      updatedAt,
+      title,
+      goal,
+      anxiety,
+      category);
 
   @override
   String toString() {
-    return 'Goal(id: $id, content: $content, originalContent: $originalContent, babySteps: $babySteps, displayOrder: $displayOrder, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
+    return 'Goal(id: $id, content: $content, originalContent: $originalContent, babySteps: $babySteps, displayOrder: $displayOrder, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt, title: $title, goal: $goal, anxiety: $anxiety, category: $category)';
   }
 }
 
@@ -123,7 +140,11 @@ abstract mixin class $GoalCopyWith<$Res> {
           name: 'updated_at',
           fromJson: _dateTimeFromTimestamp,
           toJson: _dateTimeToJson)
-      DateTime updatedAt});
+      DateTime updatedAt,
+      @JsonKey(name: 'title') String title,
+      @JsonKey(name: 'goal') String? goal,
+      @JsonKey(name: 'anxiety') String? anxiety,
+      @JsonKey(name: 'category') String? category});
 }
 
 /// @nodoc
@@ -148,6 +169,10 @@ class _$GoalCopyWithImpl<$Res> implements $GoalCopyWith<$Res> {
     Object? createdAt = null,
     Object? updatedBy = null,
     Object? updatedAt = null,
+    Object? title = null,
+    Object? goal = freezed,
+    Object? anxiety = freezed,
+    Object? category = freezed,
   }) {
     return _then(_self.copyWith(
       id: null == id
@@ -190,6 +215,22 @@ class _$GoalCopyWithImpl<$Res> implements $GoalCopyWith<$Res> {
           ? _self.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      title: null == title
+          ? _self.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      goal: freezed == goal
+          ? _self.goal
+          : goal // ignore: cast_nullable_to_non_nullable
+              as String?,
+      anxiety: freezed == anxiety
+          ? _self.anxiety
+          : anxiety // ignore: cast_nullable_to_non_nullable
+              as String?,
+      category: freezed == category
+          ? _self.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -219,7 +260,11 @@ class _Goal implements Goal {
           name: 'updated_at',
           fromJson: _dateTimeFromTimestamp,
           toJson: _dateTimeToJson)
-      required this.updatedAt})
+      required this.updatedAt,
+      @JsonKey(name: 'title') required this.title,
+      @JsonKey(name: 'goal') this.goal,
+      @JsonKey(name: 'anxiety') this.anxiety,
+      @JsonKey(name: 'category') this.category})
       : _babySteps = babySteps;
   factory _Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);
 
@@ -271,6 +316,22 @@ class _Goal implements Goal {
       fromJson: _dateTimeFromTimestamp,
       toJson: _dateTimeToJson)
   final DateTime updatedAt;
+// レコード更新日
+  @override
+  @JsonKey(name: 'title')
+  final String title;
+// タイトル
+  @override
+  @JsonKey(name: 'goal')
+  final String? goal;
+// やりたいこと
+  @override
+  @JsonKey(name: 'anxiety')
+  final String? anxiety;
+// 不安なこと
+  @override
+  @JsonKey(name: 'category')
+  final String? category;
 
   /// Create a copy of Goal
   /// with the given fields replaced by the non-null parameter values.
@@ -309,7 +370,12 @@ class _Goal implements Goal {
             (identical(other.updatedBy, updatedBy) ||
                 other.updatedBy == updatedBy) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.title, title) || other.title == title) &&
+            (identical(other.goal, goal) || other.goal == goal) &&
+            (identical(other.anxiety, anxiety) || other.anxiety == anxiety) &&
+            (identical(other.category, category) ||
+                other.category == category));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -325,11 +391,15 @@ class _Goal implements Goal {
       createdBy,
       createdAt,
       updatedBy,
-      updatedAt);
+      updatedAt,
+      title,
+      goal,
+      anxiety,
+      category);
 
   @override
   String toString() {
-    return 'Goal(id: $id, content: $content, originalContent: $originalContent, babySteps: $babySteps, displayOrder: $displayOrder, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
+    return 'Goal(id: $id, content: $content, originalContent: $originalContent, babySteps: $babySteps, displayOrder: $displayOrder, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt, title: $title, goal: $goal, anxiety: $anxiety, category: $category)';
   }
 }
 
@@ -361,7 +431,11 @@ abstract mixin class _$GoalCopyWith<$Res> implements $GoalCopyWith<$Res> {
           name: 'updated_at',
           fromJson: _dateTimeFromTimestamp,
           toJson: _dateTimeToJson)
-      DateTime updatedAt});
+      DateTime updatedAt,
+      @JsonKey(name: 'title') String title,
+      @JsonKey(name: 'goal') String? goal,
+      @JsonKey(name: 'anxiety') String? anxiety,
+      @JsonKey(name: 'category') String? category});
 }
 
 /// @nodoc
@@ -386,6 +460,10 @@ class __$GoalCopyWithImpl<$Res> implements _$GoalCopyWith<$Res> {
     Object? createdAt = null,
     Object? updatedBy = null,
     Object? updatedAt = null,
+    Object? title = null,
+    Object? goal = freezed,
+    Object? anxiety = freezed,
+    Object? category = freezed,
   }) {
     return _then(_Goal(
       id: null == id
@@ -428,6 +506,22 @@ class __$GoalCopyWithImpl<$Res> implements _$GoalCopyWith<$Res> {
           ? _self.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      title: null == title
+          ? _self.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      goal: freezed == goal
+          ? _self.goal
+          : goal // ignore: cast_nullable_to_non_nullable
+              as String?,
+      anxiety: freezed == anxiety
+          ? _self.anxiety
+          : anxiety // ignore: cast_nullable_to_non_nullable
+              as String?,
+      category: freezed == category
+          ? _self.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }

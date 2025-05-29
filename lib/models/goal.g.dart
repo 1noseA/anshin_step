@@ -17,6 +17,10 @@ _Goal _$GoalFromJson(Map<String, dynamic> json) => _Goal(
       createdAt: _dateTimeFromTimestamp(json['created_at']),
       updatedBy: json['updated_by'] as String,
       updatedAt: _dateTimeFromTimestamp(json['updated_at']),
+      title: json['title'] as String,
+      goal: json['goal'] as String?,
+      anxiety: json['anxiety'] as String?,
+      category: json['category'] as String?,
     );
 
 Map<String, dynamic> _$GoalToJson(_Goal instance) => <String, dynamic>{
@@ -30,4 +34,8 @@ Map<String, dynamic> _$GoalToJson(_Goal instance) => <String, dynamic>{
       'created_at': _dateTimeToJson(instance.createdAt),
       'updated_by': instance.updatedBy,
       'updated_at': _dateTimeToJson(instance.updatedAt),
+      'title': instance.title,
+      'goal': instance.goal,
+      'anxiety': instance.anxiety,
+      'category': instance.category,
     };

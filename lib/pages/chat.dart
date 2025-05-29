@@ -11,6 +11,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anshin_step/models/app_user.dart';
 import 'package:anshin_step/components/colors.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:anshin_step/constants/action_suggestion_prompts.dart';
 
 // プロフィール情報を取得するProvider
 final userProfileProvider = StreamProvider<AppUser?>((ref) {
@@ -38,6 +41,10 @@ class _ChatState extends ConsumerState<Chat> {
   final _contentController = TextEditingController();
   List<BabyStep> _steps = [];
   bool _isGenerating = false;
+  String? _goalSummary;
+  String? _anxietySummary;
+  String? _titleSummary;
+  String? _category;
 
   @override
   void dispose() {
@@ -60,53 +67,19 @@ class _ChatState extends ConsumerState<Chat> {
     return null;
   }
 
-  /// Goalを保存する
-  Future<void> _saveGoal(Goal goal) async {
-    // TODO: データベースに保存する処理を実装
-    if (kDebugMode) {
-      print('Goalを保存: ${goal.content}');
-    }
-  }
-
   /// AIを使用してベイビーステップを生成する
   Future<void> _generateStepsWithAI() async {
-    if (_contentController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('目標や不安なことを入力してください'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return;
-    }
-
-    final apiKey = await _getApiKey();
-    if (apiKey == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('API Keyが設定されていません'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-      return;
-    }
-
     setState(() {
       _isGenerating = true;
     });
-
-    String role = '不安を抱える人々のためのベイビーステップ生成アシスタント';
-    String profileContext = '';
-
     try {
       final userProfile = await _getUserProfile();
       if (userProfile == null) {
         throw Exception('ユーザープロファイルが見つかりません');
       }
-
       // プロフィール情報からrole, profileContextを組み立て
+      String role = '';
+      String profileContext = '';
       if (userProfile.hasMentalIllness == true) {
         role = '認知行動療法の専門家であり、公認心理師・臨床心理士二つの有資格者です';
         if (userProfile.mentalIllnesses != null &&
@@ -129,17 +102,14 @@ class _ChatState extends ConsumerState<Chat> {
         profileInfo.add('診断名: 「${userProfile.mentalIllnesses!.join("、")}」');
       profileContext = '\n\nユーザーのプロフィール情報:\n${profileInfo.join("\n")}';
 
+      final apiKey = await _getApiKey();
+      if (apiKey == null) {
+        throw Exception('API Keyが取得できませんでした');
+      }
+
+      // 1. ベイビーステップ生成プロンプトでやりたいこと・不安なこと等も含めて一括でAIに依頼
       final actionSuggestionService = ActionSuggestionService(apiKey);
-
-      // 入力内容を要約（登録・表示用）
-      final summarizedContent = await actionSuggestionService.summarizeContent(
-        content: _contentController.text,
-        role: role,
-        profileContext: profileContext,
-      );
-
-      // ベイビーステップを生成
-      final steps = await actionSuggestionService.generateBabySteps(
+      final result = await actionSuggestionService.generateBabySteps(
         content: _contentController.text,
         role: role,
         profileContext: profileContext,
@@ -147,7 +117,7 @@ class _ChatState extends ConsumerState<Chat> {
 
       if (!mounted) return;
 
-      if (steps.isEmpty) {
+      if (result['steps'].isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('ステップの生成に失敗しました'),
@@ -160,12 +130,12 @@ class _ChatState extends ConsumerState<Chat> {
       // 生成したステップを_stateの_stepsリストにセット
       final currentText = _contentController.text;
       setState(() {
-        _steps = steps
+        _steps = (result['steps'] as List<String>)
             .map((step) => BabyStep(
                   id: const Uuid().v4(),
                   action: step,
                   isDone: false,
-                  displayOrder: steps.indexOf(step),
+                  displayOrder: (result['steps'] as List<String>).indexOf(step),
                   isDeleted: false,
                   createdBy: userProfile.createdBy,
                   createdAt: DateTime.now(),
@@ -173,42 +143,19 @@ class _ChatState extends ConsumerState<Chat> {
                   updatedAt: DateTime.now(),
                 ))
             .toList();
+        _goalSummary = result['goal'] as String;
+        _anxietySummary = result['anxiety'] as String;
+        _titleSummary = result['title'] as String;
+        _category = result['category'] as String;
         _contentController.text = currentText;
       });
 
-      // 新しいGoalを作成
-      final goal = Goal(
-        id: const Uuid().v4(),
-        content: summarizedContent, // 登録・表示用の要約
-        originalContent: _contentController.text, // 元の入力内容
-        babySteps: _steps,
-        displayOrder: 0,
-        isDeleted: false,
-        createdBy: userProfile.createdBy,
-        createdAt: DateTime.now(),
-        updatedBy: userProfile.updatedBy,
-        updatedAt: DateTime.now(),
-      );
-
-      // Goalを保存
-      await _saveGoal(goal);
-
-      // 成功メッセージを表示
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('ステップを生成しました'),
           duration: Duration(seconds: 2),
         ),
       );
-
-      // ステップ一覧画面への自動遷移を削除
-      // if (!mounted) return;
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => const StepList(),
-      //   ),
-      // );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -274,55 +221,10 @@ class _ChatState extends ConsumerState<Chat> {
         );
       }).toList();
 
-      // 入力内容を要約・成形
-      final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
-      if (apiKey.isEmpty) {
-        throw Exception('API Keyが設定されていません');
-      }
-
-      final actionService = ActionSuggestionService(apiKey);
-      final userProfileAsync = ref.watch(userProfileProvider);
-      final userProfile = userProfileAsync.value;
-
-      String role = '不安を抱える人々のためのベイビーステップ生成アシスタント';
-      String profileContext = '';
-
-      if (userProfile != null) {
-        if (userProfile.hasMentalIllness == true) {
-          role = '認知行動療法の専門家であり、公認心理師・臨床心理士二つの有資格者です';
-          if (userProfile.mentalIllnesses != null &&
-              userProfile.mentalIllnesses!.isNotEmpty) {
-            role = '${userProfile.mentalIllnesses!.join("、")}の臨床経験が豊富な$role';
-          }
-        }
-
-        List<String> profileInfo = [];
-        profileInfo.add('名前: ${userProfile.userName}');
-        if (userProfile.age != null)
-          profileInfo.add('年齢: 「${userProfile.age}歳」');
-        if (userProfile.gender != null)
-          profileInfo.add('性別: 「${userProfile.gender}」');
-        if (userProfile.attribute != null)
-          profileInfo.add('属性: 「${userProfile.attribute}」');
-        if (userProfile.hasMentalIllness != null)
-          profileInfo.add(
-              '精神疾患の有無: 「${userProfile.hasMentalIllness == true ? "あり" : "なし"}」');
-        if (userProfile.mentalIllnesses != null &&
-            userProfile.mentalIllnesses!.isNotEmpty)
-          profileInfo.add('診断名: 「${userProfile.mentalIllnesses!.join("、")}」');
-
-        profileContext = '\n\nユーザーのプロフィール情報:\n${profileInfo.join("\n")}';
-      }
-
-      final summarizedContent = await actionService.summarizeContent(
-        content: content,
-        role: role,
-        profileContext: profileContext,
-      );
-
+      // Goalを作成
       final newGoal = Goal(
         id: _uuid.v4(),
-        content: summarizedContent,
+        content: _contentController.text,
         originalContent: _contentController.text,
         babySteps: stepsWithOrder,
         displayOrder: userGoals.docs.length + 1,
@@ -331,6 +233,10 @@ class _ChatState extends ConsumerState<Chat> {
         createdAt: DateTime.now(),
         updatedBy: FirebaseAuth.instance.currentUser?.uid ?? 'unknown_user',
         updatedAt: DateTime.now(),
+        title: _titleSummary ?? '',
+        goal: _goalSummary,
+        anxiety: _anxietySummary,
+        category: _category,
       );
 
       final goalRef =
