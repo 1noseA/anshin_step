@@ -42,7 +42,16 @@ abstract class BabyStep with _$BabyStep {
     DateTime? executionDate, // 実行日付
     int? beforeAnxietyScore, // 事前不安得点
     int? afterAnxietyScore, // 事後不安得点
-    String? comment, // コメント
+    int? achievementScore, // 達成度
+    String? physicalData, // 身体情報
+    String? word, // 言葉
+    String? copingMethod, // 対処法
+    String? impression, // 感想
+    String? emotion, // 感情
+    String? weather, // 天気
+    int? temperature, // 気温
+    int? pressure, // 気圧
+    int? lunarAge, // 月齢
     bool? isDeleted, // 論理削除フラグ
     required String createdBy, // レコード登録者
     @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)

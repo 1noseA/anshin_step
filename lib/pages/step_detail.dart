@@ -22,7 +22,7 @@ class StepDetail extends ConsumerStatefulWidget {
 
 class _StepDetailState extends ConsumerState<StepDetail> {
   final _postAnxietyController = TextEditingController();
-  final _commentController = TextEditingController();
+  final _impressionController = TextEditingController();
   bool _isEditing = false;
   bool _isLoading = false; // ローディング状態を追加
   late BabyStep _currentStep;
@@ -34,7 +34,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
     _currentStep = widget.step;
     _postAnxietyController.text =
         _currentStep.afterAnxietyScore?.toString() ?? '';
-    _commentController.text = _currentStep.comment ?? '';
+    _impressionController.text = _currentStep.impression ?? '';
   }
 
   @override
@@ -173,7 +173,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                             const SizedBox(height: 16),
                             _isEditing
                                 ? TextField(
-                                    controller: _commentController,
+                                    controller: _impressionController,
                                     decoration: const InputDecoration(
                                       labelText: 'コメント',
                                       hintText: '感想や気付きを入力',
@@ -214,7 +214,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                           style: TextStyles.body),
                                       const SizedBox(height: 4),
                                       Text(
-                                        _currentStep.comment ?? 'コメントはありません',
+                                        _currentStep.impression ?? 'コメントはありません',
                                         style: TextStyles.body,
                                       ),
                                     ],
@@ -263,8 +263,8 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                           .afterAnxietyScore
                                           ?.toString() ??
                                       '';
-                                  _commentController.text =
-                                      _currentStep.comment ?? '';
+                                  _impressionController.text =
+                                      _currentStep.impression ?? '';
                                 });
                               },
                         style: OutlinedButton.styleFrom(
@@ -324,12 +324,12 @@ class _StepDetailState extends ConsumerState<StepDetail> {
       });
 
       final postAnxiety = int.tryParse(_postAnxietyController.text) ?? 0;
-      final comment = _commentController.text;
+      final impression = _impressionController.text;
 
       // デバッグ情報の出力
       print('入力値の確認:');
       print('事後不安得点: $postAnxiety');
-      print('コメント: $comment');
+      print('コメント: $impression');
       print('現在のステップID: ${_currentStep.id}');
       print('ゴールID: ${_currentStep.goalId}');
 
@@ -343,7 +343,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
         'action': _currentStep.action,
         'beforeAnxietyScore': _currentStep.beforeAnxietyScore,
         'afterAnxietyScore': postAnxiety,
-        'comment': comment,
+        'impression': impression,
         'isDone': _currentStep.isDone,
         'updatedAt': FieldValue.serverTimestamp(),
         'updatedBy': FirebaseAuth.instance.currentUser?.uid ?? 'unknown_user',
@@ -434,7 +434,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
           beforeAnxietyScore:
               _currentStep.beforeAnxietyScore?.toString() ?? '未入力',
           afterAnxietyScore: postAnxiety.toString(),
-          userComment: comment,
+          userComment: impression,
         );
       } catch (e) {
         aiComment = 'AIコメントの生成に失敗しました。';
@@ -448,7 +448,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
           beforeAnxietyScore:
               _currentStep.beforeAnxietyScore?.toString() ?? '未入力',
           afterAnxietyScore: postAnxiety.toString(),
-          userComment: comment,
+          userComment: impression,
         );
       } catch (e) {
         if (kDebugMode) {
@@ -511,7 +511,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
         setState(() {
           _currentStep = _currentStep.copyWith(
             afterAnxietyScore: postAnxiety,
-            comment: comment,
+            impression: impression,
           );
           _isEditing = false;
         });

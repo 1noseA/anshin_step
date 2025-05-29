@@ -25,7 +25,16 @@ mixin _$BabyStep {
   DateTime? get executionDate; // 実行日付
   int? get beforeAnxietyScore; // 事前不安得点
   int? get afterAnxietyScore; // 事後不安得点
-  String? get comment; // コメント
+  int? get achievementScore; // 達成度
+  String? get physicalData; // 身体情報
+  String? get word; // 言葉
+  String? get copingMethod; // 対処法
+  String? get impression; // 感想
+  String? get emotion; // 感情
+  String? get weather; // 天気
+  int? get temperature; // 気温
+  int? get pressure; // 気圧
+  int? get lunarAge; // 月齢
   bool? get isDeleted; // 論理削除フラグ
   String get createdBy; // レコード登録者
   @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
@@ -61,7 +70,23 @@ mixin _$BabyStep {
                 other.beforeAnxietyScore == beforeAnxietyScore) &&
             (identical(other.afterAnxietyScore, afterAnxietyScore) ||
                 other.afterAnxietyScore == afterAnxietyScore) &&
-            (identical(other.comment, comment) || other.comment == comment) &&
+            (identical(other.achievementScore, achievementScore) ||
+                other.achievementScore == achievementScore) &&
+            (identical(other.physicalData, physicalData) ||
+                other.physicalData == physicalData) &&
+            (identical(other.word, word) || other.word == word) &&
+            (identical(other.copingMethod, copingMethod) ||
+                other.copingMethod == copingMethod) &&
+            (identical(other.impression, impression) ||
+                other.impression == impression) &&
+            (identical(other.emotion, emotion) || other.emotion == emotion) &&
+            (identical(other.weather, weather) || other.weather == weather) &&
+            (identical(other.temperature, temperature) ||
+                other.temperature == temperature) &&
+            (identical(other.pressure, pressure) ||
+                other.pressure == pressure) &&
+            (identical(other.lunarAge, lunarAge) ||
+                other.lunarAge == lunarAge) &&
             (identical(other.isDeleted, isDeleted) ||
                 other.isDeleted == isDeleted) &&
             (identical(other.createdBy, createdBy) ||
@@ -76,26 +101,36 @@ mixin _$BabyStep {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      action,
-      goalId,
-      displayOrder,
-      isDone,
-      executionDate,
-      beforeAnxietyScore,
-      afterAnxietyScore,
-      comment,
-      isDeleted,
-      createdBy,
-      createdAt,
-      updatedBy,
-      updatedAt);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        action,
+        goalId,
+        displayOrder,
+        isDone,
+        executionDate,
+        beforeAnxietyScore,
+        afterAnxietyScore,
+        achievementScore,
+        physicalData,
+        word,
+        copingMethod,
+        impression,
+        emotion,
+        weather,
+        temperature,
+        pressure,
+        lunarAge,
+        isDeleted,
+        createdBy,
+        createdAt,
+        updatedBy,
+        updatedAt
+      ]);
 
   @override
   String toString() {
-    return 'BabyStep(id: $id, action: $action, goalId: $goalId, displayOrder: $displayOrder, isDone: $isDone, executionDate: $executionDate, beforeAnxietyScore: $beforeAnxietyScore, afterAnxietyScore: $afterAnxietyScore, comment: $comment, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
+    return 'BabyStep(id: $id, action: $action, goalId: $goalId, displayOrder: $displayOrder, isDone: $isDone, executionDate: $executionDate, beforeAnxietyScore: $beforeAnxietyScore, afterAnxietyScore: $afterAnxietyScore, achievementScore: $achievementScore, physicalData: $physicalData, word: $word, copingMethod: $copingMethod, impression: $impression, emotion: $emotion, weather: $weather, temperature: $temperature, pressure: $pressure, lunarAge: $lunarAge, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
   }
 }
 
@@ -116,7 +151,16 @@ abstract mixin class $BabyStepCopyWith<$Res> {
       DateTime? executionDate,
       int? beforeAnxietyScore,
       int? afterAnxietyScore,
-      String? comment,
+      int? achievementScore,
+      String? physicalData,
+      String? word,
+      String? copingMethod,
+      String? impression,
+      String? emotion,
+      String? weather,
+      int? temperature,
+      int? pressure,
+      int? lunarAge,
       bool? isDeleted,
       String createdBy,
       @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
@@ -146,7 +190,16 @@ class _$BabyStepCopyWithImpl<$Res> implements $BabyStepCopyWith<$Res> {
     Object? executionDate = freezed,
     Object? beforeAnxietyScore = freezed,
     Object? afterAnxietyScore = freezed,
-    Object? comment = freezed,
+    Object? achievementScore = freezed,
+    Object? physicalData = freezed,
+    Object? word = freezed,
+    Object? copingMethod = freezed,
+    Object? impression = freezed,
+    Object? emotion = freezed,
+    Object? weather = freezed,
+    Object? temperature = freezed,
+    Object? pressure = freezed,
+    Object? lunarAge = freezed,
     Object? isDeleted = freezed,
     Object? createdBy = null,
     Object? createdAt = null,
@@ -186,10 +239,46 @@ class _$BabyStepCopyWithImpl<$Res> implements $BabyStepCopyWith<$Res> {
           ? _self.afterAnxietyScore
           : afterAnxietyScore // ignore: cast_nullable_to_non_nullable
               as int?,
-      comment: freezed == comment
-          ? _self.comment
-          : comment // ignore: cast_nullable_to_non_nullable
+      achievementScore: freezed == achievementScore
+          ? _self.achievementScore
+          : achievementScore // ignore: cast_nullable_to_non_nullable
+              as int?,
+      physicalData: freezed == physicalData
+          ? _self.physicalData
+          : physicalData // ignore: cast_nullable_to_non_nullable
               as String?,
+      word: freezed == word
+          ? _self.word
+          : word // ignore: cast_nullable_to_non_nullable
+              as String?,
+      copingMethod: freezed == copingMethod
+          ? _self.copingMethod
+          : copingMethod // ignore: cast_nullable_to_non_nullable
+              as String?,
+      impression: freezed == impression
+          ? _self.impression
+          : impression // ignore: cast_nullable_to_non_nullable
+              as String?,
+      emotion: freezed == emotion
+          ? _self.emotion
+          : emotion // ignore: cast_nullable_to_non_nullable
+              as String?,
+      weather: freezed == weather
+          ? _self.weather
+          : weather // ignore: cast_nullable_to_non_nullable
+              as String?,
+      temperature: freezed == temperature
+          ? _self.temperature
+          : temperature // ignore: cast_nullable_to_non_nullable
+              as int?,
+      pressure: freezed == pressure
+          ? _self.pressure
+          : pressure // ignore: cast_nullable_to_non_nullable
+              as int?,
+      lunarAge: freezed == lunarAge
+          ? _self.lunarAge
+          : lunarAge // ignore: cast_nullable_to_non_nullable
+              as int?,
       isDeleted: freezed == isDeleted
           ? _self.isDeleted
           : isDeleted // ignore: cast_nullable_to_non_nullable
@@ -229,7 +318,16 @@ class _BabyStep implements BabyStep {
       this.executionDate,
       this.beforeAnxietyScore,
       this.afterAnxietyScore,
-      this.comment,
+      this.achievementScore,
+      this.physicalData,
+      this.word,
+      this.copingMethod,
+      this.impression,
+      this.emotion,
+      this.weather,
+      this.temperature,
+      this.pressure,
+      this.lunarAge,
       this.isDeleted,
       required this.createdBy,
       @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
@@ -266,8 +364,35 @@ class _BabyStep implements BabyStep {
   final int? afterAnxietyScore;
 // 事後不安得点
   @override
-  final String? comment;
-// コメント
+  final int? achievementScore;
+// 達成度
+  @override
+  final String? physicalData;
+// 身体情報
+  @override
+  final String? word;
+// 言葉
+  @override
+  final String? copingMethod;
+// 対処法
+  @override
+  final String? impression;
+// 感想
+  @override
+  final String? emotion;
+// 感情
+  @override
+  final String? weather;
+// 天気
+  @override
+  final int? temperature;
+// 気温
+  @override
+  final int? pressure;
+// 気圧
+  @override
+  final int? lunarAge;
+// 月齢
   @override
   final bool? isDeleted;
 // 論理削除フラグ
@@ -317,7 +442,23 @@ class _BabyStep implements BabyStep {
                 other.beforeAnxietyScore == beforeAnxietyScore) &&
             (identical(other.afterAnxietyScore, afterAnxietyScore) ||
                 other.afterAnxietyScore == afterAnxietyScore) &&
-            (identical(other.comment, comment) || other.comment == comment) &&
+            (identical(other.achievementScore, achievementScore) ||
+                other.achievementScore == achievementScore) &&
+            (identical(other.physicalData, physicalData) ||
+                other.physicalData == physicalData) &&
+            (identical(other.word, word) || other.word == word) &&
+            (identical(other.copingMethod, copingMethod) ||
+                other.copingMethod == copingMethod) &&
+            (identical(other.impression, impression) ||
+                other.impression == impression) &&
+            (identical(other.emotion, emotion) || other.emotion == emotion) &&
+            (identical(other.weather, weather) || other.weather == weather) &&
+            (identical(other.temperature, temperature) ||
+                other.temperature == temperature) &&
+            (identical(other.pressure, pressure) ||
+                other.pressure == pressure) &&
+            (identical(other.lunarAge, lunarAge) ||
+                other.lunarAge == lunarAge) &&
             (identical(other.isDeleted, isDeleted) ||
                 other.isDeleted == isDeleted) &&
             (identical(other.createdBy, createdBy) ||
@@ -332,26 +473,36 @@ class _BabyStep implements BabyStep {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      action,
-      goalId,
-      displayOrder,
-      isDone,
-      executionDate,
-      beforeAnxietyScore,
-      afterAnxietyScore,
-      comment,
-      isDeleted,
-      createdBy,
-      createdAt,
-      updatedBy,
-      updatedAt);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        action,
+        goalId,
+        displayOrder,
+        isDone,
+        executionDate,
+        beforeAnxietyScore,
+        afterAnxietyScore,
+        achievementScore,
+        physicalData,
+        word,
+        copingMethod,
+        impression,
+        emotion,
+        weather,
+        temperature,
+        pressure,
+        lunarAge,
+        isDeleted,
+        createdBy,
+        createdAt,
+        updatedBy,
+        updatedAt
+      ]);
 
   @override
   String toString() {
-    return 'BabyStep(id: $id, action: $action, goalId: $goalId, displayOrder: $displayOrder, isDone: $isDone, executionDate: $executionDate, beforeAnxietyScore: $beforeAnxietyScore, afterAnxietyScore: $afterAnxietyScore, comment: $comment, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
+    return 'BabyStep(id: $id, action: $action, goalId: $goalId, displayOrder: $displayOrder, isDone: $isDone, executionDate: $executionDate, beforeAnxietyScore: $beforeAnxietyScore, afterAnxietyScore: $afterAnxietyScore, achievementScore: $achievementScore, physicalData: $physicalData, word: $word, copingMethod: $copingMethod, impression: $impression, emotion: $emotion, weather: $weather, temperature: $temperature, pressure: $pressure, lunarAge: $lunarAge, isDeleted: $isDeleted, createdBy: $createdBy, createdAt: $createdAt, updatedBy: $updatedBy, updatedAt: $updatedAt)';
   }
 }
 
@@ -374,7 +525,16 @@ abstract mixin class _$BabyStepCopyWith<$Res>
       DateTime? executionDate,
       int? beforeAnxietyScore,
       int? afterAnxietyScore,
-      String? comment,
+      int? achievementScore,
+      String? physicalData,
+      String? word,
+      String? copingMethod,
+      String? impression,
+      String? emotion,
+      String? weather,
+      int? temperature,
+      int? pressure,
+      int? lunarAge,
       bool? isDeleted,
       String createdBy,
       @JsonKey(fromJson: _dateTimeFromTimestamp, toJson: _dateTimeToJson)
@@ -404,7 +564,16 @@ class __$BabyStepCopyWithImpl<$Res> implements _$BabyStepCopyWith<$Res> {
     Object? executionDate = freezed,
     Object? beforeAnxietyScore = freezed,
     Object? afterAnxietyScore = freezed,
-    Object? comment = freezed,
+    Object? achievementScore = freezed,
+    Object? physicalData = freezed,
+    Object? word = freezed,
+    Object? copingMethod = freezed,
+    Object? impression = freezed,
+    Object? emotion = freezed,
+    Object? weather = freezed,
+    Object? temperature = freezed,
+    Object? pressure = freezed,
+    Object? lunarAge = freezed,
     Object? isDeleted = freezed,
     Object? createdBy = null,
     Object? createdAt = null,
@@ -444,10 +613,46 @@ class __$BabyStepCopyWithImpl<$Res> implements _$BabyStepCopyWith<$Res> {
           ? _self.afterAnxietyScore
           : afterAnxietyScore // ignore: cast_nullable_to_non_nullable
               as int?,
-      comment: freezed == comment
-          ? _self.comment
-          : comment // ignore: cast_nullable_to_non_nullable
+      achievementScore: freezed == achievementScore
+          ? _self.achievementScore
+          : achievementScore // ignore: cast_nullable_to_non_nullable
+              as int?,
+      physicalData: freezed == physicalData
+          ? _self.physicalData
+          : physicalData // ignore: cast_nullable_to_non_nullable
               as String?,
+      word: freezed == word
+          ? _self.word
+          : word // ignore: cast_nullable_to_non_nullable
+              as String?,
+      copingMethod: freezed == copingMethod
+          ? _self.copingMethod
+          : copingMethod // ignore: cast_nullable_to_non_nullable
+              as String?,
+      impression: freezed == impression
+          ? _self.impression
+          : impression // ignore: cast_nullable_to_non_nullable
+              as String?,
+      emotion: freezed == emotion
+          ? _self.emotion
+          : emotion // ignore: cast_nullable_to_non_nullable
+              as String?,
+      weather: freezed == weather
+          ? _self.weather
+          : weather // ignore: cast_nullable_to_non_nullable
+              as String?,
+      temperature: freezed == temperature
+          ? _self.temperature
+          : temperature // ignore: cast_nullable_to_non_nullable
+              as int?,
+      pressure: freezed == pressure
+          ? _self.pressure
+          : pressure // ignore: cast_nullable_to_non_nullable
+              as int?,
+      lunarAge: freezed == lunarAge
+          ? _self.lunarAge
+          : lunarAge // ignore: cast_nullable_to_non_nullable
+              as int?,
       isDeleted: freezed == isDeleted
           ? _self.isDeleted
           : isDeleted // ignore: cast_nullable_to_non_nullable
