@@ -162,19 +162,11 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                     ),
                                     keyboardType: TextInputType.number,
                                   )
-                                : Row(
-                                    children: [
-                                      const Text('事前不安得点:',
-                                          style: TextStyles.body),
-                                      const SizedBox(width: 8),
-                                      if (_currentStep.beforeAnxietyScore !=
-                                          null)
-                                        Text(
-                                            '${_currentStep.beforeAnxietyScore}',
-                                            style: TextStyles.body),
-                                    ],
-                                  ),
-                            const SizedBox(height: 16),
+                                : _buildModernDetailRow(
+                                    Icons.sentiment_satisfied,
+                                    '事前不安得点',
+                                    _currentStep.beforeAnxietyScore
+                                        ?.toString()),
                             _isEditing
                                 ? TextField(
                                     controller: _postAnxietyController,
@@ -210,19 +202,10 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                     ),
                                     keyboardType: TextInputType.number,
                                   )
-                                : Row(
-                                    children: [
-                                      const Text('事後不安得点:',
-                                          style: TextStyles.body),
-                                      const SizedBox(width: 8),
-                                      if (_currentStep.afterAnxietyScore !=
-                                          null)
-                                        Text(
-                                            '${_currentStep.afterAnxietyScore}',
-                                            style: TextStyles.body),
-                                    ],
-                                  ),
-                            const SizedBox(height: 16),
+                                : _buildModernDetailRow(
+                                    Icons.sentiment_very_satisfied,
+                                    '事後不安得点',
+                                    _currentStep.afterAnxietyScore?.toString()),
                             if (_isEditing) ...[
                               // 実施日時
                               const Text('実施日時:', style: TextStyles.body),
@@ -290,7 +273,6 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 16),
 
                               // 達成度
                               TextField(
@@ -326,7 +308,6 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                 ),
                                 keyboardType: TextInputType.number,
                               ),
-                              const SizedBox(height: 16),
 
                               // 体調
                               TextField(
@@ -362,7 +343,6 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                 ),
                                 maxLines: 1,
                               ),
-                              const SizedBox(height: 16),
 
                               // 言葉
                               _isEditing
@@ -401,24 +381,9 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                       ),
                                       maxLines: 1,
                                     )
-                                  : Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(
-                                          width: 120,
-                                          child: Text('言葉:',
-                                              style: TextStyles.body),
-                                        ),
-                                        Expanded(
-                                          child: Text(
-                                            _currentStep.word ?? '',
-                                            style: TextStyles.body,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                              const SizedBox(height: 16),
+                                  : _buildModernDetailRow(Icons.format_quote,
+                                      '言葉', _currentStep.word,
+                                      iconColor: Colors.blueAccent),
 
                               // 対処法
                               _isEditing
@@ -457,139 +422,26 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                       ),
                                       maxLines: 1,
                                     )
-                                  : Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(
-                                          width: 120,
-                                          child: Text('対処法:',
-                                              style: TextStyles.body),
-                                        ),
-                                        Expanded(
-                                          child: Text(
-                                            _currentStep.copingMethod ?? '',
-                                            style: TextStyles.body,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                              const SizedBox(height: 16),
+                                  : _buildModernDetailRow(Icons.psychology,
+                                      '対処法', _currentStep.copingMethod,
+                                      iconColor: Colors.green),
                             ] else ...[
-                              // 実施日時
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(
-                                    width: 120,
-                                    child:
-                                        Text('実施日時:', style: TextStyles.body),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      _currentStep.executionDate
-                                              ?.toString()
-                                              .split(' ')[0] ??
-                                          '',
-                                      style: TextStyles.body,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-
-                              // 達成度
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(
-                                    width: 120,
-                                    child: Text('達成度:', style: TextStyles.body),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      _currentStep.achievementScore
-                                              ?.toString() ??
-                                          '',
-                                      style: TextStyles.body,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-
-                              // 体調
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(
-                                    width: 120,
-                                    child: Text('体調:', style: TextStyles.body),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      _currentStep.physicalData ?? '',
-                                      style: TextStyles.body,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-
-                              // 言葉
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(
-                                    width: 120,
-                                    child: Text('言葉:', style: TextStyles.body),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      _currentStep.word ?? '',
-                                      style: TextStyles.body,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-
-                              // 対処法
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(
-                                    width: 120,
-                                    child: Text('対処法:', style: TextStyles.body),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      _currentStep.copingMethod ?? '',
-                                      style: TextStyles.body,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                            ],
-                            // 感想
-                            if (!_isEditing) ...[
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(
-                                    width: 120,
-                                    child: Text('感想:', style: TextStyles.body),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      _currentStep.impression ?? '',
-                                      style: TextStyles.body,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
+                              _buildModernDetailRow(
+                                  Icons.event,
+                                  '実施日時',
+                                  _currentStep.executionDate
+                                      ?.toString()
+                                      .split(' ')[0]),
+                              _buildModernDetailRow(Icons.emoji_events, '達成度',
+                                  _currentStep.achievementScore?.toString()),
+                              _buildModernDetailRow(Icons.favorite, '体調',
+                                  _currentStep.physicalData ?? ''),
+                              _buildModernDetailRow(
+                                  Icons.format_quote, '言葉', _currentStep.word),
+                              _buildModernDetailRow(Icons.psychology, '対処法',
+                                  _currentStep.copingMethod),
+                              _buildModernDetailRow(
+                                  Icons.comment, '感想', _currentStep.impression),
                             ],
                             // 編集モード時の感想入力
                             if (_isEditing)
@@ -957,5 +809,47 @@ class _StepDetailState extends ConsumerState<StepDetail> {
     // TODO: 感情分析の実装
     // ここでは簡易的な実装として、impressionの最初の100文字を返す
     return text.substring(0, text.length.clamp(0, 100));
+  }
+
+  Widget _buildModernDetailRow(IconData icon, String label, String? value,
+      {Color? iconColor}) {
+    final displayValue = (label == '事前不安得点' && (value == null || value.isEmpty))
+        ? ''
+        : (value ?? '');
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(icon, color: Colors.grey[500], size: 22),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Color(0xFF757575),
+                  fontSize: 14,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  displayValue,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF222222),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 0, thickness: 0.7, color: Color(0xFFE0E3E8)),
+      ],
+    );
   }
 }
