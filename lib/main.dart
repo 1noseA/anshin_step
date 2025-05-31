@@ -9,6 +9,7 @@ import 'firebase_options.dart';
 import 'package:anshin_step/pages/step_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:anshin_step/components/colors.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 final authProvider = StreamProvider<User?>((ref) {
   return FirebaseAuth.instance.authStateChanges();
@@ -187,6 +188,15 @@ class MyApp extends StatelessWidget {
         '/main': (context) => const StepList(),
         '/profile': (context) => Profile(),
       },
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ja'), // 日本語
+        Locale('en'), // 英語（必要に応じて）
+      ],
     );
   }
 }

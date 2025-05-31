@@ -23,8 +23,14 @@ class StepDetail extends ConsumerStatefulWidget {
 class _StepDetailState extends ConsumerState<StepDetail> {
   final _postAnxietyController = TextEditingController();
   final _impressionController = TextEditingController();
+  final _achievementScoreController = TextEditingController();
+  final _physicalDataController = TextEditingController();
+  final _wordController = TextEditingController();
+  final _copingMethodController = TextEditingController();
+  final _preAnxietyController = TextEditingController();
+  DateTime? _executionDate;
   bool _isEditing = false;
-  bool _isLoading = false; // ローディング状態を追加
+  bool _isLoading = false;
   late BabyStep _currentStep;
   ({bool shouldRecommend, String reason})? _lastRecommendResult;
 
@@ -32,9 +38,17 @@ class _StepDetailState extends ConsumerState<StepDetail> {
   void initState() {
     super.initState();
     _currentStep = widget.step;
+    _preAnxietyController.text =
+        _currentStep.beforeAnxietyScore?.toString() ?? '';
     _postAnxietyController.text =
         _currentStep.afterAnxietyScore?.toString() ?? '';
     _impressionController.text = _currentStep.impression ?? '';
+    _achievementScoreController.text =
+        _currentStep.achievementScore?.toString() ?? '';
+    _physicalDataController.text = _currentStep.physicalData ?? '';
+    _wordController.text = _currentStep.word ?? '';
+    _copingMethodController.text = _currentStep.copingMethod ?? '';
+    _executionDate = _currentStep.executionDate ?? DateTime.now();
   }
 
   @override
@@ -48,7 +62,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
         actions: [],
       ),
       body: Container(
-        color: const Color(0xFFF6F7FB), // 背景色
+        color: const Color(0xFFF6F7FB),
         child: Column(
           children: [
             Container(
@@ -113,15 +127,53 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                               ],
                             ),
                             const SizedBox(height: 40),
-                            Row(
-                              children: [
-                                const Text('事前不安得点:', style: TextStyles.body),
-                                const SizedBox(width: 8),
-                                if (_currentStep.beforeAnxietyScore != null)
-                                  Text('${_currentStep.beforeAnxietyScore}',
-                                      style: TextStyles.body),
-                              ],
-                            ),
+                            _isEditing
+                                ? TextField(
+                                    controller: _preAnxietyController,
+                                    decoration: const InputDecoration(
+                                      labelText: '事前不安得点',
+                                      hintText: '数値を入力',
+                                      hintStyle:
+                                          TextStyle(color: Color(0xFF757575)),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(8)),
+                                        borderSide: BorderSide(
+                                            color: Color(0xFFE0E3E8)),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(8)),
+                                        borderSide: BorderSide(
+                                            color: Color(0xFFE0E3E8)),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(8)),
+                                        borderSide: BorderSide(
+                                            color: AppColors.primary, width: 2),
+                                      ),
+                                      labelStyle:
+                                          TextStyle(color: AppColors.text),
+                                      floatingLabelStyle:
+                                          TextStyle(color: AppColors.text),
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                  )
+                                : Row(
+                                    children: [
+                                      const Text('事前不安得点:',
+                                          style: TextStyles.body),
+                                      const SizedBox(width: 8),
+                                      if (_currentStep.beforeAnxietyScore !=
+                                          null)
+                                        Text(
+                                            '${_currentStep.beforeAnxietyScore}',
+                                            style: TextStyles.body),
+                                    ],
+                                  ),
                             const SizedBox(height: 16),
                             _isEditing
                                 ? TextField(
@@ -171,59 +223,413 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                     ],
                                   ),
                             const SizedBox(height: 16),
-                            _isEditing
-                                ? TextField(
-                                    controller: _impressionController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'コメント',
-                                      hintText: '感想や気付きを入力',
-                                      hintStyle:
-                                          TextStyle(color: Color(0xFF757575)),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(8)),
-                                        borderSide: BorderSide(
-                                            color: Color(0xFFE0E3E8)),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(8)),
-                                        borderSide: BorderSide(
-                                            color: Color(0xFFE0E3E8)),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(8)),
-                                        borderSide: BorderSide(
-                                            color: AppColors.primary, width: 2),
-                                      ),
-                                      labelStyle:
-                                          TextStyle(color: AppColors.text),
-                                      floatingLabelStyle:
-                                          TextStyle(color: AppColors.text),
-                                    ),
-                                    maxLines: 3,
-                                  )
-                                : Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                            if (_isEditing) ...[
+                              // 実施日時
+                              const Text('実施日時:', style: TextStyles.body),
+                              const SizedBox(height: 8),
+                              InkWell(
+                                onTap: () async {
+                                  final date = await showDatePicker(
+                                    context: context,
+                                    initialDate:
+                                        _executionDate ?? DateTime.now(),
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2100),
+                                    locale: const Locale('ja'),
+                                    builder: (context, child) {
+                                      return Theme(
+                                        data: Theme.of(context).copyWith(
+                                          colorScheme: ColorScheme.light(
+                                            primary: AppColors.primary,
+                                            onPrimary: Colors.white,
+                                            onSurface: AppColors.text,
+                                          ),
+                                          datePickerTheme: DatePickerThemeData(
+                                            todayBackgroundColor:
+                                                MaterialStateProperty.all(
+                                                    AppColors.primary
+                                                        .withOpacity(0.2)),
+                                            todayForegroundColor:
+                                                MaterialStateProperty.all(
+                                                    AppColors.primary),
+                                          ),
+                                        ),
+                                        child: child!,
+                                      );
+                                    },
+                                  );
+                                  if (date != null) {
+                                    setState(() {
+                                      _executionDate = date;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: const Color(0xFFE0E3E8)),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Text('コメント:',
-                                          style: TextStyles.body),
-                                      const SizedBox(height: 4),
                                       Text(
-                                        _currentStep.impression ?? 'コメントはありません',
-                                        style: TextStyles.body,
+                                        _executionDate
+                                                ?.toString()
+                                                .split(' ')[0] ??
+                                            '日付を選択',
+                                        style: const TextStyle(
+                                            color: AppColors.text),
                                       ),
+                                      const Icon(Icons.calendar_today,
+                                          size: 20),
                                     ],
                                   ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+
+                              // 達成度
+                              TextField(
+                                controller: _achievementScoreController,
+                                decoration: const InputDecoration(
+                                  labelText: '達成度 (1-100)',
+                                  hintText: '数値を入力',
+                                  hintStyle:
+                                      TextStyle(color: Color(0xFF757575)),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  border: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide:
+                                        BorderSide(color: Color(0xFFE0E3E8)),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide:
+                                        BorderSide(color: Color(0xFFE0E3E8)),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide: BorderSide(
+                                        color: AppColors.primary, width: 2),
+                                  ),
+                                  labelStyle: TextStyle(color: AppColors.text),
+                                  floatingLabelStyle:
+                                      TextStyle(color: AppColors.text),
+                                ),
+                                keyboardType: TextInputType.number,
+                              ),
+                              const SizedBox(height: 16),
+
+                              // 体調
+                              TextField(
+                                controller: _physicalDataController,
+                                decoration: const InputDecoration(
+                                  labelText: '体調',
+                                  hintText: '体調について入力',
+                                  hintStyle:
+                                      TextStyle(color: Color(0xFF757575)),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  border: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide:
+                                        BorderSide(color: Color(0xFFE0E3E8)),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide:
+                                        BorderSide(color: Color(0xFFE0E3E8)),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide: BorderSide(
+                                        color: AppColors.primary, width: 2),
+                                  ),
+                                  labelStyle: TextStyle(color: AppColors.text),
+                                  floatingLabelStyle:
+                                      TextStyle(color: AppColors.text),
+                                ),
+                                maxLines: 1,
+                              ),
+                              const SizedBox(height: 16),
+
+                              // 言葉
+                              _isEditing
+                                  ? TextField(
+                                      controller: _wordController,
+                                      decoration: const InputDecoration(
+                                        labelText: '支えになった言葉',
+                                        hintText: '支えになった言葉を入力',
+                                        hintStyle:
+                                            TextStyle(color: Color(0xFF757575)),
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(8)),
+                                          borderSide: BorderSide(
+                                              color: Color(0xFFE0E3E8)),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(8)),
+                                          borderSide: BorderSide(
+                                              color: Color(0xFFE0E3E8)),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(8)),
+                                          borderSide: BorderSide(
+                                              color: AppColors.primary,
+                                              width: 2),
+                                        ),
+                                        labelStyle:
+                                            TextStyle(color: AppColors.text),
+                                        floatingLabelStyle:
+                                            TextStyle(color: AppColors.text),
+                                      ),
+                                      maxLines: 1,
+                                    )
+                                  : Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(
+                                          width: 120,
+                                          child: Text('言葉:',
+                                              style: TextStyles.body),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            _currentStep.word ?? '',
+                                            style: TextStyles.body,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                              const SizedBox(height: 16),
+
+                              // 対処法
+                              _isEditing
+                                  ? TextField(
+                                      controller: _copingMethodController,
+                                      decoration: const InputDecoration(
+                                        labelText: '効果があった対処法',
+                                        hintText: '効果があった対処法を入力',
+                                        hintStyle:
+                                            TextStyle(color: Color(0xFF757575)),
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(8)),
+                                          borderSide: BorderSide(
+                                              color: Color(0xFFE0E3E8)),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(8)),
+                                          borderSide: BorderSide(
+                                              color: Color(0xFFE0E3E8)),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(8)),
+                                          borderSide: BorderSide(
+                                              color: AppColors.primary,
+                                              width: 2),
+                                        ),
+                                        labelStyle:
+                                            TextStyle(color: AppColors.text),
+                                        floatingLabelStyle:
+                                            TextStyle(color: AppColors.text),
+                                      ),
+                                      maxLines: 1,
+                                    )
+                                  : Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(
+                                          width: 120,
+                                          child: Text('対処法:',
+                                              style: TextStyles.body),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            _currentStep.copingMethod ?? '',
+                                            style: TextStyles.body,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                              const SizedBox(height: 16),
+                            ] else ...[
+                              // 実施日時
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    width: 120,
+                                    child:
+                                        Text('実施日時:', style: TextStyles.body),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      _currentStep.executionDate
+                                              ?.toString()
+                                              .split(' ')[0] ??
+                                          '',
+                                      style: TextStyles.body,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+
+                              // 達成度
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    width: 120,
+                                    child: Text('達成度:', style: TextStyles.body),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      _currentStep.achievementScore
+                                              ?.toString() ??
+                                          '',
+                                      style: TextStyles.body,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+
+                              // 体調
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    width: 120,
+                                    child: Text('体調:', style: TextStyles.body),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      _currentStep.physicalData ?? '',
+                                      style: TextStyles.body,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+
+                              // 言葉
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    width: 120,
+                                    child: Text('言葉:', style: TextStyles.body),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      _currentStep.word ?? '',
+                                      style: TextStyles.body,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+
+                              // 対処法
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    width: 120,
+                                    child: Text('対処法:', style: TextStyles.body),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      _currentStep.copingMethod ?? '',
+                                      style: TextStyles.body,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                            // 感想
+                            if (!_isEditing) ...[
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    width: 120,
+                                    child: Text('感想:', style: TextStyles.body),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      _currentStep.impression ?? '',
+                                      style: TextStyles.body,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                            // 編集モード時の感想入力
+                            if (_isEditing)
+                              TextField(
+                                controller: _impressionController,
+                                decoration: const InputDecoration(
+                                  labelText: '感想や気づき',
+                                  hintText: '感想や気づきを入力',
+                                  hintStyle:
+                                      TextStyle(color: Color(0xFF757575)),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  border: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide:
+                                        BorderSide(color: Color(0xFFE0E3E8)),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide:
+                                        BorderSide(color: Color(0xFFE0E3E8)),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide: BorderSide(
+                                        color: AppColors.primary, width: 2),
+                                  ),
+                                  labelStyle: TextStyle(color: AppColors.text),
+                                  floatingLabelStyle:
+                                      TextStyle(color: AppColors.text),
+                                ),
+                                maxLines: 3,
+                              ),
                             const SizedBox(height: 32),
                           ],
                         ),
                       ),
-                      // カード右下に小さめのペンマークアイコン配置（丸背景なし、アイコンのみ）
                       if (!_isEditing)
                         Positioned(
                           bottom: 16,
@@ -259,12 +665,27 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                 setState(() {
                                   _isEditing = false;
                                   // 編集内容を破棄し、元の値に戻す
+                                  _preAnxietyController.text = _currentStep
+                                          .beforeAnxietyScore
+                                          ?.toString() ??
+                                      '';
                                   _postAnxietyController.text = _currentStep
                                           .afterAnxietyScore
                                           ?.toString() ??
                                       '';
                                   _impressionController.text =
                                       _currentStep.impression ?? '';
+                                  _achievementScoreController.text =
+                                      _currentStep.achievementScore
+                                              ?.toString() ??
+                                          '';
+                                  _physicalDataController.text =
+                                      _currentStep.physicalData ?? '';
+                                  _wordController.text =
+                                      _currentStep.word ?? '';
+                                  _copingMethodController.text =
+                                      _currentStep.copingMethod ?? '';
+                                  _executionDate = _currentStep.executionDate;
                                 });
                               },
                         style: OutlinedButton.styleFrom(
@@ -320,30 +741,32 @@ class _StepDetailState extends ConsumerState<StepDetail> {
   Future<void> _saveStep() async {
     try {
       setState(() {
-        _isLoading = true; // ローディング開始
+        _isLoading = true;
       });
 
+      final preAnxiety = int.tryParse(_preAnxietyController.text) ?? 0;
       final postAnxiety = int.tryParse(_postAnxietyController.text) ?? 0;
+      final achievementScore =
+          int.tryParse(_achievementScoreController.text) ?? 0;
       final impression = _impressionController.text;
+      final physicalData = _physicalDataController.text;
+      final word = _wordController.text;
+      final copingMethod = _copingMethodController.text;
 
-      // デバッグ情報の出力
-      print('入力値の確認:');
-      print('事後不安得点: $postAnxiety');
-      print('コメント: $impression');
-      print('現在のステップID: ${_currentStep.id}');
-      print('ゴールID: ${_currentStep.goalId}');
+      // 感情分析の処理（impressionから感情を抽出）
+      final emotion = await _analyzeEmotion(impression);
 
-      // 親ドキュメントの参照を取得
-      final parentRef = FirebaseFirestore.instance
-          .collection('goals')
-          .doc(_currentStep.goalId ?? '');
-
-      // サブコレクションに保存
       final stepData = {
         'action': _currentStep.action,
-        'beforeAnxietyScore': _currentStep.beforeAnxietyScore,
+        'beforeAnxietyScore': preAnxiety,
         'afterAnxietyScore': postAnxiety,
+        'achievementScore': achievementScore,
+        'physicalData': physicalData,
+        'word': word,
+        'copingMethod': copingMethod,
         'impression': impression,
+        'emotion': emotion,
+        'executionDate': _executionDate,
         'isDone': _currentStep.isDone,
         'updatedAt': FieldValue.serverTimestamp(),
         'updatedBy': FirebaseAuth.instance.currentUser?.uid ?? 'unknown_user',
@@ -354,33 +777,22 @@ class _StepDetailState extends ConsumerState<StepDetail> {
         'createdAt': _currentStep.createdAt,
       };
 
-      print('保存するデータ:');
-      print(stepData);
-
-      // 保存前のデータを確認
-      final beforeDoc =
-          await parentRef.collection('babySteps').doc(_currentStep.id).get();
-      print('保存前のデータ:');
-      print(beforeDoc.data());
+      // 親ドキュメントの参照を取得
+      final parentRef = FirebaseFirestore.instance
+          .collection('goals')
+          .doc(_currentStep.goalId ?? '');
 
       await parentRef
           .collection('babySteps')
           .doc(_currentStep.id)
           .set(stepData);
 
-      // 保存後のデータを確認
-      final afterDoc =
-          await parentRef.collection('babySteps').doc(_currentStep.id).get();
-      print('保存後のデータ:');
-      print(afterDoc.data());
-
       // AIコメント生成処理
       String profileContext = '';
       bool isProfileReady = false;
       int retryCount = 0;
-      const maxRetries = 5; // 最大リトライ回数
+      const maxRetries = 5;
 
-      // プロフィール情報の取得を待機
       while (!isProfileReady && retryCount < maxRetries) {
         final userProfileAsync = ref.read(userProfileProvider);
         if (userProfileAsync is AsyncData<AppUser?> &&
@@ -410,7 +822,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
         if (!isProfileReady) {
           retryCount++;
           if (retryCount < maxRetries) {
-            await Future.delayed(const Duration(milliseconds: 500)); // 0.5秒待機
+            await Future.delayed(const Duration(milliseconds: 500));
           }
         }
       }
@@ -440,7 +852,6 @@ class _StepDetailState extends ConsumerState<StepDetail> {
         aiComment = 'AIコメントの生成に失敗しました。';
       }
 
-      // ★ここで専門家受診レコメンド判定を実施
       try {
         _lastRecommendResult = await commentService.checkRecommendConsultation(
           profileContext: profileContext,
@@ -458,7 +869,6 @@ class _StepDetailState extends ConsumerState<StepDetail> {
       }
 
       if (mounted) {
-        // まずAIコメントダイアログを表示
         await showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -479,7 +889,6 @@ class _StepDetailState extends ConsumerState<StepDetail> {
           ),
         );
 
-        // _lastRecommendResultをローカル変数に退避してからnullにリセット
         final recommendResult = _lastRecommendResult;
         _lastRecommendResult = null;
         if (recommendResult != null && recommendResult.shouldRecommend) {
@@ -507,11 +916,17 @@ class _StepDetailState extends ConsumerState<StepDetail> {
           );
         }
 
-        // 更新後のデータを画面に反映
         setState(() {
           _currentStep = _currentStep.copyWith(
+            beforeAnxietyScore: preAnxiety,
             afterAnxietyScore: postAnxiety,
+            achievementScore: achievementScore,
+            physicalData: physicalData,
+            word: word,
+            copingMethod: copingMethod,
             impression: impression,
+            emotion: emotion,
+            executionDate: _executionDate,
           );
           _isEditing = false;
         });
@@ -531,9 +946,16 @@ class _StepDetailState extends ConsumerState<StepDetail> {
     } finally {
       if (mounted) {
         setState(() {
-          _isLoading = false; // ローディング終了
+          _isLoading = false;
         });
       }
     }
+  }
+
+  // 感情分析の関数
+  Future<String> _analyzeEmotion(String text) async {
+    // TODO: 感情分析の実装
+    // ここでは簡易的な実装として、impressionの最初の100文字を返す
+    return text.substring(0, text.length.clamp(0, 100));
   }
 }
