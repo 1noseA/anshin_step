@@ -170,9 +170,13 @@ class StepList extends ConsumerWidget {
                                 children: [
                                   if (goal.babySteps != null &&
                                       goal.babySteps!.isNotEmpty)
-                                    ...goal.babySteps!
-                                        .asMap()
-                                        .entries
+                                    ...(() {
+                                      final sortedSteps = [...goal.babySteps!];
+                                      sortedSteps.sort((a, b) =>
+                                          (a.displayOrder ?? 0)
+                                              .compareTo(b.displayOrder ?? 0));
+                                      return sortedSteps.asMap().entries;
+                                    })()
                                         .map((entry) {
                                       final step = entry.value;
                                       final updatedStep =
@@ -191,15 +195,11 @@ class StepList extends ConsumerWidget {
                                                   width: 32,
                                                   child: Stack(
                                                     children: [
-                                                      // 縦線（最終ステップ以外）
                                                       if (!isLast)
                                                         Positioned(
-                                                          left:
-                                                              14, // 丸数字の中心に合わせる
-                                                          top:
-                                                              24, // 丸数字の下端から縦線を開始
-                                                          bottom:
-                                                              -24, // 次の丸数字の上端まで縦線を伸ばす
+                                                          left: 14,
+                                                          top: 24,
+                                                          bottom: -24,
                                                           child: Container(
                                                             width: 2,
                                                             color: AppColors
@@ -208,7 +208,6 @@ class StepList extends ConsumerWidget {
                                                                     0.3),
                                                           ),
                                                         ),
-                                                      // 丸数字
                                                       Align(
                                                         alignment:
                                                             Alignment.topCenter,
@@ -228,7 +227,7 @@ class StepList extends ConsumerWidget {
                                                                 BoxShape.circle,
                                                           ),
                                                           child: Text(
-                                                            '${entry.key + 1}',
+                                                            '${displayStep.displayOrder ?? entry.key + 1}',
                                                             textAlign: TextAlign
                                                                 .center,
                                                             style:
@@ -248,7 +247,6 @@ class StepList extends ConsumerWidget {
                                                   ),
                                                 ),
                                                 const SizedBox(width: 12),
-                                                // ステップ内容＋チェックボックス
                                                 Expanded(
                                                   child: InkWell(
                                                     onTap: () =>
@@ -263,19 +261,20 @@ class StepList extends ConsumerWidget {
                                                       child: Row(
                                                         children: [
                                                           Expanded(
-                                                              child: Text(
-                                                            displayStep.action
-                                                                .replaceAll(
-                                                                    RegExp(
-                                                                        r'（[^）]*）|\([^\)]*\)'),
-                                                                    '')
-                                                                .trim(),
-                                                            style: TextStyles
-                                                                .body
-                                                                .copyWith(
-                                                                    height:
-                                                                        1.2),
-                                                          )),
+                                                            child: Text(
+                                                              displayStep.action
+                                                                  .replaceAll(
+                                                                      RegExp(
+                                                                          r'（[^）]*）|\([^\)]*\)'),
+                                                                      '')
+                                                                  .trim(),
+                                                              style: TextStyles
+                                                                  .body
+                                                                  .copyWith(
+                                                                      height:
+                                                                          1.2),
+                                                            ),
+                                                          ),
                                                           Checkbox(
                                                             value: displayStep
                                                                     .isDone ??
@@ -356,8 +355,6 @@ class StepList extends ConsumerWidget {
                                                                   .read(updatedBabyStepProvider
                                                                       .notifier)
                                                                   .state = updatedMap;
-                                                              ref.refresh(
-                                                                  goalsProvider);
                                                             },
                                                           ),
                                                         ],
@@ -365,14 +362,12 @@ class StepList extends ConsumerWidget {
                                                     ),
                                                   ),
                                                 ),
-                                                const SizedBox(width: 4),
                                               ],
                                             ),
                                           ),
-                                          if (isLast) SizedBox(height: 20),
                                         ],
                                       );
-                                    }).toList(),
+                                    }),
                                   if (goal.babySteps == null ||
                                       goal.babySteps!.isEmpty)
                                     const Padding(
