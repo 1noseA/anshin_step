@@ -128,79 +128,34 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                             ),
                             const SizedBox(height: 40),
                             _isEditing
-                                ? TextField(
+                                ? _buildModernDetailRow(
+                                    Icons.sentiment_satisfied,
+                                    '事前不安得点',
+                                    _currentStep.beforeAnxietyScore == null
+                                        ? ''
+                                        : _currentStep.beforeAnxietyScore
+                                            .toString(),
+                                    isEditing: _isEditing,
                                     controller: _preAnxietyController,
-                                    decoration: const InputDecoration(
-                                      labelText: '事前不安得点',
-                                      hintText: '数値を入力',
-                                      hintStyle:
-                                          TextStyle(color: Color(0xFF757575)),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(8)),
-                                        borderSide: BorderSide(
-                                            color: Color(0xFFE0E3E8)),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(8)),
-                                        borderSide: BorderSide(
-                                            color: Color(0xFFE0E3E8)),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(8)),
-                                        borderSide: BorderSide(
-                                            color: AppColors.primary, width: 2),
-                                      ),
-                                      labelStyle:
-                                          TextStyle(color: AppColors.text),
-                                      floatingLabelStyle:
-                                          TextStyle(color: AppColors.text),
-                                    ),
                                     keyboardType: TextInputType.number,
+                                    hintText: '数値を入力',
                                   )
                                 : _buildModernDetailRow(
                                     Icons.sentiment_satisfied,
                                     '事前不安得点',
-                                    _currentStep.beforeAnxietyScore
-                                        ?.toString()),
+                                    _currentStep.beforeAnxietyScore == null
+                                        ? ''
+                                        : _currentStep.beforeAnxietyScore
+                                            .toString()),
                             _isEditing
-                                ? TextField(
+                                ? _buildModernDetailRow(
+                                    Icons.sentiment_very_satisfied,
+                                    '事後不安得点',
+                                    _currentStep.afterAnxietyScore?.toString(),
+                                    isEditing: _isEditing,
                                     controller: _postAnxietyController,
-                                    decoration: const InputDecoration(
-                                      labelText: '事後不安得点',
-                                      hintText: '数値を入力',
-                                      hintStyle:
-                                          TextStyle(color: Color(0xFF757575)),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(8)),
-                                        borderSide: BorderSide(
-                                            color: Color(0xFFE0E3E8)),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(8)),
-                                        borderSide: BorderSide(
-                                            color: Color(0xFFE0E3E8)),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(8)),
-                                        borderSide: BorderSide(
-                                            color: AppColors.primary, width: 2),
-                                      ),
-                                      labelStyle:
-                                          TextStyle(color: AppColors.text),
-                                      floatingLabelStyle:
-                                          TextStyle(color: AppColors.text),
-                                    ),
                                     keyboardType: TextInputType.number,
+                                    hintText: '数値を入力',
                                   )
                                 : _buildModernDetailRow(
                                     Icons.sentiment_very_satisfied,
@@ -208,223 +163,145 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                     _currentStep.afterAnxietyScore?.toString()),
                             if (_isEditing) ...[
                               // 実施日時
-                              const Text('実施日時:', style: TextStyles.body),
-                              const SizedBox(height: 8),
-                              InkWell(
-                                onTap: () async {
-                                  final date = await showDatePicker(
-                                    context: context,
-                                    initialDate:
-                                        _executionDate ?? DateTime.now(),
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(2100),
-                                    locale: const Locale('ja'),
-                                    builder: (context, child) {
-                                      return Theme(
-                                        data: Theme.of(context).copyWith(
-                                          colorScheme: ColorScheme.light(
-                                            primary: AppColors.primary,
-                                            onPrimary: Colors.white,
-                                            onSurface: AppColors.text,
-                                          ),
-                                          datePickerTheme: DatePickerThemeData(
-                                            todayBackgroundColor:
-                                                MaterialStateProperty.all(
-                                                    AppColors.primary
-                                                        .withOpacity(0.2)),
-                                            todayForegroundColor:
-                                                MaterialStateProperty.all(
-                                                    AppColors.primary),
-                                          ),
-                                        ),
-                                        child: child!,
-                                      );
-                                    },
-                                  );
-                                  if (date != null) {
-                                    setState(() {
-                                      _executionDate = date;
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: const Color(0xFFE0E3E8)),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        _executionDate
-                                                ?.toString()
-                                                .split(' ')[0] ??
-                                            '日付を選択',
-                                        style: const TextStyle(
-                                            color: AppColors.text),
-                                      ),
-                                      const Icon(Icons.calendar_today,
-                                          size: 20),
-                                    ],
-                                  ),
-                                ),
+                              _buildModernDetailRow(
+                                Icons.event,
+                                '実施日時',
+                                _currentStep.executionDate
+                                    ?.toString()
+                                    .split(' ')[0],
+                                isEditing: _isEditing,
+                                controller: TextEditingController(
+                                    text: _executionDate
+                                            ?.toString()
+                                            .split(' ')[0] ??
+                                        ''),
+                                onTap: _isEditing
+                                    ? () async {
+                                        final date = await showDatePicker(
+                                          context: context,
+                                          initialDate:
+                                              _executionDate ?? DateTime.now(),
+                                          firstDate: DateTime(2000),
+                                          lastDate: DateTime(2100),
+                                          locale: const Locale('ja'),
+                                          builder: (context, child) {
+                                            return Theme(
+                                              data: Theme.of(context).copyWith(
+                                                colorScheme: ColorScheme.light(
+                                                  primary: AppColors.primary,
+                                                  onPrimary: Colors.white,
+                                                  onSurface: AppColors.text,
+                                                ),
+                                                datePickerTheme:
+                                                    DatePickerThemeData(
+                                                  todayBackgroundColor:
+                                                      MaterialStateProperty.all(
+                                                          AppColors.primary
+                                                              .withOpacity(
+                                                                  0.2)),
+                                                  todayForegroundColor:
+                                                      MaterialStateProperty.all(
+                                                          AppColors.primary),
+                                                ),
+                                              ),
+                                              child: child!,
+                                            );
+                                          },
+                                        );
+                                        if (date != null) {
+                                          setState(() {
+                                            _executionDate = date;
+                                          });
+                                        }
+                                      }
+                                    : null,
+                                hintText: '日付が未入力です',
                               ),
 
                               // 達成度
-                              TextField(
-                                controller: _achievementScoreController,
-                                decoration: const InputDecoration(
-                                  labelText: '達成度 (1-100)',
-                                  hintText: '数値を入力',
-                                  hintStyle:
-                                      TextStyle(color: Color(0xFF757575)),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFFE0E3E8)),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFFE0E3E8)),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide: BorderSide(
-                                        color: AppColors.primary, width: 2),
-                                  ),
-                                  labelStyle: TextStyle(color: AppColors.text),
-                                  floatingLabelStyle:
-                                      TextStyle(color: AppColors.text),
-                                ),
-                                keyboardType: TextInputType.number,
-                              ),
+                              _isEditing
+                                  ? _buildModernDetailRow(
+                                      Icons.emoji_events,
+                                      '達成度',
+                                      _currentStep.achievementScore?.toString(),
+                                      isEditing: _isEditing,
+                                      controller: _achievementScoreController,
+                                      keyboardType: TextInputType.number,
+                                      hintText: '1-100',
+                                    )
+                                  : _buildModernDetailRow(
+                                      Icons.emoji_events,
+                                      '達成度',
+                                      _currentStep.achievementScore
+                                          ?.toString()),
 
                               // 体調
-                              TextField(
-                                controller: _physicalDataController,
-                                decoration: const InputDecoration(
-                                  labelText: '体調',
-                                  hintText: '体調について入力',
-                                  hintStyle:
-                                      TextStyle(color: Color(0xFF757575)),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFFE0E3E8)),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFFE0E3E8)),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide: BorderSide(
-                                        color: AppColors.primary, width: 2),
-                                  ),
-                                  labelStyle: TextStyle(color: AppColors.text),
-                                  floatingLabelStyle:
-                                      TextStyle(color: AppColors.text),
-                                ),
-                                maxLines: 1,
-                              ),
+                              _isEditing
+                                  ? _buildModernDetailRow(
+                                      Icons.favorite,
+                                      '体調',
+                                      _currentStep.physicalData ?? '',
+                                      isEditing: _isEditing,
+                                      controller: _physicalDataController,
+                                      hintText: '体調について入力',
+                                    )
+                                  : _buildModernDetailRow(Icons.favorite, '体調',
+                                      _currentStep.physicalData ?? ''),
 
                               // 言葉
                               _isEditing
-                                  ? TextField(
+                                  ? _buildModernDetailRow(
+                                      Icons.format_quote,
+                                      '言葉',
+                                      _currentStep.word,
+                                      isEditing: _isEditing,
                                       controller: _wordController,
-                                      decoration: const InputDecoration(
-                                        labelText: '支えになった言葉',
-                                        hintText: '支えになった言葉を入力',
-                                        hintStyle:
-                                            TextStyle(color: Color(0xFF757575)),
-                                        filled: true,
-                                        fillColor: Colors.white,
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(8)),
-                                          borderSide: BorderSide(
-                                              color: Color(0xFFE0E3E8)),
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(8)),
-                                          borderSide: BorderSide(
-                                              color: Color(0xFFE0E3E8)),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(8)),
-                                          borderSide: BorderSide(
-                                              color: AppColors.primary,
-                                              width: 2),
-                                        ),
-                                        labelStyle:
-                                            TextStyle(color: AppColors.text),
-                                        floatingLabelStyle:
-                                            TextStyle(color: AppColors.text),
-                                      ),
-                                      maxLines: 1,
+                                      hintText: '支えになった言葉',
+                                      isMultiline: true,
                                     )
-                                  : _buildModernDetailRow(Icons.format_quote,
-                                      '言葉', _currentStep.word,
-                                      iconColor: Colors.blueAccent),
+                                  : _buildModernDetailRow(
+                                      Icons.format_quote,
+                                      '言葉',
+                                      _currentStep.word,
+                                      isMultiline: true,
+                                    ),
 
                               // 対処法
                               _isEditing
-                                  ? TextField(
+                                  ? _buildModernDetailRow(
+                                      Icons.psychology,
+                                      '対処法',
+                                      _currentStep.copingMethod,
+                                      isEditing: _isEditing,
                                       controller: _copingMethodController,
-                                      decoration: const InputDecoration(
-                                        labelText: '効果があった対処法',
-                                        hintText: '効果があった対処法を入力',
-                                        hintStyle:
-                                            TextStyle(color: Color(0xFF757575)),
-                                        filled: true,
-                                        fillColor: Colors.white,
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(8)),
-                                          borderSide: BorderSide(
-                                              color: Color(0xFFE0E3E8)),
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(8)),
-                                          borderSide: BorderSide(
-                                              color: Color(0xFFE0E3E8)),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(8)),
-                                          borderSide: BorderSide(
-                                              color: AppColors.primary,
-                                              width: 2),
-                                        ),
-                                        labelStyle:
-                                            TextStyle(color: AppColors.text),
-                                        floatingLabelStyle:
-                                            TextStyle(color: AppColors.text),
-                                      ),
-                                      maxLines: 1,
+                                      hintText: '試してみた対処法',
+                                      isMultiline: true,
                                     )
-                                  : _buildModernDetailRow(Icons.psychology,
-                                      '対処法', _currentStep.copingMethod,
-                                      iconColor: Colors.green),
+                                  : _buildModernDetailRow(
+                                      Icons.psychology,
+                                      '対処法',
+                                      _currentStep.copingMethod,
+                                      isMultiline: true,
+                                    ),
+
+                              // 感想
+                              _isEditing
+                                  ? _buildModernDetailRow(
+                                      Icons.comment,
+                                      '感想',
+                                      _currentStep.impression,
+                                      isEditing: _isEditing,
+                                      controller: _impressionController,
+                                      maxLines: 3,
+                                      hintText: '感想や気づき',
+                                      isMultiline: true,
+                                    )
+                                  : _buildModernDetailRow(
+                                      Icons.comment,
+                                      '感想',
+                                      _currentStep.impression,
+                                      isMultiline: true,
+                                    ),
                             ] else ...[
                               _buildModernDetailRow(
                                   Icons.event,
@@ -437,47 +314,15 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                               _buildModernDetailRow(Icons.favorite, '体調',
                                   _currentStep.physicalData ?? ''),
                               _buildModernDetailRow(
-                                  Icons.format_quote, '言葉', _currentStep.word),
+                                  Icons.format_quote, '言葉', _currentStep.word,
+                                  isMultiline: true),
                               _buildModernDetailRow(Icons.psychology, '対処法',
-                                  _currentStep.copingMethod),
+                                  _currentStep.copingMethod,
+                                  isMultiline: true),
                               _buildModernDetailRow(
-                                  Icons.comment, '感想', _currentStep.impression),
+                                  Icons.comment, '感想', _currentStep.impression,
+                                  isMultiline: true),
                             ],
-                            // 編集モード時の感想入力
-                            if (_isEditing)
-                              TextField(
-                                controller: _impressionController,
-                                decoration: const InputDecoration(
-                                  labelText: '感想や気づき',
-                                  hintText: '感想や気づきを入力',
-                                  hintStyle:
-                                      TextStyle(color: Color(0xFF757575)),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFFE0E3E8)),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFFE0E3E8)),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    borderSide: BorderSide(
-                                        color: AppColors.primary, width: 2),
-                                  ),
-                                  labelStyle: TextStyle(color: AppColors.text),
-                                  floatingLabelStyle:
-                                      TextStyle(color: AppColors.text),
-                                ),
-                                maxLines: 3,
-                              ),
                             const SizedBox(height: 32),
                           ],
                         ),
@@ -811,42 +656,182 @@ class _StepDetailState extends ConsumerState<StepDetail> {
     return text.substring(0, text.length.clamp(0, 100));
   }
 
-  Widget _buildModernDetailRow(IconData icon, String label, String? value,
-      {Color? iconColor}) {
+  Widget _buildModernDetailRow(
+    IconData icon,
+    String label,
+    String? value, {
+    Color? iconColor,
+    bool isEditing = false,
+    TextEditingController? controller,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+    String? hintText,
+    bool isMultiline = false,
+    VoidCallback? onTap,
+    Widget? trailingWidget,
+  }) {
     final displayValue = (label == '事前不安得点' && (value == null || value.isEmpty))
         ? ''
         : (value ?? '');
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(icon, color: Colors.grey[500], size: 22),
-              const SizedBox(width: 10),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Color(0xFF757575),
-                  fontSize: 14,
-                  fontWeight: FontWeight.normal,
+          child: isMultiline
+              ? ((displayValue == null || displayValue.isEmpty) &&
+                      !(isEditing && controller != null)
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(icon, color: Colors.grey[500], size: 22),
+                        const SizedBox(width: 10),
+                        Text(
+                          label,
+                          style: const TextStyle(
+                            color: Color(0xFF757575),
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                        if (trailingWidget != null) ...[
+                          const SizedBox(width: 8),
+                          trailingWidget,
+                        ],
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(icon, color: Colors.grey[500], size: 22),
+                            const SizedBox(width: 10),
+                            Text(
+                              label,
+                              style: const TextStyle(
+                                color: Color(0xFF757575),
+                                fontSize: 14,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                            if (trailingWidget != null) ...[
+                              const SizedBox(width: 8),
+                              trailingWidget,
+                            ],
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 32, top: 4),
+                          child: (isEditing && controller != null)
+                              ? TextField(
+                                  controller: controller,
+                                  keyboardType: keyboardType,
+                                  maxLines: maxLines,
+                                  cursorColor: AppColors.primary,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                    hintText: hintText,
+                                    hintStyle: const TextStyle(
+                                        color: Color(0xFFBDBDBD)),
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Color(0xFF222222),
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                )
+                              : Text(
+                                  displayValue,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Color(0xFF222222),
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                        ),
+                      ],
+                    ))
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(icon, color: Colors.grey[500], size: 22),
+                    const SizedBox(width: 10),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        color: Color(0xFF757575),
+                        fontSize: 14,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: isEditing && controller != null
+                          ? (onTap != null
+                              ? InkWell(
+                                  onTap: onTap,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        controller.text.isEmpty
+                                            ? (hintText ?? '')
+                                            : controller.text,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Color(0xFF222222),
+                                          fontWeight: FontWeight.normal,
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(Icons.calendar_today,
+                                          size: 18, color: AppColors.primary),
+                                    ],
+                                  ),
+                                )
+                              : TextField(
+                                  controller: controller,
+                                  keyboardType: keyboardType,
+                                  maxLines: maxLines,
+                                  cursorColor: AppColors.primary,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                    hintText: hintText,
+                                    hintStyle: const TextStyle(
+                                        color: Color(0xFFBDBDBD)),
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Color(0xFF222222),
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ))
+                          : Text(
+                              displayValue,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFF222222),
+                                fontWeight: FontWeight.normal,
+                              ),
+                              textAlign: TextAlign.right,
+                            ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  displayValue,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF222222),
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
         ),
         const Divider(height: 0, thickness: 0.7, color: Color(0xFFE0E3E8)),
       ],
