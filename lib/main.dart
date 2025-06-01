@@ -10,6 +10,7 @@ import 'package:anshin_step/pages/step_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:anshin_step/components/colors.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:anshin_step/pages/main_navigation.dart';
 
 final authProvider = StreamProvider<User?>((ref) {
   return FirebaseAuth.instance.authStateChanges();
@@ -27,7 +28,7 @@ final isNewUserProvider = StreamProvider<bool>((ref) {
       .map((doc) => !doc.exists);
 });
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // .envファイルの読み込み
@@ -39,164 +40,26 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
+
     return MaterialApp(
+      title: 'あんしんステップ',
       theme: ThemeData(
-        scaffoldBackgroundColor: AppColors.background,
-        cardColor: AppColors.card,
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
         fontFamily: 'Noto Sans JP',
-        textTheme: const TextTheme(
-          headlineLarge: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppColors.text,
-            height: 1.6,
-            fontFamily: 'Noto Sans JP',
-          ),
-          headlineMedium: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.text,
-            height: 1.6,
-            fontFamily: 'Noto Sans JP',
-          ),
-          headlineSmall: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.text,
-            height: 1.6,
-            fontFamily: 'Noto Sans JP',
-          ),
-          bodyLarge: TextStyle(
-            fontSize: 16,
-            color: AppColors.text,
-            height: 1.75,
-            fontFamily: 'Noto Sans JP',
-          ),
-          bodyMedium: TextStyle(
-            fontSize: 14,
-            color: AppColors.text,
-            height: 1.75,
-            fontFamily: 'Noto Sans JP',
-          ),
-          bodySmall: TextStyle(
-            fontSize: 12,
-            color: AppColors.text,
-            height: 1.75,
-            fontFamily: 'Noto Sans JP',
-          ),
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.card,
-          foregroundColor: AppColors.text,
-          elevation: 1,
-          titleTextStyle: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.text,
-            fontFamily: 'Noto Sans JP',
-          ),
-          iconTheme: IconThemeData(color: AppColors.text),
-        ),
-        primaryColor: AppColors.card,
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          primary: AppColors.card,
-          secondary: AppColors.primary,
-        ),
-        inputDecorationTheme: const InputDecorationTheme(
-          filled: true,
-          fillColor: AppColors.card,
-          border: OutlineInputBorder(),
-          labelStyle: TextStyle(color: AppColors.text),
-        ),
-        snackBarTheme: const SnackBarThemeData(
-          backgroundColor: AppColors.card,
-          contentTextStyle: TextStyle(color: AppColors.text),
-        ),
-        dialogBackgroundColor: AppColors.card,
-        floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.card,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.card,
-            textStyle: const TextStyle(fontWeight: FontWeight.bold),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-            ),
-          ),
-        ),
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.primary,
-            textStyle: const TextStyle(
-              color: AppColors.primary,
-              fontWeight: FontWeight.normal,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ),
-        shadowColor: Colors.black12,
       ),
-      home: Consumer(
-        builder: (context, ref, _) {
-          final authState = ref.watch(authProvider);
-          final isNewUser = ref.watch(isNewUserProvider);
-
-          return authState.when(
-            data: (user) {
-              if (user == null) {
-                return const SignInPage();
-              }
-
-              // 新規ユーザーの場合のみプロフィール画面を表示
-              return isNewUser.when(
-                data: (isNew) {
-                  final creationTime = user.metadata.creationTime;
-                  // 新規ユーザーで、かつメタデータが新規作成の場合のみプロフィール画面を表示
-                  if (isNew &&
-                      creationTime != null &&
-                      creationTime.isAfter(DateTime.now()
-                          .subtract(const Duration(minutes: 5)))) {
-                    return Profile(isNewUser: true);
-                  }
-                  return const StepList();
-                },
-                loading: () => const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                ),
-                error: (error, _) => Scaffold(
-                  body: Center(child: Text('エラー: $error')),
-                ),
-              );
-            },
-            loading: () => const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            ),
-            error: (error, _) => Scaffold(
-              body: Center(child: Text('エラー: $error')),
-            ),
-          );
-        },
+      home: authState.when(
+        data: (user) =>
+            user != null ? const MainNavigation() : const SignInPage(),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('エラーが発生しました: $error')),
       ),
-      routes: {
-        '/main': (context) => const StepList(),
-        '/profile': (context) => Profile(),
-      },
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('ja'), // 日本語
-        Locale('en'), // 英語（必要に応じて）
-      ],
     );
   }
 }
@@ -308,8 +171,9 @@ class _SignInPageState extends State<SignInPage> {
       appBar: AppBar(
         title: const Text('ログイン方法を選択'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
+      backgroundColor: Colors.white,
+      body: Container(
+        color: AppColors.background,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

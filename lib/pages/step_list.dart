@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:anshin_step/components/colors.dart';
 import 'package:anshin_step/components/text_styles.dart';
+import 'package:anshin_step/services/report_service.dart';
 
 final goalsProvider = StreamProvider<List<Goal>>((ref) {
   final firestore = FirebaseFirestore.instance;
@@ -55,6 +56,9 @@ final goalsProvider = StreamProvider<List<Goal>>((ref) {
 // 更新されたBabyStepを保持するProvider
 final updatedBabyStepProvider =
     StateProvider<Map<String, BabyStep>>((ref) => {});
+
+// レポートサービスのProvider
+final reportServiceProvider = Provider((ref) => ReportService());
 
 class StepList extends ConsumerWidget {
   const StepList({super.key});
@@ -116,8 +120,10 @@ class StepList extends ConsumerWidget {
           ),
         ],
       ),
+      backgroundColor: AppColors.background,
       body: Container(
-        color: AppColors.background,
+        width: double.infinity,
+        height: double.infinity,
         child: Column(
           children: [
             Container(
@@ -150,231 +156,271 @@ class StepList extends ConsumerWidget {
                             }
                             final goal = goals[index - 1];
                             return Card(
+                              color: Colors.white,
                               margin: const EdgeInsets.symmetric(
                                   vertical: 10, horizontal: 8),
-                              child: ExpansionTile(
-                                title: Text(
-                                  goal.content.split('\\n')[0],
-                                  style: TextStyles.h3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 2,
+                              clipBehavior: Clip.antiAlias,
+                              child: Theme(
+                                data: Theme.of(context).copyWith(
+                                  colorScheme:
+                                      Theme.of(context).colorScheme.copyWith(
+                                            outlineVariant: Colors.transparent,
+                                          ),
                                 ),
-                                subtitle: Text(
-                                  goal.content.split('\\n').length > 1
-                                      ? goal.content.split('\\n')[1]
-                                      : '',
-                                  style: TextStyles.body.copyWith(
-                                    color: AppColors.text.withOpacity(0.7),
+                                child: ExpansionTile(
+                                  title: Text(
+                                    goal.content.split('\\n')[0],
+                                    style: TextStyles.h3,
                                   ),
-                                ),
-                                iconColor: AppColors.text,
-                                collapsedIconColor: AppColors.text,
-                                children: [
-                                  if (goal.babySteps != null &&
-                                      goal.babySteps!.isNotEmpty)
-                                    ...(() {
-                                      final sortedSteps = [...goal.babySteps!];
-                                      sortedSteps.sort((a, b) =>
-                                          (a.displayOrder ?? 0)
-                                              .compareTo(b.displayOrder ?? 0));
-                                      return sortedSteps.asMap().entries;
-                                    })()
-                                        .map((entry) {
-                                      final step = entry.value;
-                                      final updatedStep =
-                                          updatedBabySteps[step.id];
-                                      final displayStep = updatedStep ?? step;
-                                      final isLast = entry.key ==
-                                          goal.babySteps!.length - 1;
-                                      return Column(
-                                        children: [
-                                          IntrinsicHeight(
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.stretch,
-                                              children: [
-                                                SizedBox(
-                                                  width: 32,
-                                                  child: Stack(
-                                                    children: [
-                                                      if (!isLast)
-                                                        Positioned(
-                                                          left: 14,
-                                                          top: 24,
-                                                          bottom: -24,
-                                                          child: Container(
-                                                            width: 2,
-                                                            color: AppColors
-                                                                .primary
-                                                                .withOpacity(
-                                                                    0.3),
-                                                          ),
-                                                        ),
-                                                      Align(
-                                                        alignment:
-                                                            Alignment.topCenter,
-                                                        child: Container(
-                                                          width: 24,
-                                                          height: 24,
-                                                          alignment:
-                                                              Alignment.center,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: Colors.white,
-                                                            border: Border.all(
-                                                                color: AppColors
-                                                                    .primary,
-                                                                width: 2),
-                                                            shape:
-                                                                BoxShape.circle,
-                                                          ),
-                                                          child: Text(
-                                                            '${displayStep.displayOrder ?? entry.key + 1}',
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            style:
-                                                                const TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
+                                  subtitle: Text(
+                                    goal.content.split('\\n').length > 1
+                                        ? goal.content.split('\\n')[1]
+                                        : '',
+                                    style: TextStyles.body.copyWith(
+                                      color: AppColors.text.withOpacity(0.7),
+                                    ),
+                                  ),
+                                  iconColor: AppColors.text,
+                                  collapsedIconColor: AppColors.text,
+                                  childrenPadding: EdgeInsets.zero,
+                                  children: [
+                                    const Divider(
+                                        height: 0,
+                                        thickness: 0,
+                                        color: Colors.transparent),
+                                    if (goal.babySteps != null &&
+                                        goal.babySteps!.isNotEmpty)
+                                      ...(() {
+                                        final sortedSteps = [
+                                          ...goal.babySteps!
+                                        ];
+                                        sortedSteps.sort((a, b) =>
+                                            (a.displayOrder ?? 0).compareTo(
+                                                b.displayOrder ?? 0));
+                                        return sortedSteps.asMap().entries;
+                                      })()
+                                          .map((entry) {
+                                        final step = entry.value;
+                                        final updatedStep =
+                                            updatedBabySteps[step.id];
+                                        final displayStep = updatedStep ?? step;
+                                        final isLast = entry.key ==
+                                            goal.babySteps!.length - 1;
+                                        return Column(
+                                          children: [
+                                            IntrinsicHeight(
+                                              child: Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.stretch,
+                                                children: [
+                                                  SizedBox(
+                                                    width: 32,
+                                                    child: Stack(
+                                                      children: [
+                                                        if (!isLast)
+                                                          Positioned(
+                                                            left: 14,
+                                                            top: 24,
+                                                            bottom: -24,
+                                                            child: Container(
+                                                              width: 2,
                                                               color: AppColors
-                                                                  .primary,
-                                                              fontSize: 16,
-                                                              height: 1.0,
+                                                                  .primary
+                                                                  .withOpacity(
+                                                                      0.3),
+                                                            ),
+                                                          ),
+                                                        Align(
+                                                          alignment: Alignment
+                                                              .topCenter,
+                                                          child: Container(
+                                                            width: 24,
+                                                            height: 24,
+                                                            alignment: Alignment
+                                                                .center,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color:
+                                                                  Colors.white,
+                                                              border: Border.all(
+                                                                  color: AppColors
+                                                                      .primary,
+                                                                  width: 2),
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                            ),
+                                                            child: Text(
+                                                              '${displayStep.displayOrder ?? entry.key + 1}',
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: AppColors
+                                                                    .primary,
+                                                                fontSize: 16,
+                                                                height: 1.0,
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ],
+                                                      ],
+                                                    ),
                                                   ),
-                                                ),
-                                                const SizedBox(width: 12),
-                                                Expanded(
-                                                  child: InkWell(
-                                                    onTap: () =>
-                                                        _navigateToStepDetail(
-                                                            context,
-                                                            displayStep,
-                                                            ref),
-                                                    child: Container(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          vertical: 8),
-                                                      child: Row(
-                                                        children: [
-                                                          Expanded(
-                                                            child: Text(
-                                                              displayStep.action
-                                                                  .replaceAll(
-                                                                      RegExp(
-                                                                          r'（[^）]*）|\([^\)]*\)'),
-                                                                      '')
-                                                                  .trim(),
-                                                              style: TextStyles
-                                                                  .body
-                                                                  .copyWith(
-                                                                      height:
-                                                                          1.2),
+                                                  const SizedBox(width: 12),
+                                                  Expanded(
+                                                    child: InkWell(
+                                                      onTap: () =>
+                                                          _navigateToStepDetail(
+                                                              context,
+                                                              displayStep,
+                                                              ref),
+                                                      child: Container(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                vertical: 8),
+                                                        child: Row(
+                                                          children: [
+                                                            Expanded(
+                                                              child: Text(
+                                                                displayStep
+                                                                    .action
+                                                                    .replaceAll(
+                                                                        RegExp(
+                                                                            r'（[^）]*）|\([^\)]*\)'),
+                                                                        '')
+                                                                    .trim(),
+                                                                style: TextStyles
+                                                                    .body
+                                                                    .copyWith(
+                                                                        height:
+                                                                            1.2),
+                                                              ),
                                                             ),
-                                                          ),
-                                                          Checkbox(
-                                                            value: displayStep
-                                                                    .isDone ??
-                                                                false,
-                                                            activeColor:
-                                                                AppColors
-                                                                    .primary,
-                                                            side: const BorderSide(
-                                                                color: AppColors
-                                                                    .text,
-                                                                width: 2),
-                                                            onChanged:
-                                                                (checked) async {
-                                                              final user =
-                                                                  FirebaseAuth
-                                                                      .instance
-                                                                      .currentUser;
-                                                              if (user == null)
-                                                                return;
-                                                              final newIsDone =
-                                                                  checked ??
-                                                                      false;
-                                                              final newExecutionDate =
-                                                                  newIsDone
-                                                                      ? DateTime
-                                                                          .now()
-                                                                      : null;
-                                                              final firestore =
-                                                                  FirebaseFirestore
-                                                                      .instance;
-                                                              if (displayStep
-                                                                      .goalId ==
-                                                                  null) return;
-                                                              final stepRef = firestore
-                                                                  .collection(
-                                                                      'goals')
-                                                                  .doc(displayStep
-                                                                      .goalId)
-                                                                  .collection(
-                                                                      'babySteps')
-                                                                  .doc(
-                                                                      displayStep
-                                                                          .id);
-                                                              await stepRef
-                                                                  .update({
-                                                                'isDone':
-                                                                    newIsDone,
-                                                                'executionDate':
-                                                                    newExecutionDate,
-                                                                'updatedBy':
-                                                                    user.uid,
-                                                                'updatedAt':
-                                                                    DateTime
-                                                                        .now(),
-                                                              });
-                                                              final updatedStep =
-                                                                  displayStep
-                                                                      .copyWith(
-                                                                isDone:
-                                                                    newIsDone,
-                                                                executionDate:
-                                                                    newExecutionDate,
-                                                                updatedBy:
-                                                                    user.uid,
-                                                                updatedAt:
-                                                                    DateTime
-                                                                        .now(),
-                                                              );
-                                                              final updatedMap = Map<
-                                                                      String,
-                                                                      BabyStep>.from(
-                                                                  updatedBabySteps);
-                                                              updatedMap[
-                                                                      displayStep
-                                                                          .id] =
-                                                                  updatedStep;
-                                                              ref
-                                                                  .read(updatedBabyStepProvider
-                                                                      .notifier)
-                                                                  .state = updatedMap;
-                                                            },
-                                                          ),
-                                                        ],
+                                                            Checkbox(
+                                                              value: displayStep
+                                                                      .isDone ??
+                                                                  false,
+                                                              activeColor:
+                                                                  AppColors
+                                                                      .primary,
+                                                              side: const BorderSide(
+                                                                  color:
+                                                                      AppColors
+                                                                          .text,
+                                                                  width: 2),
+                                                              onChanged:
+                                                                  (checked) async {
+                                                                final user =
+                                                                    FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser;
+                                                                if (user ==
+                                                                    null)
+                                                                  return;
+                                                                final newIsDone =
+                                                                    checked ??
+                                                                        false;
+                                                                final newExecutionDate =
+                                                                    newIsDone
+                                                                        ? DateTime
+                                                                            .now()
+                                                                        : null;
+                                                                final firestore =
+                                                                    FirebaseFirestore
+                                                                        .instance;
+                                                                if (displayStep
+                                                                        .goalId ==
+                                                                    null)
+                                                                  return;
+                                                                final stepRef = firestore
+                                                                    .collection(
+                                                                        'goals')
+                                                                    .doc(displayStep
+                                                                        .goalId)
+                                                                    .collection(
+                                                                        'babySteps')
+                                                                    .doc(displayStep
+                                                                        .id);
+                                                                await stepRef
+                                                                    .update({
+                                                                  'isDone':
+                                                                      newIsDone,
+                                                                  'executionDate':
+                                                                      newExecutionDate,
+                                                                  'updatedBy':
+                                                                      user.uid,
+                                                                  'updatedAt':
+                                                                      DateTime
+                                                                          .now(),
+                                                                });
+                                                                final updatedStep =
+                                                                    displayStep
+                                                                        .copyWith(
+                                                                  isDone:
+                                                                      newIsDone,
+                                                                  executionDate:
+                                                                      newExecutionDate,
+                                                                  updatedBy:
+                                                                      user.uid,
+                                                                  updatedAt:
+                                                                      DateTime
+                                                                          .now(),
+                                                                );
+                                                                final updatedMap = Map<
+                                                                        String,
+                                                                        BabyStep>.from(
+                                                                    updatedBabySteps);
+                                                                updatedMap[
+                                                                        displayStep
+                                                                            .id] =
+                                                                    updatedStep;
+                                                                ref
+                                                                    .read(updatedBabyStepProvider
+                                                                        .notifier)
+                                                                    .state = updatedMap;
+
+                                                                // レポートを生成
+                                                                await ref
+                                                                    .read(
+                                                                        reportServiceProvider)
+                                                                    .generateReport(
+                                                                        user.uid);
+                                                              },
+                                                            ),
+                                                          ],
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      );
-                                    }),
-                                  if (goal.babySteps == null ||
-                                      goal.babySteps!.isEmpty)
-                                    const Padding(
-                                      padding: EdgeInsets.all(16.0),
-                                      child: Text('ベイビーステップが設定されていません'),
-                                    ),
-                                ],
+                                            if ((entry.key == 9))
+                                              const SizedBox(height: 16),
+                                          ],
+                                        );
+                                      }),
+                                    if (goal.babySteps == null ||
+                                        goal.babySteps!.isEmpty)
+                                      const Padding(
+                                        padding: EdgeInsets.all(16.0),
+                                        child: Text('ベイビーステップが設定されていません'),
+                                      ),
+                                    const Divider(
+                                        height: 0,
+                                        thickness: 0,
+                                        color: Colors.transparent),
+                                  ],
+                                ),
                               ),
                             );
                           },
@@ -389,11 +435,12 @@ class StepList extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primary,
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const Chat()),
         ),
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

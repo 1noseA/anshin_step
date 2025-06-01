@@ -129,13 +129,15 @@ class _ChatState extends ConsumerState<Chat> {
 
       // 生成したステップを_stateの_stepsリストにセット
       final currentText = _contentController.text;
+      final tempGoalId = _uuid.v4(); // 一時的なGoal IDを生成
       setState(() {
         _steps = (result['steps'] as List<String>)
             .map((step) => BabyStep(
                   id: const Uuid().v4(),
+                  goalId: tempGoalId,
                   action: step,
-                  isDone: false,
                   displayOrder: (result['steps'] as List<String>).indexOf(step),
+                  isDone: false,
                   isDeleted: false,
                   createdBy: userProfile.createdBy,
                   createdAt: DateTime.now(),
@@ -204,26 +206,29 @@ class _ChatState extends ConsumerState<Chat> {
               isEqualTo: FirebaseAuth.instance.currentUser?.uid)
           .get();
 
+      // 新しいGoalのIDを生成
+      final newGoalId = _uuid.v4();
+
       // BabyStepにdisplayOrderを設定
       final stepsWithOrder = _steps.asMap().entries.map((entry) {
         final step = entry.value;
         return BabyStep(
           id: step.id,
+          goalId: newGoalId,
           action: step.action,
+          displayOrder: entry.key + 1,
           isDone: step.isDone,
-          displayOrder: entry.key + 1, // 1から10までの連番
           isDeleted: false,
           createdBy: step.createdBy,
           createdAt: step.createdAt,
           updatedBy: step.updatedBy,
           updatedAt: step.updatedAt,
-          goalId: null, // 一時的にnullを設定
         );
       }).toList();
 
       // Goalを作成
       final newGoal = Goal(
-        id: _uuid.v4(),
+        id: newGoalId,
         content: _contentController.text,
         originalContent: _contentController.text,
         babySteps: stepsWithOrder,
