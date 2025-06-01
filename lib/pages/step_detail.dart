@@ -454,6 +454,12 @@ class _StepDetailState extends ConsumerState<StepDetail> {
       // 感情分析の処理（impressionから感情を抽出）
       final emotion = await _analyzeEmotion(impression);
 
+      // 天気、気温、気圧、月齢の仮値を設定
+      final weather = 'sunny'; // 天気: sunny, rainy, cloudy
+      final temperature = 25; // 気温（摂氏）
+      final pressure = 1013; // 気圧（hPa）
+      final lunarAge = 15; // 月齢（0-29.5）
+
       final stepData = {
         'action': _currentStep.action,
         'beforeAnxietyScore': preAnxiety,
@@ -465,6 +471,10 @@ class _StepDetailState extends ConsumerState<StepDetail> {
         'impression': impression,
         'emotion': emotion,
         'executionDate': _executionDate,
+        'weather': weather,
+        'temperature': temperature,
+        'pressure': pressure,
+        'lunarAge': lunarAge,
         'isDone': _currentStep.isDone,
         'updatedAt': FieldValue.serverTimestamp(),
         'updatedBy': FirebaseAuth.instance.currentUser?.uid ?? 'unknown_user',
@@ -497,6 +507,10 @@ class _StepDetailState extends ConsumerState<StepDetail> {
           impression: impression,
           emotion: emotion,
           executionDate: _executionDate,
+          weather: weather,
+          temperature: temperature,
+          pressure: pressure,
+          lunarAge: lunarAge,
         );
       });
 

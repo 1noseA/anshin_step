@@ -125,6 +125,9 @@ class MindReport extends ConsumerWidget {
   }
 
   Widget _buildAnxietyTendency(Report report) {
+    // データの有無をチェック
+    final hasAnalysis = report.anxietyTendency['analysis'] != null;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -139,48 +142,21 @@ class MindReport extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildTendencyItem('天気', report.anxietyTendency['weather']),
-            _buildTendencyItem('気温', report.anxietyTendency['temperature']),
-            _buildTendencyItem('気圧', report.anxietyTendency['pressure']),
-            _buildTendencyItem('月齢', report.anxietyTendency['lunarAge']),
+            if (!hasAnalysis)
+              const Text(
+                '情報が不足しています。ベビーステップを記録すると、より詳細な分析が表示されます。',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              )
+            else if (report.anxietyTendency['analysis']?['summary'] != null)
+              Text(
+                report.anxietyTendency['analysis']['summary'],
+                style: const TextStyle(fontSize: 16),
+              ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTendencyItem(String title, Map<String, dynamic> data) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ...data.entries.map((entry) {
-            return Padding(
-              padding: const EdgeInsets.only(left: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(entry.key),
-                  Text(
-                    '平均不安度: ${entry.value['averageAnxiety']}',
-                    style: const TextStyle(
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
       ),
     );
   }

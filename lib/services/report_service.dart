@@ -247,47 +247,44 @@ class ReportService {
     final stepsData = babySteps
         .map((step) => {
               'date': step.executionDate?.toIso8601String(),
+              'action': step.action,
               'beforeScore': step.beforeAnxietyScore,
               'afterScore': step.afterAnxietyScore,
+              'achievementScore': step.achievementScore,
               'weather': step.weather,
               'temperature': step.temperature,
               'pressure': step.pressure,
               'lunarAge': step.lunarAge,
+              'impression': step.impression,
+              'copingMethod': step.copingMethod,
+              'physicalData': step.physicalData,
+              'word': step.word,
             })
         .toList();
 
     return '''
-以下のベビーステップのデータを分析し、不安傾向を特定してください。
+以下のベビーステップのデータを分析し、不安の傾向を特定してください。
 データはJSON形式で提供されます。
 
 データ:
 ${jsonEncode(stepsData)}
 
-以下の形式で分析結果を返してください：
+以下の形式で分析結果を返してください。必ずJSON形式のみを返し、マークダウンやその他の装飾は含めないでください：
 {
-  "weather": {
-    "sunny": {"count": 数値, "averageAnxiety": 数値},
-    "rainy": {"count": 数値, "averageAnxiety": 数値},
-    "cloudy": {"count": 数値, "averageAnxiety": 数値}
-  },
-  "temperature": {
-    "high": {"count": 数値, "averageAnxiety": 数値},
-    "medium": {"count": 数値, "averageAnxiety": 数値},
-    "low": {"count": 数値, "averageAnxiety": 数値}
-  },
-  "pressure": {
-    "high": {"count": 数値, "averageAnxiety": 数値},
-    "low": {"count": 数値, "averageAnxiety": 数値}
-  },
-  "lunarAge": {
-    "new": {"count": 数値, "averageAnxiety": 数値},
-    "waxing": {"count": 数値, "averageAnxiety": 数値},
-    "full": {"count": 数値, "averageAnxiety": 数値},
-    "waning": {"count": 数値, "averageAnxiety": 数値}
+  "analysis": {
+    "summary": "不安の傾向に関する自然な日本語の説明（2〜3文程度、物理名ではなく論理名（例：行動、事前不安得点、達成度、身体情報、言葉、感想、対処法など）を使って、あなたの傾向や合いそうな対処法の方向性が分かるようにまとめてください）"
   }
 }
 
-必ずJSON形式で返してください。
+注意点：
+1. データが不足している場合は、「情報が不足しています。ベビーステップを記録すると、より詳細な分析が表示されます。」と返してください
+2. 不安スコアの変化（事前不安得点 - 事後不安得点）を重視して分析してください
+3. 以下の要素を考慮して分析してください：
+   - 行動（action）とその達成度（achievementScore）
+   - 身体情報（physicalData）
+   - 言葉（word）
+   - 感想（impression）や対処法（copingMethod）
+4. 分析結果は自然な日本語で、温かみのある説明的な内容にしてください
 ''';
   }
 
@@ -295,9 +292,14 @@ ${jsonEncode(stepsData)}
     final stepsData = babySteps
         .map((step) => {
               'date': step.executionDate?.toIso8601String(),
+              'action': step.action,
               'beforeScore': step.beforeAnxietyScore,
               'afterScore': step.afterAnxietyScore,
+              'achievementScore': step.achievementScore,
+              'physicalData': step.physicalData,
+              'word': step.word,
               'copingMethod': step.copingMethod,
+              'impression': step.impression,
             })
         .toList();
 
@@ -308,7 +310,7 @@ ${jsonEncode(stepsData)}
 データ:
 ${jsonEncode(stepsData)}
 
-以下の形式で対処法のリストを返してください：
+以下の形式で対処法のリストを返してください。必ずJSON形式のみを返し、マークダウンやその他の装飾は含めないでください：
 [
   "対処法1",
   "対処法2",
@@ -317,8 +319,11 @@ ${jsonEncode(stepsData)}
   "対処法5"
 ]
 
-各対処法は具体的で実践的な内容にしてください。
-必ずJSON形式で返してください。
+注意点：
+1. 過去の対処法（copingMethod）の効果を分析し、特に効果があったものを参考にしてください
+2. 行動内容（action）と達成度（achievementScore）を考慮して、実践的な対処法を提案してください
+3. 身体状態（physicalData）や使用した言葉（word）も参考にしてください
+4. 各対処法は具体的で実践的な内容にしてください
 ''';
   }
 
@@ -326,8 +331,13 @@ ${jsonEncode(stepsData)}
     final stepsData = babySteps
         .map((step) => {
               'date': step.executionDate?.toIso8601String(),
+              'action': step.action,
               'beforeScore': step.beforeAnxietyScore,
               'afterScore': step.afterAnxietyScore,
+              'achievementScore': step.achievementScore,
+              'physicalData': step.physicalData,
+              'word': step.word,
+              'impression': step.impression,
             })
         .toList();
 
@@ -338,7 +348,7 @@ ${jsonEncode(stepsData)}
 データ:
 ${jsonEncode(stepsData)}
 
-以下の形式で言葉のリストを返してください：
+以下の形式で言葉のリストを返してください。必ずJSON形式のみを返し、マークダウンやその他の装飾は含めないでください：
 [
   "言葉1",
   "言葉2",
@@ -347,34 +357,56 @@ ${jsonEncode(stepsData)}
   "言葉5"
 ]
 
-各言葉は温かみがあり、励ましになる内容にしてください。
-必ずJSON形式で返してください。
+注意点：
+1. 過去に使用した言葉（word）で効果があったものを参考にしてください
+2. 行動内容（action）と達成度（achievementScore）を考慮して、励ましになる言葉を提案してください
+3. 身体状態（physicalData）や印象（impression）も参考にしてください
+4. 各言葉は温かみがあり、励ましになる内容にしてください
 ''';
   }
 
   Map<String, dynamic> _parseAnxietyTendencyResponse(String response) {
     try {
-      return jsonDecode(response);
+      // レスポンスからJSON部分のみを抽出
+      final jsonStr =
+          response.replaceAll('```json', '').replaceAll('```', '').trim();
+      final result = jsonDecode(jsonStr);
+
+      // データの制限がある場合は、その旨をログに出力
+      if (result['dataLimitations'] != null) {
+        print('データの制限: ${result['dataLimitations']}');
+      }
+
+      return result;
     } catch (e) {
       print('不安傾向のパースエラー: $e');
+      print('パース対象のレスポンス: $response');
       rethrow;
     }
   }
 
   List<String> _parseCopingMethodsResponse(String response) {
     try {
-      return List<String>.from(jsonDecode(response));
+      // レスポンスからJSON部分のみを抽出
+      final jsonStr =
+          response.replaceAll('```json', '').replaceAll('```', '').trim();
+      return List<String>.from(jsonDecode(jsonStr));
     } catch (e) {
       print('対処法のパースエラー: $e');
+      print('パース対象のレスポンス: $response');
       rethrow;
     }
   }
 
   List<String> _parseComfortingWordsResponse(String response) {
     try {
-      return List<String>.from(jsonDecode(response));
+      // レスポンスからJSON部分のみを抽出
+      final jsonStr =
+          response.replaceAll('```json', '').replaceAll('```', '').trim();
+      return List<String>.from(jsonDecode(jsonStr));
     } catch (e) {
       print('安心ワードのパースエラー: $e');
+      print('パース対象のレスポンス: $response');
       rethrow;
     }
   }
