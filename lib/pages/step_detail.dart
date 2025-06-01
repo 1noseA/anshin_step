@@ -10,6 +10,7 @@ import 'package:anshin_step/models/app_user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:anshin_step/components/text_styles.dart';
 import 'package:anshin_step/components/colors.dart';
+import 'package:anshin_step/services/report_service.dart';
 
 class StepDetail extends ConsumerStatefulWidget {
   final BabyStep step;
@@ -484,167 +485,163 @@ class _StepDetailState extends ConsumerState<StepDetail> {
           .doc(_currentStep.id)
           .set(stepData);
 
-      // AIコメント生成処理
-      String profileContext = '';
-      bool isProfileReady = false;
-      int retryCount = 0;
-      const maxRetries = 5;
+      // _currentStepを更新
+      setState(() {
+        _currentStep = _currentStep.copyWith(
+          beforeAnxietyScore: preAnxiety,
+          afterAnxietyScore: postAnxiety,
+          achievementScore: achievementScore,
+          physicalData: physicalData,
+          word: word,
+          copingMethod: copingMethod,
+          impression: impression,
+          emotion: emotion,
+          executionDate: _executionDate,
+        );
+      });
 
-      while (!isProfileReady && retryCount < maxRetries) {
-        final userProfileAsync = ref.read(userProfileProvider);
-        if (userProfileAsync is AsyncData<AppUser?> &&
-            userProfileAsync.value != null) {
-          final userProfile = userProfileAsync.value;
-          if (userProfile != null) {
-            List<String> profileInfo = [];
-            profileInfo.add('名前: ${userProfile.userName}');
-            if (userProfile.age != null)
-              profileInfo.add('年齢: 「${userProfile.age}歳」');
-            if (userProfile.gender != null)
-              profileInfo.add('性別: 「${userProfile.gender}」');
-            if (userProfile.attribute != null)
-              profileInfo.add('属性: 「${userProfile.attribute}」');
-            if (userProfile.hasMentalIllness != null)
-              profileInfo.add(
-                  '精神疾患の有無: 「${userProfile.hasMentalIllness == true ? "あり" : "なし"}」');
-            if (userProfile.mentalIllnesses != null &&
-                userProfile.mentalIllnesses!.isNotEmpty)
-              profileInfo
-                  .add('診断名: 「${userProfile.mentalIllnesses!.join("、")}」');
-            profileContext = '\n\nユーザーのプロフィール情報:\n${profileInfo.join("\n")}';
-            isProfileReady = true;
+      // AIコメントの生成
+      if (_currentStep.achievementScore != null) {
+        String profileContext = '';
+        bool isProfileReady = false;
+        int retryCount = 0;
+        const maxRetries = 5;
+
+        while (!isProfileReady && retryCount < maxRetries) {
+          final userProfileAsync = ref.read(userProfileProvider);
+          if (userProfileAsync is AsyncData<AppUser?> &&
+              userProfileAsync.value != null) {
+            final userProfile = userProfileAsync.value;
+            if (userProfile != null) {
+              List<String> profileInfo = [];
+              profileInfo.add('名前: ${userProfile.userName}');
+              if (userProfile.age != null)
+                profileInfo.add('年齢: 「${userProfile.age}歳」');
+              if (userProfile.gender != null)
+                profileInfo.add('性別: 「${userProfile.gender}」');
+              if (userProfile.attribute != null)
+                profileInfo.add('属性: 「${userProfile.attribute}」');
+              if (userProfile.hasMentalIllness != null)
+                profileInfo.add(
+                    '精神疾患の有無: 「${userProfile.hasMentalIllness == true ? "あり" : "なし"}」');
+              if (userProfile.mentalIllnesses != null &&
+                  userProfile.mentalIllnesses!.isNotEmpty)
+                profileInfo
+                    .add('診断名: 「${userProfile.mentalIllnesses!.join("、")}」');
+              profileContext = '\n\nユーザーのプロフィール情報:\n${profileInfo.join("\n")}';
+              isProfileReady = true;
+            }
+          }
+
+          if (!isProfileReady) {
+            retryCount++;
+            if (retryCount < maxRetries) {
+              await Future.delayed(const Duration(milliseconds: 500));
+            }
           }
         }
 
         if (!isProfileReady) {
-          retryCount++;
-          if (retryCount < maxRetries) {
-            await Future.delayed(const Duration(milliseconds: 500));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('プロフィール情報の取得に失敗しました')),
+            );
           }
+          return;
         }
-      }
 
-      if (!isProfileReady) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('プロフィール情報の取得に失敗しました')),
+        final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+        final commentService = CommentService(apiKey);
+        try {
+          final aiComment = await commentService.generateComment(
+            profileContext: profileContext,
+            action: _currentStep.action,
+            beforeAnxietyScore:
+                _currentStep.beforeAnxietyScore?.toString() ?? '未入力',
+            afterAnxietyScore:
+                _currentStep.afterAnxietyScore?.toString() ?? '未入力',
+            userComment: _currentStep.impression ?? '',
           );
+
+          if (mounted) {
+            await showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('あなたへのメッセージ'),
+                content: Text(aiComment),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      textStyle: const TextStyle(
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                    child: const Text('閉じる'),
+                  ),
+                ],
+              ),
+            );
+          }
+        } catch (e) {
+          print('AIコメント生成エラー: $e');
         }
-        return;
       }
 
-      final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
-      final commentService = CommentService(apiKey);
-      String aiComment = '';
+      // レポートの再生成
       try {
-        aiComment = await commentService.generateComment(
-          profileContext: profileContext,
-          action: _currentStep.action,
-          beforeAnxietyScore:
-              _currentStep.beforeAnxietyScore?.toString() ?? '未入力',
-          afterAnxietyScore: postAnxiety.toString(),
-          userComment: impression,
-        );
+        print('=== レポート生成開始 ===');
+        final currentUser = FirebaseAuth.instance.currentUser;
+        if (currentUser == null) {
+          print('ユーザーがログインしていません');
+          return;
+        }
+        print('現在のユーザー情報:');
+        print('- UID: ${currentUser.uid}');
+        print('- Email: ${currentUser.email}');
+        print('- DisplayName: ${currentUser.displayName}');
+        print('ステップのユーザー情報:');
+        print('- createdBy: ${_currentStep.createdBy}');
+        print('- goalId: ${_currentStep.goalId}');
+
+        final reportService = ReportService();
+        if (_currentStep.createdBy != null) {
+          await reportService.generateReport(
+            _currentStep.createdBy!,
+            goalId: _currentStep.goalId,
+          );
+        } else {
+          print('ステップのcreatedByがnullのため、レポート生成をスキップします');
+        }
+        print('レポートの再生成が完了しました');
       } catch (e) {
-        aiComment = 'AIコメントの生成に失敗しました。';
+        print('レポートの再生成中にエラーが発生しました: $e');
+        print('エラーの詳細: ${e.toString()}');
+        // レポート生成のエラーは全体の処理を中断しない
       }
 
-      try {
-        _lastRecommendResult = await commentService.checkRecommendConsultation(
-          profileContext: profileContext,
-          action: _currentStep.action,
-          beforeAnxietyScore:
-              _currentStep.beforeAnxietyScore?.toString() ?? '未入力',
-          afterAnxietyScore: postAnxiety.toString(),
-          userComment: impression,
-        );
-      } catch (e) {
-        if (kDebugMode) {
-          print('専門家受診レコメンド判定エラー: $e');
-        }
-        _lastRecommendResult = null;
-      }
+      setState(() {
+        _isLoading = false;
+      });
 
       if (mounted) {
-        await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('あなたへのメッセージ'),
-            content: Text(aiComment),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  textStyle: const TextStyle(
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-                child: const Text('閉じる'),
-              ),
-            ],
-          ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('保存しました')),
         );
-
-        final recommendResult = _lastRecommendResult;
-        _lastRecommendResult = null;
-        if (recommendResult != null && recommendResult.shouldRecommend) {
-          await showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('サポートのご案内',
-                  style: TextStyle(
-                      color: Colors.red, fontWeight: FontWeight.bold)),
-              content: const Text(
-                  'あなたの状態について、専門家（精神科・カウンセリング等）への相談を強くおすすめします。\nオンラインで相談できるサービスもあります。'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    textStyle: const TextStyle(
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
-                  child: const Text('閉じる'),
-                ),
-              ],
-            ),
-          );
-        }
-
+        // 詳細画面に戻る（編集モードを解除）
         setState(() {
-          _currentStep = _currentStep.copyWith(
-            beforeAnxietyScore: preAnxiety,
-            afterAnxietyScore: postAnxiety,
-            achievementScore: achievementScore,
-            physicalData: physicalData,
-            word: word,
-            copingMethod: copingMethod,
-            impression: impression,
-            emotion: emotion,
-            executionDate: _executionDate,
-          );
           _isEditing = false;
         });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('更新が完了しました')),
-        );
       }
     } catch (e) {
-      print('エラーが発生しました:');
-      print(e.toString());
+      setState(() {
+        _isLoading = false;
+      });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('更新に失敗しました: ${e.toString()}')),
+          SnackBar(content: Text('エラーが発生しました: $e')),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }

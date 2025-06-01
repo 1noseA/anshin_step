@@ -9,26 +9,78 @@ class ReportService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
   final String _apiUrl =
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
   // レポートを生成・更新する
-  Future<void> generateReport(String userId) async {
+  Future<void> generateReport(String userId, {String? goalId}) async {
     try {
+      print('=== ReportService.generateReport開始 ===');
+      print('ユーザーID: $userId');
+      print('ゴールID: $goalId');
+
       // ユーザーのベビーステップを取得
-      final babyStepsSnapshot = await _firestore
-          .collection('baby_steps')
+      // まずgoalsコレクションを取得
+      print('ゴール取得開始...');
+      print('Firestoreのパス: goals');
+      print('クエリ条件: createdBy = $userId');
+      final goalsSnapshot = await _firestore
+          .collection('goals')
           .where('createdBy', isEqualTo: userId)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      if (babyStepsSnapshot.docs.isEmpty) {
+      print('取得したゴール数: ${goalsSnapshot.docs.length}');
+      print('ゴールID一覧: ${goalsSnapshot.docs.map((doc) => doc.id).join(', ')}');
+      print('ゴールのデータ: ${goalsSnapshot.docs.map((doc) => doc.data()).toList()}');
+
+      // ベビーステップを格納するリスト
+      List<QueryDocumentSnapshot> allBabySteps = [];
+
+      // ゴールが取得できない場合、直接goalIdを使用してベビーステップを取得
+      if (goalsSnapshot.docs.isEmpty && goalId != null) {
+        print('ゴールが取得できませんでした。直接ベビーステップを取得します。');
+        final babyStepsSnapshot = await _firestore
+            .collection('goals')
+            .doc(goalId)
+            .collection('babySteps')
+            .where('isDeleted', isEqualTo: false)
+            .orderBy('createdAt', descending: true)
+            .get();
+
+        print('直接取得したベビーステップ数: ${babyStepsSnapshot.docs.length}');
+        print(
+            'ベビーステップのデータ: ${babyStepsSnapshot.docs.map((doc) => doc.data()).toList()}');
+
+        if (babyStepsSnapshot.docs.isNotEmpty) {
+          allBabySteps.addAll(babyStepsSnapshot.docs);
+        }
+      } else {
+        // 各ゴールのサブコレクションからベビーステップを取得
+        for (var goalDoc in goalsSnapshot.docs) {
+          print('ゴールID ${goalDoc.id} のベビーステップを取得中...');
+          final babyStepsSnapshot = await goalDoc.reference
+              .collection('babySteps')
+              .where('isDeleted', isEqualTo: false)
+              .orderBy('createdAt', descending: true)
+              .get();
+          print(
+              'ゴールID ${goalDoc.id} のベビーステップ数: ${babyStepsSnapshot.docs.length}');
+          print(
+              'ベビーステップのデータ: ${babyStepsSnapshot.docs.map((doc) => doc.data()).toList()}');
+          allBabySteps.addAll(babyStepsSnapshot.docs);
+        }
+      }
+
+      print('取得したベビーステップ数: ${allBabySteps.length}');
+
+      if (allBabySteps.isEmpty) {
+        print('ベビーステップが存在しないため、レポート生成をスキップします');
         return;
       }
 
       // ベビーステップのデータを変換
-      final babyStepsData = babyStepsSnapshot.docs
+      final babyStepsData = allBabySteps
           .map((stepDoc) {
-            final stepData = stepDoc.data();
+            final stepData = stepDoc.data() as Map<String, dynamic>;
             stepData['id'] = stepDoc.id;
             // 必須フィールドが揃っていない場合はnullを返す
             if (stepData['id'] == null ||
@@ -43,17 +95,22 @@ class ReportService {
           .cast<BabyStep>()
           .toList();
 
+      print('変換後のベビーステップ数: ${babyStepsData.length}');
+
       // 不安得点の推移を生成
       final anxietyScoreHistory = _generateAnxietyScoreHistory(babyStepsData);
 
       // 不安傾向を分析（AIを使用）
+      print('不安傾向の分析を開始します');
       final anxietyTendency = await _analyzeAnxietyTendency(babyStepsData);
 
       // 効果的な対処法を生成（AIを使用）
+      print('対処法の生成を開始します');
       final effectiveCopingMethods =
           await _generateEffectiveCopingMethods(babyStepsData);
 
       // 安心につながる言葉を生成（AIを使用）
+      print('安心ワードの生成を開始します');
       final comfortingWords = await _generateComfortingWords(babyStepsData);
 
       // レポートを作成または更新
@@ -70,12 +127,16 @@ class ReportService {
         updatedAt: DateTime.now(),
       );
 
+      print('レポートをFirestoreに保存します');
       await _firestore
           .collection('reports')
           .doc('report_$userId')
           .set(report.toJson());
+
+      print('=== ReportService.generateReport完了 ===');
     } catch (e) {
       print('Error generating report: $e');
+      print('エラーの詳細: ${e.toString()}');
       rethrow;
     }
   }
@@ -112,6 +173,7 @@ class ReportService {
   Future<Map<String, dynamic>> _analyzeAnxietyTendency(
       List<BabyStep> babySteps) async {
     final prompt = _createAnxietyTendencyPrompt(babySteps);
+    print('=== AIプロンプト（不安傾向分析） ===\n$prompt');
     final response = await _callAI(prompt);
     return _parseAnxietyTendencyResponse(response);
   }
@@ -119,6 +181,7 @@ class ReportService {
   Future<List<String>> _generateEffectiveCopingMethods(
       List<BabyStep> babySteps) async {
     final prompt = _createCopingMethodsPrompt(babySteps);
+    print('=== AIプロンプト（対処法生成） ===\n$prompt');
     final response = await _callAI(prompt);
     return _parseCopingMethodsResponse(response);
   }
@@ -126,12 +189,17 @@ class ReportService {
   Future<List<String>> _generateComfortingWords(
       List<BabyStep> babySteps) async {
     final prompt = _createComfortingWordsPrompt(babySteps);
+    print('=== AIプロンプト（安心ワード生成） ===\n$prompt');
     final response = await _callAI(prompt);
     return _parseComfortingWordsResponse(response);
   }
 
   Future<String> _callAI(String prompt) async {
     try {
+      print('=== AI呼び出し開始 ===');
+      print('API URL: $_apiUrl');
+      print('プロンプト: $prompt');
+
       final response = await http.post(
         Uri.parse('$_apiUrl?key=$_apiKey'),
         headers: {
@@ -141,10 +209,7 @@ class ReportService {
           'contents': [
             {
               'parts': [
-                {
-                  'text':
-                      'あなたは不安症の専門家です。ユーザーのデータを分析し、適切なアドバイスを提供してください。\n\n$prompt'
-                }
+                {'text': prompt}
               ]
             }
           ],
@@ -157,14 +222,23 @@ class ReportService {
         }),
       );
 
+      print('APIレスポンスステータス: ${response.statusCode}');
+      print('APIレスポンス本文: ${response.body}');
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['candidates'][0]['content']['parts'][0]['text'];
+        final result = data['candidates'][0]['content']['parts'][0]['text'];
+        print('=== AI呼び出し成功 ===');
+        print('結果: $result');
+        return result;
       } else {
-        throw Exception('API呼び出しに失敗しました: {response.statusCode}');
+        print('=== AI呼び出しエラー ===');
+        print('エラー内容: ${response.body}');
+        throw Exception('API呼び出しに失敗しました: ${response.statusCode}');
       }
     } catch (e) {
-      print('AI呼び出しエラー: $e');
+      print('=== AI呼び出し例外 ===');
+      print('例外内容: $e');
       rethrow;
     }
   }
