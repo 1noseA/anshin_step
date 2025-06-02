@@ -310,7 +310,9 @@ class _ChatState extends ConsumerState<Chat> {
         backgroundColor: Colors.white,
         elevation: 0,
         shadowColor: Colors.transparent,
-        leading: const BackButton(),
+        leading: (ModalRoute.of(context)?.canPop ?? false)
+            ? const BackButton()
+            : null,
         centerTitle: true,
         title: const Text(
           '新しい行動プランを作成',

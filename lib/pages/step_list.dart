@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:anshin_step/components/colors.dart';
 import 'package:anshin_step/components/text_styles.dart';
 import 'package:anshin_step/services/report_service.dart';
+import 'package:anshin_step/pages/main_navigation.dart';
 
 final goalsProvider = StreamProvider<List<Goal>>((ref) {
   final firestore = FirebaseFirestore.instance;
@@ -438,7 +439,8 @@ class StepList extends ConsumerWidget {
         backgroundColor: AppColors.primary,
         onPressed: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const Chat()),
+          MaterialPageRoute(
+              builder: (context) => const MainNavigation(initialIndex: 1)),
         ),
         child: const Icon(Icons.add, color: Colors.white),
       ),
