@@ -25,102 +25,131 @@ class MindReport extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        leading: const BackButton(),
         title: const Text('あんしんのくすり'),
       ),
-      body: reportAsync.when(
-        data: (report) {
-          if (report == null) {
-            return const Center(
-              child: Text('レポートがありません'),
-            );
-          }
+      body: Column(
+        children: [
+          Container(
+            height: 1,
+            color: const Color(0xFFE0E3E8),
+          ),
+          Expanded(
+            child: Container(
+              color: const Color(0xFFF6F7FB),
+              child: reportAsync.when(
+                data: (report) {
+                  if (report == null) {
+                    return const Center(
+                      child: Text('レポートがありません'),
+                    );
+                  }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildAnxietyScoreChart(report),
-                const SizedBox(height: 24),
-                _buildAnxietyTendency(report),
-                const SizedBox(height: 24),
-                _buildEffectiveCopingMethods(report),
-                const SizedBox(height: 24),
-                _buildComfortingWords(report),
-              ],
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildStyledCard(_buildAnxietyScoreChart(report)),
+                        const SizedBox(height: 24),
+                        _buildStyledCard(_buildAnxietyTendency(report)),
+                        const SizedBox(height: 24),
+                        _buildStyledCard(_buildEffectiveCopingMethods(report)),
+                        const SizedBox(height: 24),
+                        _buildStyledCard(_buildComfortingWords(report)),
+                      ],
+                    ),
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stackTrace) => Center(
+                  child: Text('エラーが発生しました: $error'),
+                ),
+              ),
             ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text('エラーが発生しました: $error'),
-        ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStyledCard(Widget child) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.10),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: child,
       ),
     );
   }
 
   Widget _buildAnxietyScoreChart(Report report) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '不安得点の推移',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 200,
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(show: true),
-                  titlesData: FlTitlesData(show: true),
-                  borderData: FlBorderData(show: true),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: report.anxietyScoreHistory
-                          .asMap()
-                          .entries
-                          .map((entry) {
-                        final data = entry.value as Map<String, dynamic>;
-                        return FlSpot(
-                          entry.key.toDouble(),
-                          data['beforeScore']?.toDouble() ?? 0,
-                        );
-                      }).toList(),
-                      isCurved: true,
-                      color: Colors.blue,
-                      barWidth: 3,
-                      dotData: FlDotData(show: true),
-                    ),
-                    LineChartBarData(
-                      spots: report.anxietyScoreHistory
-                          .asMap()
-                          .entries
-                          .map((entry) {
-                        final data = entry.value as Map<String, dynamic>;
-                        return FlSpot(
-                          entry.key.toDouble(),
-                          data['afterScore']?.toDouble() ?? 0,
-                        );
-                      }).toList(),
-                      isCurved: true,
-                      color: Colors.green,
-                      barWidth: 3,
-                      dotData: FlDotData(show: true),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '不安得点の推移',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 200,
+          child: LineChart(
+            LineChartData(
+              gridData: FlGridData(show: true),
+              titlesData: FlTitlesData(show: true),
+              borderData: FlBorderData(show: true),
+              lineBarsData: [
+                LineChartBarData(
+                  spots:
+                      report.anxietyScoreHistory.asMap().entries.map((entry) {
+                    final data = entry.value as Map<String, dynamic>;
+                    return FlSpot(
+                      entry.key.toDouble(),
+                      data['beforeScore']?.toDouble() ?? 0,
+                    );
+                  }).toList(),
+                  isCurved: true,
+                  color: Colors.blue,
+                  barWidth: 3,
+                  dotData: FlDotData(show: true),
+                ),
+                LineChartBarData(
+                  spots:
+                      report.anxietyScoreHistory.asMap().entries.map((entry) {
+                    final data = entry.value as Map<String, dynamic>;
+                    return FlSpot(
+                      entry.key.toDouble(),
+                      data['afterScore']?.toDouble() ?? 0,
+                    );
+                  }).toList(),
+                  isCurved: true,
+                  color: Colors.green,
+                  barWidth: 3,
+                  dotData: FlDotData(show: true),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -128,102 +157,87 @@ class MindReport extends ConsumerWidget {
     // データの有無をチェック
     final hasAnalysis = report.anxietyTendency['analysis'] != null;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'あなたの不安傾向',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (!hasAnalysis)
-              const Text(
-                '情報が不足しています。ベビーステップを記録すると、より詳細な分析が表示されます。',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
-              )
-            else if (report.anxietyTendency['analysis']?['summary'] != null)
-              Text(
-                report.anxietyTendency['analysis']['summary'],
-                style: const TextStyle(fontSize: 16),
-              ),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'あなたの不安傾向',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
+        const SizedBox(height: 16),
+        if (!hasAnalysis)
+          const Text(
+            '情報が不足しています。ベビーステップを記録すると、より詳細な分析が表示されます。',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+          )
+        else if (report.anxietyTendency['analysis']?['summary'] != null)
+          Text(
+            report.anxietyTendency['analysis']['summary'],
+            style: const TextStyle(fontSize: 16),
+          ),
+      ],
     );
   }
 
   Widget _buildEffectiveCopingMethods(Report report) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '効果的な対処法',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ...report.effectiveCopingMethods.map((method) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Row(
-                  children: [
-                    const Icon(Icons.check_circle_outline, color: Colors.green),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(method)),
-                  ],
-                ),
-              );
-            }),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '効果的な対処法',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
+        const SizedBox(height: 16),
+        ...report.effectiveCopingMethods.map((method) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Row(
+              children: [
+                const Icon(Icons.check_circle_outline, color: Colors.green),
+                const SizedBox(width: 8),
+                Expanded(child: Text(method)),
+              ],
+            ),
+          );
+        }),
+      ],
     );
   }
 
   Widget _buildComfortingWords(Report report) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '安心につながる言葉',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ...report.comfortingWords.map((word) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Row(
-                  children: [
-                    const Icon(Icons.favorite_border, color: AppColors.primary),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(word)),
-                  ],
-                ),
-              );
-            }),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '安心につながる言葉',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
+        const SizedBox(height: 16),
+        ...report.comfortingWords.map((word) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Row(
+              children: [
+                const Icon(Icons.favorite_border, color: AppColors.primary),
+                const SizedBox(width: 8),
+                Expanded(child: Text(word)),
+              ],
+            ),
+          );
+        }),
+      ],
     );
   }
 }
