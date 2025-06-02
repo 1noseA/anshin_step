@@ -30,7 +30,15 @@ class MindReport extends ConsumerWidget {
         elevation: 0,
         shadowColor: Colors.transparent,
         leading: const BackButton(),
-        title: const Text('あんしんのくすり'),
+        centerTitle: true,
+        title: const Text(
+          'レポート',
+          style: TextStyle(
+            color: AppColors.text,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         surfaceTintColor: Colors.white,
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.white,

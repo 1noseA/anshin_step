@@ -14,6 +14,7 @@ import 'package:anshin_step/components/colors.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:anshin_step/constants/action_suggestion_prompts.dart';
+import 'package:flutter/services.dart';
 
 // プロフィール情報を取得するProvider
 final userProfileProvider = StreamProvider<AppUser?>((ref) {
@@ -307,11 +308,24 @@ class _ChatState extends ConsumerState<Chat> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
         elevation: 0,
-        scrolledUnderElevation: 0,
         shadowColor: Colors.transparent,
-        title: const Text('新しい行動プラン作成'),
+        leading: const BackButton(),
+        centerTitle: true,
+        title: const Text(
+          '新しい行動プランを作成',
+          style: TextStyle(
+            color: AppColors.text,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        surfaceTintColor: Colors.white,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.white,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
       ),
       body: Container(
         color: AppColors.background,

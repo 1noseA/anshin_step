@@ -11,6 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:anshin_step/components/text_styles.dart';
 import 'package:anshin_step/components/colors.dart';
 import 'package:anshin_step/services/report_service.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
 
 class StepDetail extends ConsumerStatefulWidget {
   final BabyStep step;
@@ -59,7 +61,22 @@ class _StepDetailState extends ConsumerState<StepDetail> {
         backgroundColor: Colors.white,
         elevation: 0,
         shadowColor: Colors.transparent,
-        title: const Text('ステップ詳細'),
+        leading: const BackButton(),
+        centerTitle: true,
+        title: const Text(
+          'ステップ',
+          style: TextStyle(
+            color: AppColors.text,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        surfaceTintColor: Colors.white,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.white,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
         actions: [],
       ),
       body: Container(
