@@ -5,6 +5,7 @@ import 'package:anshin_step/services/report_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:anshin_step/components/colors.dart';
+import 'package:flutter/services.dart';
 
 // レポートサービスのProvider
 final reportServiceProvider = Provider((ref) => ReportService());
@@ -30,6 +31,12 @@ class MindReport extends ConsumerWidget {
         shadowColor: Colors.transparent,
         leading: const BackButton(),
         title: const Text('あんしんのくすり'),
+        surfaceTintColor: Colors.white,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.white,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
       ),
       body: Column(
         children: [
@@ -98,6 +105,20 @@ class MindReport extends ConsumerWidget {
   }
 
   Widget _buildAnxietyScoreChart(Report report) {
+    // 平均値計算
+    final beforeScores = report.anxietyScoreHistory
+        .map((e) => (e['beforeScore'] ?? 0) as num)
+        .toList();
+    final afterScores = report.anxietyScoreHistory
+        .map((e) => (e['afterScore'] ?? 0) as num)
+        .toList();
+    final beforeAvg = beforeScores.isNotEmpty
+        ? (beforeScores.reduce((a, b) => a + b) / beforeScores.length)
+        : 0;
+    final afterAvg = afterScores.isNotEmpty
+        ? (afterScores.reduce((a, b) => a + b) / afterScores.length)
+        : 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -106,7 +127,48 @@ class MindReport extends ConsumerWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
+            color: Color(0xFF2B2B2B),
           ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Column(
+              children: [
+                Text(
+                  beforeAvg.toStringAsFixed(1),
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  '平均事前不安得点',
+                  style: TextStyle(fontSize: 13, color: Color(0xFF757575)),
+                ),
+              ],
+            ),
+            Column(
+              children: [
+                Text(
+                  afterAvg.toStringAsFixed(1),
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF4CAF50),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  '平均事後不安得点',
+                  style: TextStyle(fontSize: 13, color: Color(0xFF757575)),
+                ),
+              ],
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         SizedBox(
@@ -114,8 +176,59 @@ class MindReport extends ConsumerWidget {
           child: LineChart(
             LineChartData(
               gridData: FlGridData(show: true),
-              titlesData: FlTitlesData(show: true),
-              borderData: FlBorderData(show: true),
+              titlesData: FlTitlesData(
+                show: true,
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      if (value % 10 != 0) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Text(
+                          value.toInt().toString(),
+                          style: const TextStyle(fontSize: 12),
+                          textAlign: TextAlign.left,
+                        ),
+                      );
+                    },
+                    interval: 10,
+                  ),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      final index = value.toInt();
+                      if (index < 0 ||
+                          index >= report.anxietyScoreHistory.length) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text('${index + 1}',
+                            style: const TextStyle(fontSize: 12)),
+                      );
+                    },
+                    interval: 1,
+                  ),
+                ),
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+              ),
+              borderData: FlBorderData(
+                show: true,
+                border: const Border(
+                  left: BorderSide(color: Colors.black, width: 1),
+                  bottom: BorderSide(color: Colors.black, width: 1),
+                  top: BorderSide(color: Color(0xFFE0E3E8), width: 1),
+                  right: BorderSide(color: Color(0xFFE0E3E8), width: 1),
+                ),
+              ),
               lineBarsData: [
                 LineChartBarData(
                   spots:
@@ -127,7 +240,7 @@ class MindReport extends ConsumerWidget {
                     );
                   }).toList(),
                   isCurved: true,
-                  color: Colors.blue,
+                  color: AppColors.primary,
                   barWidth: 3,
                   dotData: FlDotData(show: true),
                 ),
@@ -141,7 +254,7 @@ class MindReport extends ConsumerWidget {
                     );
                   }).toList(),
                   isCurved: true,
-                  color: Colors.green,
+                  color: Color(0xFF4CAF50),
                   barWidth: 3,
                   dotData: FlDotData(show: true),
                 ),
@@ -161,10 +274,11 @@ class MindReport extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'あなたの不安傾向',
+          '不安傾向',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
+            color: Color(0xFF2B2B2B),
           ),
         ),
         const SizedBox(height: 16),
@@ -173,13 +287,13 @@ class MindReport extends ConsumerWidget {
             '情報が不足しています。ベビーステップを記録すると、より詳細な分析が表示されます。',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey,
+              color: Color(0xFF2B2B2B),
             ),
           )
         else if (report.anxietyTendency['analysis']?['summary'] != null)
           Text(
             report.anxietyTendency['analysis']['summary'],
-            style: const TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 16, color: Color(0xFF2B2B2B)),
           ),
       ],
     );
@@ -194,6 +308,7 @@ class MindReport extends ConsumerWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
+            color: Color(0xFF2B2B2B),
           ),
         ),
         const SizedBox(height: 16),
@@ -204,7 +319,12 @@ class MindReport extends ConsumerWidget {
               children: [
                 const Icon(Icons.check_circle_outline, color: Colors.green),
                 const SizedBox(width: 8),
-                Expanded(child: Text(method)),
+                Expanded(
+                  child: Text(
+                    method,
+                    style: const TextStyle(color: Color(0xFF2B2B2B)),
+                  ),
+                ),
               ],
             ),
           );
@@ -222,6 +342,7 @@ class MindReport extends ConsumerWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
+            color: Color(0xFF2B2B2B),
           ),
         ),
         const SizedBox(height: 16),
@@ -232,7 +353,12 @@ class MindReport extends ConsumerWidget {
               children: [
                 const Icon(Icons.favorite_border, color: AppColors.primary),
                 const SizedBox(width: 8),
-                Expanded(child: Text(word)),
+                Expanded(
+                  child: Text(
+                    word,
+                    style: const TextStyle(color: Color(0xFF2B2B2B)),
+                  ),
+                ),
               ],
             ),
           );
