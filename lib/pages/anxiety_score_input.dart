@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anshin_step/pages/step_list.dart';
 import 'package:anshin_step/components/colors.dart';
+import 'package:flutter/services.dart';
 
 class AnxietyScoreInput extends ConsumerStatefulWidget {
   final List<BabyStep> steps;
@@ -97,6 +98,8 @@ class _AnxietyScoreInputState extends ConsumerState<AnxietyScoreInput> {
 
   @override
   Widget build(BuildContext context) {
+    print(
+        'DEBUG: steps.length = \\${widget.steps.length}, _currentIndex = \\$_currentIndex');
     if (widget.steps.isEmpty) {
       return const Scaffold(
         body: Center(child: Text('ベイビーステップがありません')),
@@ -109,7 +112,23 @@ class _AnxietyScoreInputState extends ConsumerState<AnxietyScoreInput> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text('事前不安得点の入力 (${_currentIndex + 1}/${widget.steps.length})'),
+        shadowColor: Colors.transparent,
+        leading: SizedBox.shrink(),
+        centerTitle: true,
+        title: const Text(
+          '事前不安得点の入力',
+          style: TextStyle(
+            color: AppColors.text,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        surfaceTintColor: Colors.white,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.white,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
       ),
       body: Container(
         color: AppColors.background,
@@ -174,30 +193,74 @@ class _AnxietyScoreInputState extends ConsumerState<AnxietyScoreInput> {
                       },
                     ),
                     const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (_currentIndex > 0)
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _currentIndex--;
-                              });
-                            },
-                            child: const Text('前へ'),
-                          )
-                        else
-                          const SizedBox(width: 80), // 前へボタンがない場合のスペース
-                        if (_currentIndex < widget.steps.length - 1)
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _currentIndex++;
-                              });
-                            },
-                            child: const Text('次へ'),
-                          ),
-                      ],
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          if (_currentIndex > 0)
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _currentIndex--;
+                                });
+                              },
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                    AppColors.primary),
+                                foregroundColor:
+                                    MaterialStateProperty.all(Colors.white),
+                                textStyle: MaterialStateProperty.all(
+                                    const TextStyle(
+                                        fontWeight: FontWeight.bold)),
+                                minimumSize: MaterialStateProperty.all(
+                                    const Size(100, 44)),
+                                shape: MaterialStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(24)),
+                                  ),
+                                ),
+                                overlayColor: MaterialStateProperty.all(
+                                    AppColors.primary.withOpacity(0.8)),
+                              ),
+                              child: const Text('前へ'),
+                            ),
+                          if (_currentIndex > 0 &&
+                              _currentIndex < widget.steps.length - 1)
+                            const SizedBox(width: 16),
+                          if (_currentIndex == 0)
+                            const SizedBox(width: 80), // 前へボタンがない場合のスペース
+                          if (_currentIndex < widget.steps.length - 1)
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _currentIndex++;
+                                });
+                              },
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                    AppColors.primary),
+                                foregroundColor:
+                                    MaterialStateProperty.all(Colors.white),
+                                textStyle: MaterialStateProperty.all(
+                                    const TextStyle(
+                                        fontWeight: FontWeight.bold)),
+                                minimumSize: MaterialStateProperty.all(
+                                    const Size(100, 44)),
+                                shape: MaterialStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(24)),
+                                  ),
+                                ),
+                                overlayColor: MaterialStateProperty.all(
+                                    AppColors.primary.withOpacity(0.8)),
+                              ),
+                              child: const Text('次へ'),
+                            ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -213,19 +276,35 @@ class _AnxietyScoreInputState extends ConsumerState<AnxietyScoreInput> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              TextButton(
-                onPressed: _skipInput,
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  textStyle: const TextStyle(
-                    decoration: TextDecoration.none,
+              Expanded(
+                child: TextButton(
+                  onPressed: _skipInput,
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    minimumSize: const Size.fromHeight(44),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(24)),
+                        side: BorderSide(color: AppColors.primary, width: 2)),
                   ),
+                  child: const Text('スキップ'),
                 ),
-                child: const Text('スキップ'),
               ),
-              ElevatedButton(
-                onPressed: _saveScore,
-                child: const Text('保存して完了'),
+              const SizedBox(width: 16),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _saveScore,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    minimumSize: const Size.fromHeight(44),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(24))),
+                  ),
+                  child: const Text('保存して完了'),
+                ),
               ),
             ],
           ),

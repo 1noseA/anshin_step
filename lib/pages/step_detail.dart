@@ -373,7 +373,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Expanded(
-                      child: OutlinedButton(
+                      child: TextButton(
                         onPressed: _isLoading
                             ? null
                             : () {
@@ -403,18 +403,19 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                   _executionDate = _currentStep.executionDate;
                                 });
                               },
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          side: const BorderSide(color: AppColors.primary),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppColors.primary,
+                          textStyle:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                          minimumSize: const Size.fromHeight(44),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(24)),
+                              side: BorderSide(
+                                  color: AppColors.primary, width: 2)),
                         ),
-                        child: const Text(
-                          'キャンセル',
-                          style:
-                              TextStyle(color: AppColors.primary, fontSize: 16),
-                        ),
+                        child: const Text('キャンセル'),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -422,11 +423,14 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _saveStep,
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
                           backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          textStyle:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                          minimumSize: const Size.fromHeight(44),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(24))),
                         ),
                         child: _isLoading
                             ? const SizedBox(
@@ -438,11 +442,7 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                                       Colors.white),
                                 ),
                               )
-                            : const Text(
-                                '保存',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 16),
-                              ),
+                            : const Text('保存'),
                       ),
                     ),
                   ],
