@@ -15,6 +15,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:anshin_step/constants/action_suggestion_prompts.dart';
 import 'package:flutter/services.dart';
+import 'dart:math';
 
 // プロフィール情報を取得するProvider
 final userProfileProvider = StreamProvider<AppUser?>((ref) {
@@ -37,19 +38,33 @@ class Chat extends ConsumerStatefulWidget {
   ConsumerState<Chat> createState() => _ChatState();
 }
 
+class ChatMessage {
+  final String text;
+  final bool isUser;
+  ChatMessage({required this.text, required this.isUser});
+}
+
 class _ChatState extends ConsumerState<Chat> {
   final Uuid _uuid = const Uuid();
-  final _contentController = TextEditingController();
+  final TextEditingController _inputController = TextEditingController();
   List<BabyStep> _steps = [];
   bool _isGenerating = false;
   String? _goalSummary;
   String? _anxietySummary;
   String? _titleSummary;
   String? _category;
+  final List<ChatMessage> _messages = [
+    ChatMessage(
+      text: 'こんにちは。不安やパニックで困っていること、今挑戦したいことがあれば教えてください。',
+      isUser: false,
+    ),
+  ];
+  bool _isLoading = false;
+  bool _isReadyForStepGeneration = false;
 
   @override
   void dispose() {
-    _contentController.dispose();
+    _inputController.dispose();
     super.dispose();
   }
 
@@ -68,7 +83,14 @@ class _ChatState extends ConsumerState<Chat> {
     return null;
   }
 
-  /// AIを使用してベイビーステップを生成する
+  /// チャット履歴を1つのテキストにまとめる
+  String _buildChatHistoryText() {
+    return _messages
+        .map((m) => (m.isUser ? 'ユーザー: ' : 'カウンセラー: ') + m.text)
+        .join('\n');
+  }
+
+  /// AIを使用してベイビーステップのみ生成する
   Future<void> _generateStepsWithAI() async {
     setState(() {
       _isGenerating = true;
@@ -78,7 +100,6 @@ class _ChatState extends ConsumerState<Chat> {
       if (userProfile == null) {
         throw Exception('ユーザープロファイルが見つかりません');
       }
-      // プロフィール情報からrole, profileContextを組み立て
       String role = '';
       String profileContext = '';
       if (userProfile.hasMentalIllness == true) {
@@ -100,7 +121,7 @@ class _ChatState extends ConsumerState<Chat> {
             '精神疾患の有無: 「${userProfile.hasMentalIllness == true ? "あり" : "なし"}」');
       if (userProfile.mentalIllnesses != null &&
           userProfile.mentalIllnesses!.isNotEmpty)
-        profileInfo.add('診断名: 「${userProfile.mentalIllnesses!.join("、")}」');
+        profileInfo.add('診断名: 「${userProfile.mentalIllnesses!.join("、")}"');
       profileContext = '\n\nユーザーのプロフィール情報:\n${profileInfo.join("\n")}';
 
       final apiKey = await _getApiKey();
@@ -108,17 +129,17 @@ class _ChatState extends ConsumerState<Chat> {
         throw Exception('API Keyが取得できませんでした');
       }
 
-      // 1. ベイビーステップ生成プロンプトでやりたいこと・不安なこと等も含めて一括でAIに依頼
+      final chatHistoryText = _buildChatHistoryText();
       final actionSuggestionService = ActionSuggestionService(apiKey);
-      final result = await actionSuggestionService.generateBabySteps(
-        content: _contentController.text,
+      final steps = await actionSuggestionService.generateStepsFromHistory(
+        chatHistory: chatHistoryText,
         role: role,
         profileContext: profileContext,
       );
 
       if (!mounted) return;
 
-      if (result['steps'].isEmpty) {
+      if (steps.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('ステップの生成に失敗しました'),
@@ -128,16 +149,16 @@ class _ChatState extends ConsumerState<Chat> {
         return;
       }
 
-      // 生成したステップを_stateの_stepsリストにセット
-      final currentText = _contentController.text;
-      final tempGoalId = _uuid.v4(); // 一時的なGoal IDを生成
+      final tempGoalId = _uuid.v4();
       setState(() {
-        _steps = (result['steps'] as List<String>)
-            .map((step) => BabyStep(
+        _steps = steps
+            .asMap()
+            .entries
+            .map((entry) => BabyStep(
                   id: const Uuid().v4(),
                   goalId: tempGoalId,
-                  action: step,
-                  displayOrder: (result['steps'] as List<String>).indexOf(step),
+                  action: entry.value,
+                  displayOrder: entry.key,
                   isDone: false,
                   isDeleted: false,
                   createdBy: userProfile.createdBy,
@@ -146,11 +167,6 @@ class _ChatState extends ConsumerState<Chat> {
                   updatedAt: DateTime.now(),
                 ))
             .toList();
-        _goalSummary = result['goal'] as String;
-        _anxietySummary = result['anxiety'] as String;
-        _titleSummary = result['title'] as String;
-        _category = result['category'] as String;
-        _contentController.text = currentText;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -171,6 +187,8 @@ class _ChatState extends ConsumerState<Chat> {
       if (mounted) {
         setState(() {
           _isGenerating = false;
+          _isLoading = false;
+          _isReadyForStepGeneration = false;
         });
       }
     }
@@ -183,6 +201,9 @@ class _ChatState extends ConsumerState<Chat> {
   }
 
   void _saveSteps() async {
+    setState(() {
+      _isLoading = true;
+    });
     try {
       if (_steps.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -191,14 +212,50 @@ class _ChatState extends ConsumerState<Chat> {
         return;
       }
 
-      final content = _contentController.text.trim();
+      // チャット履歴のユーザー発言を連結
+      final userContent =
+          _messages.where((m) => m.isUser).map((m) => m.text).join('\n');
 
-      if (content.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('内容を入力してください')),
-        );
-        return;
+      final userProfile = await _getUserProfile();
+      if (userProfile == null) {
+        throw Exception('ユーザープロファイルが見つかりません');
       }
+      String role = '';
+      String profileContext = '';
+      if (userProfile.hasMentalIllness == true) {
+        role = '認知行動療法の専門家であり、公認心理師・臨床心理士二つの有資格者です';
+        if (userProfile.mentalIllnesses != null &&
+            userProfile.mentalIllnesses!.isNotEmpty) {
+          role = '${userProfile.mentalIllnesses!.join("、")}の臨床経験が豊富な' + role;
+        }
+      }
+      List<String> profileInfo = [];
+      profileInfo.add('名前: ${userProfile.userName}');
+      if (userProfile.age != null) profileInfo.add('年齢: 「${userProfile.age}歳」');
+      if (userProfile.gender != null)
+        profileInfo.add('性別: 「${userProfile.gender}」');
+      if (userProfile.attribute != null)
+        profileInfo.add('属性: 「${userProfile.attribute}」');
+      if (userProfile.hasMentalIllness != null)
+        profileInfo.add(
+            '精神疾患の有無: 「${userProfile.hasMentalIllness == true ? "あり" : "なし"}」');
+      if (userProfile.mentalIllnesses != null &&
+          userProfile.mentalIllnesses!.isNotEmpty)
+        profileInfo.add('診断名: 「${userProfile.mentalIllnesses!.join("、")}"');
+      profileContext = '\n\nユーザーのプロフィール情報:\n${profileInfo.join("\n")}';
+
+      final apiKey = await _getApiKey();
+      if (apiKey == null) {
+        throw Exception('API Keyが取得できませんでした');
+      }
+
+      final chatHistoryText = _buildChatHistoryText();
+      final actionSuggestionService = ActionSuggestionService(apiKey);
+      final analysis = await actionSuggestionService.extractAnalysisFromHistory(
+        chatHistory: chatHistoryText,
+        role: role,
+        profileContext: profileContext,
+      );
 
       // ユーザーの既存のGoal数を取得
       final userGoals = await FirebaseFirestore.instance
@@ -230,8 +287,8 @@ class _ChatState extends ConsumerState<Chat> {
       // Goalを作成
       final newGoal = Goal(
         id: newGoalId,
-        content: _contentController.text,
-        originalContent: _contentController.text,
+        content: userContent,
+        originalContent: userContent,
         babySteps: stepsWithOrder,
         displayOrder: userGoals.docs.length + 1,
         isDeleted: false,
@@ -239,10 +296,10 @@ class _ChatState extends ConsumerState<Chat> {
         createdAt: DateTime.now(),
         updatedBy: FirebaseAuth.instance.currentUser?.uid ?? 'unknown_user',
         updatedAt: DateTime.now(),
-        title: _titleSummary ?? '',
-        goal: _goalSummary,
-        anxiety: _anxietySummary,
-        category: _category,
+        title: analysis['title'] ?? '',
+        goal: analysis['goal'] ?? '',
+        anxiety: analysis['anxiety'] ?? '',
+        category: analysis['category'] ?? '',
       );
 
       final goalRef =
@@ -267,15 +324,13 @@ class _ChatState extends ConsumerState<Chat> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('保存が完了しました')),
         );
-        // 入力フィールドをクリア（保存完了時のみ）
-        _contentController.clear();
-        // 事前不安得点入力画面に遷移
+        _inputController.clear();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => AnxietyScoreInput(
               steps: stepsWithOrder,
-              goalId: newGoal.id,
+              goalId: newGoalId,
             ),
           ),
         );
@@ -283,17 +338,199 @@ class _ChatState extends ConsumerState<Chat> {
     } catch (e, stackTrace) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存エラー: ${e.toString()}')),
+          SnackBar(content: Text('保存エラー:  ${e.toString()}')),
         );
-        // デバッグ用にコンソール出力
         if (kDebugMode) {
           print('Firestore保存エラー詳細:');
           print('エラータイプ: ${e.runtimeType}');
           print('エラーメッセージ: ${e.toString()}');
           print('スタックトレース: $stackTrace');
           print('入力データ:');
-          print('内容: ${_contentController.text}');
+          print('内容: ${_inputController.text}');
           print('ステップ数: ${_steps.length}');
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isGenerating = false;
+          _isReadyForStepGeneration = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _sendMessage() async {
+    final input = _inputController.text.trim();
+    if (input.isEmpty) return;
+
+    if (_isLoading) return;
+
+    setState(() {
+      _messages.add(ChatMessage(text: input, isUser: true));
+      _isLoading = true;
+      _inputController.clear();
+    });
+
+    int retryCount = 0;
+    const maxRetries = 3;
+
+    // 具体的な不安点ワード（体調・吐き気なども含める）
+    final extraConcreteWords = [
+      '体調',
+      '吐き気',
+      '気分が悪い',
+      '気分悪く',
+      '気分がすぐれない',
+      'めまい',
+      '動悸',
+      '息苦しい',
+      '冷や汗',
+      'パニック',
+      '発作',
+      '不安発作',
+      '気持ち悪い'
+    ];
+
+    // ユーザー発言数
+    final userMsgCount = _messages.where((m) => m.isUser).length;
+    final isFirstUserInput = userMsgCount == 1;
+
+    // 目標系・不安系ワードのリスト
+    final goalWords = [
+      'やりたい',
+      'やらなければ',
+      '達成したい',
+      '向き合いたい',
+      '挑戦したい',
+      '目標',
+      'したい'
+    ];
+    final anxietyWords = ['不安', '悩み', '困っている', '怖い', '心配', '恐怖'];
+    // 具体的な不安ワードを拡充
+    final concreteWords = [
+      '体調',
+      '吐き気',
+      '息苦しい',
+      '動悸',
+      '汗',
+      'パニック',
+      '発作',
+      '混雑',
+      '人混み',
+      'トイレ',
+      '閉塞感',
+      '逃げられない',
+      '乗り換え',
+      '車内',
+      '出口',
+      '座れない',
+      '暑い',
+      '寒い',
+      '周囲の目',
+      '視線',
+      '話しかけられる',
+      '遅延',
+      '停車',
+      '長時間',
+      '短時間',
+      '距離',
+      '時間',
+      '不快',
+      '不安',
+      '怖い',
+      '心配',
+      '困る',
+      '緊張',
+      'めまい',
+      '不調',
+      '不快感',
+      '不安感',
+    ];
+
+    // 目標・不安の有無
+    final allUserText =
+        _messages.where((m) => m.isUser).map((m) => m.text).join('\n');
+    final allHasGoal = goalWords.any((w) => allUserText.contains(w));
+    final allHasAnxiety = anxietyWords.any((w) => allUserText.contains(w));
+    // 直前のAIが深掘り質問、直後のユーザー発言にconcreteWordsが含まれる場合のみ具体的な不安とみなす
+    final isDeepQuestion = concreteWords.any((w) => allUserText.contains(w));
+    final isConcreteAnswer = concreteWords.any((w) => input.contains(w));
+    // isEnoughは深掘り質問→具体的な答えのペアでのみtrue
+    final isEnough = !isFirstUserInput &&
+        allHasGoal &&
+        allHasAnxiety &&
+        isDeepQuestion &&
+        isConcreteAnswer;
+
+    // 具体的な不安点が入力されたらフラグを立てる（ただし最初の入力は除外）
+    final hasConcreteSymptom = concreteWords.any((w) => input.contains(w)) ||
+        extraConcreteWords.any((w) => input.contains(w));
+    if (!isFirstUserInput && hasConcreteSymptom) {
+      setState(() {
+        _isReadyForStepGeneration = true;
+      });
+      // ここでreturnせず、AI返事も必ず返す
+    }
+
+    while (retryCount < maxRetries) {
+      try {
+        final apiKey = await _getApiKey();
+        if (apiKey == null) throw Exception('API Keyが取得できませんでした');
+
+        final service = ActionSuggestionService(apiKey);
+        // 直近の会話履歴（ユーザー・AI合わせて直近6件＝3往復）
+        final recentHistory = _messages.length > 6
+            ? _messages.sublist(_messages.length - 6)
+            : _messages;
+        final historyText = recentHistory
+            .map((m) => (m.isUser ? 'ユーザー: ' : 'カウンセラー: ') + m.text)
+            .join('\n');
+        final systemPrompt =
+            'あなたはカウンセラーです。会話履歴を考慮し、すでに聞いた内容やユーザーが答えた内容は繰り返さず、1回につき1つだけ短い質問だけを返してください。あなたが答えるのではなく、必ずユーザーに質問してください。\n$historyText\nカウンセラー:';
+        String prompt = '';
+        if (isFirstUserInput) {
+          prompt = systemPrompt;
+        } else if (!allHasGoal) {
+          prompt = systemPrompt;
+        } else if (!allHasAnxiety) {
+          prompt = systemPrompt;
+        } else if (!isDeepQuestion || !isConcreteAnswer) {
+          prompt = systemPrompt;
+        }
+        if (isEnough) {
+          // ベイビーステップ提案APIのみ呼ぶ
+          await _generateStepsWithAI();
+          setState(() {
+            _isLoading = false;
+          });
+        } else {
+          // 通常会話用API呼び出し
+          final aiReply = await service.summarizeContentForChat(
+            content: prompt,
+            role: '',
+            profileContext: '',
+          );
+          if (mounted) {
+            setState(() {
+              _messages.add(
+                  ChatMessage(text: aiReply ?? 'AIからの返答がありません', isUser: false));
+              _isLoading = false;
+            });
+          }
+        }
+        break;
+      } catch (e) {
+        retryCount++;
+        if (retryCount < maxRetries) {
+          await Future.delayed(Duration(seconds: 1)); // Wait between retries
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('最大リトライ回数に達しました: $e')),
+            );
+          }
         }
       }
     }
@@ -338,130 +575,156 @@ class _ChatState extends ConsumerState<Chat> {
               color: const Color(0xFFE0E3E8),
             ),
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ListView(
-                  children: [
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _contentController,
-                      decoration: InputDecoration(
-                        labelText: '目標や不安なこと',
-                        hintText: '達成したいこと、心配なこと、悩みなどなんでも入力してください',
-                        helperText: '例：\n・目標：人前で話せるようになりたい\n・不安：声が震える、頭が真っ白になる',
-                        helperMaxLines: 3,
-                        hintStyle: const TextStyle(color: Color(0xFF757575)),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide:
-                              const BorderSide(color: Color(0xFFE0E3E8)),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide:
-                              const BorderSide(color: Color(0xFFE0E3E8)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                              color: AppColors.primary, width: 2),
-                        ),
-                        labelStyle: const TextStyle(color: AppColors.text),
-                        floatingLabelStyle:
-                            const TextStyle(color: AppColors.text),
-                      ),
-                      cursorColor: AppColors.primary,
-                      keyboardType: TextInputType.text,
-                      textInputAction: TextInputAction.next,
-                      enableSuggestions: true,
-                      autocorrect: true,
-                      style: const TextStyle(fontSize: 16),
-                      maxLines: 5,
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _isGenerating ? null : _generateStepsWithAI,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: _isGenerating
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Text(
-                              'AIに提案を依頼',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  ..._messages.map((msg) => Align(
+                        alignment: msg.isUser
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 14),
+                          decoration: BoxDecoration(
+                            color: msg.isUser
+                                ? AppColors.primary.withOpacity(0.1)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: msg.isUser
+                                  ? AppColors.primary
+                                  : const Color(0xFFE0E3E8),
                             ),
-                    ),
-                    if (_steps.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: _clearSteps,
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          textStyle: const TextStyle(
-                            decoration: TextDecoration.none,
+                          ),
+                          child: Text(
+                            msg.text.replaceAll('**', ''),
+                            style: TextStyle(
+                              color: msg.isUser
+                                  ? AppColors.primary
+                                  : AppColors.text,
+                              fontSize: 15,
+                            ),
                           ),
                         ),
-                        child: const Text('クリア'),
-                      ),
-                      const SizedBox(height: 16),
-                      ...List.generate(_steps.length, (index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${index + 1}.',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.text,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _steps[index].action,
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                              ),
-                            ],
+                      )),
+                  if (_steps.isNotEmpty)
+                    Column(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(top: 16),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: AppColors.primary.withOpacity(0.3)),
                           ),
-                        );
-                      }),
-                    ],
-                    const SizedBox(height: 20),
-                    if (_steps.isNotEmpty) ...[
-                      ElevatedButton(
-                        onPressed: _saveSteps,
-                        child: const Text('保存して次へ'),
-                      ),
-                    ],
-                  ],
+                          child: _steps.length == 10
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('提案されたベイビーステップ',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16)),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      _steps
+                                          .asMap()
+                                          .entries
+                                          .map((entry) =>
+                                              '${entry.key + 1}. ${entry.value.action.replaceAll('**', '')}')
+                                          .join('\n\n'),
+                                      style: const TextStyle(fontSize: 15),
+                                    ),
+                                  ],
+                                )
+                              : const Text('ベイビーステップが正しく抽出できませんでした',
+                                  style: TextStyle(color: Colors.red)),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: _isLoading ? null : _saveSteps,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            textStyle:
+                                const TextStyle(fontWeight: FontWeight.bold),
+                            minimumSize: const Size.fromHeight(44),
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(24))),
+                          ),
+                          child: const Text('保存する'),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+            if (_isLoading)
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: CircularProgressIndicator(),
+              ),
+            if (_isReadyForStepGeneration && _steps.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: ElevatedButton(
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          await _generateStepsWithAI();
+                          setState(() {
+                            _isLoading = false;
+                            _isReadyForStepGeneration = false;
+                          });
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    minimumSize: const Size.fromHeight(44),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(24))),
+                  ),
+                  child: const Text('ステップを生成する'),
                 ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _inputController,
+                      enabled: !_isLoading,
+                      decoration: const InputDecoration(
+                        hintText: 'メッセージを入力...',
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                      ),
+                      onSubmitted: (_) => _sendMessage(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.send, color: AppColors.primary),
+                    onPressed: _isLoading ? null : _sendMessage,
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
+      bottomNavigationBar: null,
     );
   }
 }
