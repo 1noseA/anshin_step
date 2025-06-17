@@ -157,7 +157,7 @@ class _ChatState extends ConsumerState<Chat> {
             .map((entry) => BabyStep(
                   id: const Uuid().v4(),
                   goalId: tempGoalId,
-                  action: entry.value,
+                  action: entry.value.replaceAll('**', ''),
                   displayOrder: entry.key,
                   isDone: false,
                   isDeleted: false,
@@ -273,7 +273,7 @@ class _ChatState extends ConsumerState<Chat> {
         return BabyStep(
           id: step.id,
           goalId: newGoalId,
-          action: step.action,
+          action: step.action.replaceAll('**', ''),
           displayOrder: entry.key + 1,
           isDone: step.isDone,
           isDeleted: false,
@@ -467,11 +467,23 @@ class _ChatState extends ConsumerState<Chat> {
     // 具体的な不安点が入力されたらフラグを立てる（ただし最初の入力は除外）
     final hasConcreteSymptom = concreteWords.any((w) => input.contains(w)) ||
         extraConcreteWords.any((w) => input.contains(w));
-    if (!isFirstUserInput && hasConcreteSymptom) {
+
+    // --- 修正: やりたいこと＆不安なことが両方入力されたらボタンを出す ---
+    if (allHasGoal && allHasAnxiety) {
       setState(() {
         _isReadyForStepGeneration = true;
       });
-      // ここでreturnせず、AI返事も必ず返す
+    }
+
+    // ここから追加: やりたいことが入力されたら必ず「不安なことは何ですか？」と返す
+    if (goalWords.any((w) => input.contains(w)) && !allHasAnxiety) {
+      await Future.delayed(const Duration(milliseconds: 400));
+      setState(() {
+        _messages
+            .add(ChatMessage(text: 'そのやりたいことについて、不安なことは何ですか？', isUser: false));
+        _isLoading = false;
+      });
+      return;
     }
 
     while (retryCount < maxRetries) {
@@ -499,26 +511,27 @@ class _ChatState extends ConsumerState<Chat> {
         } else if (!isDeepQuestion || !isConcreteAnswer) {
           prompt = systemPrompt;
         }
-        if (isEnough) {
-          // ベイビーステップ提案APIのみ呼ぶ
-          await _generateStepsWithAI();
+        // --- isEnoughによる自動生成はしない ---
+        // promptが空や短すぎる場合はデフォルト質問文を送る
+        if (prompt.trim().isEmpty || prompt.trim().length < 10) {
+          prompt = 'あなたはカウンセラーです。ユーザーの悩みや目標を聞き出すため、1回につき1つだけ短い質問だけを返してください。';
+        }
+        if (kDebugMode) {
+          print('=== AI送信プロンプト ===');
+          print(prompt);
+        }
+        // 通常会話用API呼び出し
+        final aiReply = await service.summarizeContentForChat(
+          content: prompt,
+          role: '',
+          profileContext: '',
+        );
+        if (mounted) {
           setState(() {
+            _messages.add(
+                ChatMessage(text: aiReply ?? 'AIからの返答がありません', isUser: false));
             _isLoading = false;
           });
-        } else {
-          // 通常会話用API呼び出し
-          final aiReply = await service.summarizeContentForChat(
-            content: prompt,
-            role: '',
-            profileContext: '',
-          );
-          if (mounted) {
-            setState(() {
-              _messages.add(
-                  ChatMessage(text: aiReply ?? 'AIからの返答がありません', isUser: false));
-              _isLoading = false;
-            });
-          }
         }
         break;
       } catch (e) {
@@ -634,7 +647,7 @@ class _ChatState extends ConsumerState<Chat> {
                                           .asMap()
                                           .entries
                                           .map((entry) =>
-                                              '${entry.key + 1}. ${entry.value.action.replaceAll('**', '')}')
+                                              '${entry.key + 1}. ${entry.value.action}')
                                           .join('\n\n'),
                                       style: const TextStyle(fontSize: 15),
                                     ),
@@ -666,7 +679,9 @@ class _ChatState extends ConsumerState<Chat> {
             if (_isLoading)
               const Padding(
                 padding: EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                ),
               ),
             if (_isReadyForStepGeneration && _steps.isEmpty)
               Padding(
@@ -703,9 +718,14 @@ class _ChatState extends ConsumerState<Chat> {
                     child: TextField(
                       controller: _inputController,
                       enabled: !_isLoading,
+                      cursorColor: AppColors.primary,
                       decoration: const InputDecoration(
                         hintText: 'メッセージを入力...',
                         border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: AppColors.primary, width: 2),
+                        ),
                         isDense: true,
                         contentPadding:
                             EdgeInsets.symmetric(vertical: 10, horizontal: 12),
