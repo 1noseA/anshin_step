@@ -115,10 +115,15 @@ class MindReport extends ConsumerWidget {
   }
 
   Widget _buildAnxietyScoreChart(Report report) {
-    // 事後不安得点が入力された履歴のみ抽出
+    // 事後不安得点が入力された履歴のみ抽出し、updatedAtで昇順ソート
     final filteredHistory = report.anxietyScoreHistory
         .where((e) => e['afterScore'] != null)
-        .toList();
+        .toList()
+      ..sort((a, b) {
+        final dateA = DateTime.tryParse(a['date'] ?? '');
+        final dateB = DateTime.tryParse(b['date'] ?? '');
+        return (dateA ?? DateTime.now()).compareTo(dateB ?? DateTime.now());
+      });
 
     final beforeScores =
         filteredHistory.map((e) => (e['beforeScore'] ?? 0) as num).toList();
