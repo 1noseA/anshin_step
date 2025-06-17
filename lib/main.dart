@@ -54,6 +54,9 @@ class MyApp extends ConsumerWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
         fontFamily: 'Noto Sans JP',
       ),
+      routes: {
+        '/profile': (context) => Profile(),
+      },
       home: authState.when(
         data: (user) =>
             user != null ? const MainNavigation() : const SignInPage(),
