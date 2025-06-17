@@ -184,15 +184,14 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                               _buildModernDetailRow(
                                 Icons.event,
                                 '実施日時',
-                                _currentStep.executionDate
-                                    ?.toString()
-                                    .split(' ')[0],
+                                _currentStep.executionDate != null
+                                    ? '${_currentStep.executionDate!.year}/${_currentStep.executionDate!.month.toString().padLeft(2, '0')}/${_currentStep.executionDate!.day.toString().padLeft(2, '0')}'
+                                    : '',
                                 isEditing: _isEditing,
                                 controller: TextEditingController(
-                                    text: _executionDate
-                                            ?.toString()
-                                            .split(' ')[0] ??
-                                        ''),
+                                    text: _executionDate != null
+                                        ? '${_executionDate!.year}/${_executionDate!.month.toString().padLeft(2, '0')}/${_executionDate!.day.toString().padLeft(2, '0')}'
+                                        : ''),
                                 onTap: _isEditing
                                     ? () async {
                                         final date = await showDatePicker(
@@ -324,9 +323,9 @@ class _StepDetailState extends ConsumerState<StepDetail> {
                               _buildModernDetailRow(
                                   Icons.event,
                                   '実施日時',
-                                  _currentStep.executionDate
-                                      ?.toString()
-                                      .split(' ')[0]),
+                                  _currentStep.executionDate != null
+                                      ? '${_currentStep.executionDate!.year}/${_currentStep.executionDate!.month.toString().padLeft(2, '0')}/${_currentStep.executionDate!.day.toString().padLeft(2, '0')}'
+                                      : ''),
                               _buildModernDetailRow(Icons.emoji_events, '達成度',
                                   _currentStep.achievementScore?.toString()),
                               _buildModernDetailRow(Icons.favorite, '体調',
@@ -597,21 +596,27 @@ class _StepDetailState extends ConsumerState<StepDetail> {
           if (mounted) {
             await showDialog(
               context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('あなたへのメッセージ'),
-                content: Text(aiComment),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      textStyle: const TextStyle(
-                        decoration: TextDecoration.none,
+              builder: (context) => Theme(
+                data: Theme.of(context).copyWith(
+                  dialogBackgroundColor: Colors.white,
+                ),
+                child: AlertDialog(
+                  backgroundColor: Colors.white,
+                  title: const Text('あなたへのメッセージ'),
+                  content: Text(aiComment),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        textStyle: const TextStyle(
+                          decoration: TextDecoration.none,
+                        ),
                       ),
+                      child: const Text('閉じる'),
                     ),
-                    child: const Text('閉じる'),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           }

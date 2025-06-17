@@ -451,6 +451,7 @@ class StepList extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
         title: const Text('メニュー', style: TextStyle(color: AppColors.text)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
