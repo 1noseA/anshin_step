@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anshin_step/pages/step_list.dart';
 import 'package:anshin_step/components/colors.dart';
 import 'package:flutter/services.dart';
+import 'package:anshin_step/pages/main_navigation.dart';
 
 class AnxietyScoreInput extends ConsumerStatefulWidget {
   final List<BabyStep> steps;
@@ -79,8 +80,12 @@ class _AnxietyScoreInputState extends ConsumerState<AnxietyScoreInput> {
       if (mounted) {
         // goalsProviderをリフレッシュ
         ref.refresh(goalsProvider);
-        // 一覧画面に戻る
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        // 一覧画面（MainNavigation/StepList）に遷移
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+              builder: (context) => const MainNavigation(initialIndex: 0)),
+          (route) => false,
+        );
       }
     } catch (e) {
       print('保存エラー: $e'); // デバッグ用にエラーを出力
