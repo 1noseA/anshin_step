@@ -115,13 +115,15 @@ class MindReport extends ConsumerWidget {
   }
 
   Widget _buildAnxietyScoreChart(Report report) {
-    // 平均値計算
-    final beforeScores = report.anxietyScoreHistory
-        .map((e) => (e['beforeScore'] ?? 0) as num)
+    // 事後不安得点が入力された履歴のみ抽出
+    final filteredHistory = report.anxietyScoreHistory
+        .where((e) => e['afterScore'] != null)
         .toList();
-    final afterScores = report.anxietyScoreHistory
-        .map((e) => (e['afterScore'] ?? 0) as num)
-        .toList();
+
+    final beforeScores =
+        filteredHistory.map((e) => (e['beforeScore'] ?? 0) as num).toList();
+    final afterScores =
+        filteredHistory.map((e) => (e['afterScore'] ?? 0) as num).toList();
     final beforeAvg = beforeScores.isNotEmpty
         ? (beforeScores.reduce((a, b) => a + b) / beforeScores.length)
         : 0;
@@ -195,10 +197,15 @@ class MindReport extends ConsumerWidget {
                       if (value % 10 != 0) return const SizedBox.shrink();
                       return Padding(
                         padding: const EdgeInsets.only(right: 8.0),
-                        child: Text(
-                          value.toInt().toString(),
-                          style: const TextStyle(fontSize: 12),
-                          textAlign: TextAlign.left,
+                        child: SizedBox(
+                          width: 28,
+                          child: Text(
+                            value.toInt().toString(),
+                            style: const TextStyle(fontSize: 12),
+                            softWrap: false,
+                            overflow: TextOverflow.visible,
+                            textAlign: TextAlign.left,
+                          ),
                         ),
                       );
                     },
@@ -210,8 +217,7 @@ class MindReport extends ConsumerWidget {
                     showTitles: true,
                     getTitlesWidget: (value, meta) {
                       final index = value.toInt();
-                      if (index < 0 ||
-                          index >= report.anxietyScoreHistory.length) {
+                      if (index < 0 || index >= filteredHistory.length) {
                         return const SizedBox.shrink();
                       }
                       return Padding(
@@ -241,8 +247,7 @@ class MindReport extends ConsumerWidget {
               ),
               lineBarsData: [
                 LineChartBarData(
-                  spots:
-                      report.anxietyScoreHistory.asMap().entries.map((entry) {
+                  spots: filteredHistory.asMap().entries.map((entry) {
                     final data = entry.value as Map<String, dynamic>;
                     return FlSpot(
                       entry.key.toDouble(),
@@ -255,8 +260,7 @@ class MindReport extends ConsumerWidget {
                   dotData: FlDotData(show: true),
                 ),
                 LineChartBarData(
-                  spots:
-                      report.anxietyScoreHistory.asMap().entries.map((entry) {
+                  spots: filteredHistory.asMap().entries.map((entry) {
                     final data = entry.value as Map<String, dynamic>;
                     return FlSpot(
                       entry.key.toDouble(),
