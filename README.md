@@ -1,16 +1,14 @@
-# anshin_step
+# Stepumo
 
-A new Flutter project.
+認知行動療法の不安階層表をベースにした
+不安がある人の行動をサポートするアプリ
 
-## Getting Started
+## 機能概要
+- 「やりたいこと」と「不安なこと」を入力すると、AIが10段階のベイビーステップを提案
+- 実施後の不安度や感想を記録し、それに対してAIがコメント
+- 希死念慮や強い不安が検知された場合、受診を促すような表示を行う
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 技術スタック
+- Flutter
+- Firebase（Firestore、Authentication）
+- Gemini AI（gemini-2.0-flash）
